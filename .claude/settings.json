@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell.exe -NoProfile -File \"C:\\Users\\Anwender\\Desktop\\Website\\Pizza\\Doku\\Pizza\\Tracking\\scripts\\session-report.ps1\""
+          }
+        ]
+      }
+    ]
+  }
+}
