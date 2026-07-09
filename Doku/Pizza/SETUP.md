@@ -44,7 +44,7 @@
 | Abhängigkeiten installieren | `bun install` |
 | Dev-Server | `bun run dev` |
 | Build | `bun run build` |
-| Unit/Component-Tests | `bun run test` (Vitest) |
+| Unit/Component-Tests | `bun run test` (Bun-nativ, `bun test src`) |
 | E2E-Tests | `bun run test:e2e` (Playwright) |
 
 ## Offene Punkte

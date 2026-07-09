@@ -5,4 +5,6 @@
 
 | Prio | Beschreibung | Status | Abhängigkeiten |
 |------|--------------|--------|----------------|
-| P2 | _Beispiel: Erste echte Aufgabe eintragen_ | offen | — |
+| P1 | Teil-A Frontend-Fundament umsetzen (Plan `docs/superpowers/plans/2026-07-09-teil-a-frontend-fundament.md`) | in Arbeit | — |
+| P1 | Teil-B: Supabase-Schema, echte Admin-Auth, WhatsApp via CallMeBot, Bestell-Status + Realtime, serverseitige Vorlauf-/Preis-Validierung | offen | Teil-A |
+| P2 | Teil-C: Capacitor iOS/Android (QR/Push, Icons/Splash, Store) | offen | Teil-B |
