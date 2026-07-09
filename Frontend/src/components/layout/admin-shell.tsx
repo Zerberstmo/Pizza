@@ -1,8 +1,9 @@
 import type React from "react";
-import { NavLink, Outlet, useNavigate } from "react-router";
+import { NavLink, Outlet, Navigate, useNavigate } from "react-router";
 import { motion } from "motion/react";
 import { BarChart2, Calendar, Clock, Timer, Package, Tag, ChefHat, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAdminAuth } from "@/hooks/use-admin-auth";
 import { Button } from "@/components/ui/button";
 
 // Admin-Layout mit Tab-Navigation. Portiert aus App.tsx:1179-1223,
@@ -18,6 +19,15 @@ const NAV: Array<{ to: string; icon: React.ElementType; label: string }> = [
 
 export default function AdminLayout(): React.ReactElement {
   const navigate = useNavigate();
+  const { isAdmin, logout } = useAdminAuth();
+
+  if (!isAdmin) return <Navigate to="/admin" replace />;
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <header className="sticky top-0 z-50 bg-sidebar border-b border-sidebar-border px-4 py-3 flex items-center justify-between">
@@ -25,7 +35,7 @@ export default function AdminLayout(): React.ReactElement {
           <ChefHat size={16} className="text-primary" />
           <span className="font-black text-sm">Pizza Admin</span>
         </div>
-        <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="text-xs text-muted-foreground gap-1.5 h-7">
+        <Button variant="ghost" size="sm" onClick={handleLogout} className="text-xs text-muted-foreground gap-1.5 h-7">
           <LogOut size={11} /> Abmelden
         </Button>
       </header>
