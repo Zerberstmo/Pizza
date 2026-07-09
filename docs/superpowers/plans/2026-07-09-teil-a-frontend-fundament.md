@@ -11,7 +11,7 @@
 ## Global Constraints
 
 - **Package-Manager: ausschließlich Bun.** Kein `npm`/`pnpm install`. Keine `pnpm-workspace.yaml`.
-- **Tests laufen über Vitest** (`bun run test`) — **nicht** `bun test` (Bun-eigener Runner). E2E: `bun run test:e2e` (Playwright).
+- **Unit/Component-Tests laufen über den Bun-nativen Runner** (`bun:test`-API) mit **happy-dom** (Preload) + `@testing-library/react`. Befehl: `bun test src`. E2E: `bun run test:e2e` (Playwright). (Vitest läuft nicht unter Bun-on-Windows — siehe SETUP/ADR-0004.)
 - **Kein MUI / Emotion:** `@mui/*`, `@emotion/*` werden nicht installiert.
 - **Dateinamen `kebab-case`, Komponenten-Bezeichner `PascalCase`** (z. B. `pizza-card.tsx` → `PizzaCard`).
 - **Alle Daten laufen über `lib/data/store.ts`** (async). Seiten importieren keine Seed-Konstanten direkt.
@@ -82,10 +82,9 @@ tests/ (Playwright)
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:e2e": "playwright test",
-    "lint": "eslint ."
+    "test": "bun test src",
+    "test:watch": "bun test src --watch",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@radix-ui/react-scroll-area": "1.2.3",
@@ -103,24 +102,23 @@ tests/ (Playwright)
     "tailwind-merge": "3.2.0"
   },
   "devDependencies": {
+    "@happy-dom/global-registrator": "15.7.4",
     "@playwright/test": "1.48.0",
     "@tailwindcss/vite": "4.1.12",
-    "@testing-library/jest-dom": "6.5.0",
     "@testing-library/react": "16.0.1",
-    "@testing-library/user-event": "14.5.2",
+    "@types/bun": "latest",
+    "@types/node": "22.7.4",
     "@types/react": "18.3.12",
     "@types/react-dom": "18.3.1",
     "@vitejs/plugin-react": "4.7.0",
-    "jsdom": "25.0.1",
     "tailwindcss": "4.1.12",
     "tw-animate-css": "1.3.8",
     "typescript": "5.6.3",
-    "vite": "6.3.5",
-    "vitest": "2.1.4"
+    "vite": "6.3.5"
   }
 }
 ```
-> Hinweis: Weitere Radix-Primitives (dialog, select, label, progress …) werden bei Bedarf in den Port-Tasks nachinstalliert (`bun add …`), damit `package.json` nur enthält, was wirklich genutzt wird.
+> Hinweise: Test-Runner ist **`bun test`** (Bun-nativ, `bun:test`-API) mit **happy-dom** statt Vitest/jsdom (Vitest startet nicht unter Bun-on-Windows). `@types/node` ist nötig, damit `vite.config.ts` typcheckt. Weitere Radix-Primitives (dialog, select, label, progress …) werden bei Bedarf in den Port-Tasks nachinstalliert (`bun add …`).
 
 - [ ] **Step 2: Styles aus der Vorlage kopieren**
 
@@ -218,21 +216,23 @@ export default function App() {
 }
 ```
 
-- [ ] **Step 5: Vitest + Playwright konfigurieren**
+- [ ] **Step 5: Bun-Test + Playwright konfigurieren**
 
-`vitest.config.ts`:
-```ts
-import { defineConfig } from "vitest/config";
-import path from "path";
-export default defineConfig({
-  test: { environment: "jsdom", globals: true, setupFiles: ["./vitest.setup.ts"] },
-  resolve: { alias: { "@": path.resolve(__dirname, "./src") } },
-});
+`bunfig.toml` (Preload registriert happy-dom + Cleanup vor jedem Testlauf):
+```toml
+[test]
+preload = ["./test-setup.ts"]
 ```
-`vitest.setup.ts`:
+`test-setup.ts`:
 ```ts
-import "@testing-library/jest-dom/vitest";
+import { GlobalRegistrator } from "@happy-dom/global-registrator";
+GlobalRegistrator.register();
+import { afterEach } from "bun:test";
+import { cleanup } from "@testing-library/react";
+afterEach(() => cleanup());
 ```
+> Hinweis: `@` (Vite-Alias) wird in Tests über `tsconfig`-`paths` aufgelöst (Bun liest `tsconfig.json`-`paths`). Keine separate Test-Config-Alias-Angabe nötig.
+
 `playwright.config.ts`:
 ```ts
 import { defineConfig, devices } from "@playwright/test";
@@ -245,7 +245,7 @@ export default defineConfig({
 ```
 `src/lib/__tests__/smoke.test.ts`:
 ```ts
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "bun:test";
 import { cn } from "@/lib/utils";
 describe("scaffold", () => {
   it("cn merges classes", () => { expect(cn("a", "b")).toBe("a b"); });
@@ -255,7 +255,7 @@ describe("scaffold", () => {
 - [ ] **Step 6: Installieren, verifizieren**
 
 Run: `cd Frontend && bun install && bun run test && bun run build`
-Expected: `bun install` ohne pnpm/npm; Vitest: 1 passed; `vite build` erzeugt `dist/` ohne Fehler.
+Expected: `bun install` ohne pnpm/npm; `bun test src`: 1 passed (happy-dom aktiv, Output pristine); `vite build` erzeugt `dist/` ohne Fehler.
 Run: `bun run dev` → http://localhost:5173 zeigt „🍕 Pizzeria" auf dunklem Grund. Danach abbrechen.
 
 - [ ] **Step 7: Commit**
@@ -303,7 +303,7 @@ export function validateVoucher(code: string, vouchers: VoucherDef[], now: Date)
 - [ ] **Step 2: Failing test `pricing.test.ts`**
 
 ```ts
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "bun:test";
 import { formatPrice, computeSubtotal, computeDiscount, computeTotal, validateVoucher } from "@/lib/pricing";
 import type { VoucherDef } from "@/types";
 
@@ -336,7 +336,7 @@ describe("pricing", () => {
 
 - [ ] **Step 3: Run → FAIL**
 
-Run: `cd Frontend && bun run test pricing`
+Run: `cd Frontend && bun test src/lib/__tests__/pricing.test.ts`
 Expected: FAIL („does not provide an export named …").
 
 - [ ] **Step 4: `src/lib/pricing.ts` implementieren** (Logik 1:1 aus `App.tsx:99,188,1743-1773`)
@@ -377,7 +377,7 @@ export function validateVoucher(code: string, vouchers: VoucherDef[], now: Date)
 
 - [ ] **Step 5: Run → PASS**
 
-Run: `cd Frontend && bun run test pricing`
+Run: `cd Frontend && bun test src/lib/__tests__/pricing.test.ts`
 Expected: PASS (alle grün).
 
 - [ ] **Step 6: Commit**
@@ -410,7 +410,7 @@ export function isSlotAllowed(dateStr: string, time: string, config: AppConfig, 
 - [ ] **Step 1: Failing test `slots.test.ts`** (Kern: Vorlaufzeit + erlaubte Tage)
 
 ```ts
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "bun:test";
 import { getSelectableDates, getAvailableTimes, isSlotAllowed } from "@/lib/slots";
 import type { AppConfig } from "@/types";
 
@@ -443,7 +443,7 @@ describe("slots", () => {
 });
 ```
 
-- [ ] **Step 2: Run → FAIL** — Run: `cd Frontend && bun run test slots` — Expected: FAIL.
+- [ ] **Step 2: Run → FAIL** — Run: `cd Frontend && bun test src/lib/__tests__/slots.test.ts` — Expected: FAIL.
 
 - [ ] **Step 3: `src/lib/slots.ts` implementieren** (erweitert `App.tsx:174-243` um `leadTimeDays`)
 
@@ -493,7 +493,7 @@ export function isSlotAllowed(dateStr: string, time: string, config: AppConfig, 
 }
 ```
 
-- [ ] **Step 4: Run → PASS** — Run: `cd Frontend && bun run test slots` — Expected: PASS.
+- [ ] **Step 4: Run → PASS** — Run: `cd Frontend && bun test src/lib/__tests__/slots.test.ts` — Expected: PASS.
 
 - [ ] **Step 5: Commit**
 
@@ -541,7 +541,7 @@ export const ADMIN_PASSWORD = "pizza"; // TEIL-B TODO: durch Supabase-Auth erset
 - [ ] **Step 2: Failing test `store.test.ts`**
 
 ```ts
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { getIngredients, saveConfig, getConfig, createOrder } from "@/lib/data/store";
 
 beforeEach(() => localStorage.clear());
@@ -566,7 +566,7 @@ describe("data store", () => {
 });
 ```
 
-- [ ] **Step 3: Run → FAIL** — Run: `cd Frontend && bun run test store` — Expected: FAIL.
+- [ ] **Step 3: Run → FAIL** — Run: `cd Frontend && bun test src/lib/data/__tests__/store.test.ts` — Expected: FAIL.
 
 - [ ] **Step 4: `store.ts` implementieren** (localStorage + künstliches Delay + Preislogik aus Task 2)
 
@@ -615,7 +615,7 @@ export async function createOrder(input: NewOrder): Promise<OrderData> {
 export const verifyAdminPassword = (pw: string) => delay(pw === ADMIN_PASSWORD);
 ```
 
-- [ ] **Step 5: Run → PASS** — Run: `cd Frontend && bun run test store` — Expected: PASS.
+- [ ] **Step 5: Run → PASS** — Run: `cd Frontend && bun test src/lib/data/__tests__/store.test.ts` — Expected: PASS.
 
 - [ ] **Step 6: Commit**
 
@@ -666,7 +666,7 @@ export function useAsync<T>(fn: () => Promise<T>, deps: unknown[] = []) {
 - [ ] **Step 2: Failing test `use-cart.test.tsx`**
 
 ```tsx
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { renderHook, act } from "@testing-library/react";
 import { CartProvider, useCart } from "@/hooks/use-cart";
 
@@ -694,7 +694,7 @@ describe("useCart", () => {
 });
 ```
 
-- [ ] **Step 3: Run → FAIL** — Run: `cd Frontend && bun run test use-cart` — Expected: FAIL.
+- [ ] **Step 3: Run → FAIL** — Run: `cd Frontend && bun test src/hooks/__tests__/use-cart.test.tsx` — Expected: FAIL.
 
 - [ ] **Step 4: `use-cart.tsx` implementieren**
 
@@ -739,7 +739,7 @@ export function useCart(): CartContextValue {
 }
 ```
 
-- [ ] **Step 5: Run → PASS** — Run: `cd Frontend && bun run test use-cart` — Expected: PASS.
+- [ ] **Step 5: Run → PASS** — Run: `cd Frontend && bun test src/hooks/__tests__/use-cart.test.tsx` — Expected: PASS.
 
 - [ ] **Step 6: Commit**
 
@@ -789,7 +789,7 @@ export function AsyncBoundary<T>({ loading, error, data, empty, children }: {
 - [ ] **Step 4: Smoke-Test `pizza-svg.test.tsx`**
 
 ```tsx
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "bun:test";
 import { render } from "@testing-library/react";
 import { PizzaSVG } from "@/components/pizza/pizza-svg";
 
@@ -801,7 +801,7 @@ describe("PizzaSVG", () => {
 });
 ```
 
-- [ ] **Step 5: Run → PASS + build** — Run: `cd Frontend && bun run test pizza-svg && bun run build` — Expected: Test PASS, Build ohne TS-Fehler.
+- [ ] **Step 5: Run → PASS + build** — Run: `cd Frontend && bun test src/components/__tests__/pizza-svg.test.tsx && bun run build` — Expected: Test PASS, Build ohne TS-Fehler.
 
 - [ ] **Step 6: Commit**
 
@@ -1187,7 +1187,7 @@ Expected: `sauber`.
   - `Changelog.md`: Eintrag „Teil-A Frontend-Fundament umgesetzt".
   - `TODO.md`: Teil-B-Punkte (Supabase-Schema, echte Admin-Auth, WhatsApp via CallMeBot, Status-Workflow + Realtime, serverseitige Vorlauf-/Preis-Validierung, Telefon-Validierung) und Teil-C (Capacitor).
   - `Doku/Pizza/Frontend/README.md`: Seiten/Komponenten-Überblick.
-  - ADRs anlegen: 0001 Capacitor (Mobile-Weg), 0002 Supabase (Backend), 0003 WhatsApp via CallMeBot.
+  - ADRs anlegen: 0001 Capacitor (Mobile-Weg), 0002 Supabase (Backend), 0003 WhatsApp via CallMeBot, **0004 Bun-nativer Test-Runner statt Vitest** (Bun-on-Windows-Inkompatibilität).
 
 - [ ] **Step 5: Commit**
 

@@ -16,12 +16,14 @@
 | Backend / DB | Supabase (Postgres, Auth, Storage, Auto-API) | ✅ |
 | Supabase-Clients | `@supabase/supabase-js`, `@supabase/ssr` | ✅ |
 | Auth | Supabase Auth | ✅ |
-| Test-Runner (Unit/Component) | Vitest | ✅ |
+| Test-Runner (Unit/Component) | **Bun test** (`bun:test`) + happy-dom + Testing Library | ✅ |
 | Test-Runner (E2E) | Playwright | ✅ |
 | Deployment-Ziel | — | 🕓 |
 | CI/CD | — | 🕓 |
 
-> **Bun-Hinweise:** Nur ein Package-Manager konsequent nutzen — **kein** zwischenzeitliches `npm install` (sonst driften Lockfiles). Tests laufen über **Vitest** (`bun run test`), **nicht** über `bun test`. Die `pnpm-workspace.yaml` aus der Frontend-Vorlage ist damit obsolet.
+> **Bun-Hinweise:** Nur ein Package-Manager konsequent nutzen — **kein** zwischenzeitliches `npm install` (sonst driften Lockfiles). Die `pnpm-workspace.yaml` aus der Frontend-Vorlage ist damit obsolet.
+>
+> **Test-Runner-Entscheidung (2026-07-09):** Ursprünglich war Vitest vorgesehen. Auf dieser **Bun-only-Windows**-Maschine (kein Node installiert) startet Vitest jedoch nicht unter der Bun-Runtime (`TypeError: File URL path must be an absolute path` im Vitest-Bootstrap — bekannte Bun-on-Windows-Inkompatibilität). Daher **Bun-nativer Test-Runner** (`bun test`) mit `bun:test`-API, **happy-dom** (statt jsdom) via Preload und `@testing-library/react`/`jest-dom`-Matchern. Unit/Component-Tests: `bun test src`. E2E bleibt Playwright. Siehe ADR-0004.
 
 ## Konventionen
 
