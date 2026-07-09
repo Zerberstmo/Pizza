@@ -1,0 +1,7 @@
+import { defineConfig, devices } from "@playwright/test";
+export default defineConfig({
+  testDir: "./tests/e2e",
+  use: { baseURL: "http://localhost:5173" },
+  webServer: { command: "bun run dev", url: "http://localhost:5173", reuseExistingServer: true },
+  projects: [{ name: "mobile", use: { ...devices["iPhone 13"] } }],
+});
