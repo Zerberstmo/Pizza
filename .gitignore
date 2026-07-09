@@ -8,6 +8,10 @@ dist/
 build/
 out/
 *.tsbuildinfo
+vite.config.d.ts
+vite.config.js
+vitest.config.d.ts
+vitest.config.js
 
 # Umgebungsvariablen / Secrets
 .env

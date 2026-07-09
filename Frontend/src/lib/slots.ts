@@ -3,7 +3,12 @@ import type { AppConfig, Hours } from "@/types";
 export const DAYS_OF_WEEK = ["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"] as const;
 export const JS_DAY_MAP: Record<number, string> = { 0:"Sonntag",1:"Montag",2:"Dienstag",3:"Mittwoch",4:"Donnerstag",5:"Freitag",6:"Samstag" };
 
-function toISO(d: Date): string { return d.toISOString().split("T")[0]; }
+function toISO(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
 
 export function getSelectableDates(config: AppConfig, today: Date): string[] {
   const dates: string[] = [];

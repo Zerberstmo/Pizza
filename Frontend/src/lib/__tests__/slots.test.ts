@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { getSelectableDates, getAvailableTimes, isSlotAllowed } from "@/lib/slots";
+import { getSelectableDates, getAvailableTimes, isSlotAllowed, formatDateLabel } from "@/lib/slots";
 import type { AppConfig } from "@/types";
 
 const allDays = { Montag: true, Dienstag: true, Mittwoch: true, Donnerstag: true, Freitag: true, Samstag: true, Sonntag: true };
@@ -27,5 +27,8 @@ describe("slots", () => {
     const now = new Date("2026-07-09T10:00:00");
     expect(isSlotAllowed("2026-07-10", "11:00", cfg(3), now)).toBe(false);
     expect(isSlotAllowed("2026-07-12", "11:00", cfg(3), now)).toBe(true);
+  });
+  it("formatDateLabel formats german weekday + date", () => {
+    expect(formatDateLabel("2026-07-12")).toBe("So, 12.07.2026");
   });
 });
