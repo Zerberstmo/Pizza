@@ -6,6 +6,7 @@
 
 ## 2026-07-09
 
+- **Speisekarte (Task 8):** `menu-page` portiert — Menü + Zutaten async über `useAsync`/`AsyncBoundary`, `PizzaCard`-Kacheln, „In den Warenkorb" via `useCart`, Warenkorb-Hinweisleiste mit Navigation zu `/warenkorb`.
 - **Routing-Gerüst (Task 7):** react-router mit Kunden-Layout (`app-layout` + `BottomNav`) und Admin-Layout (`admin-shell`, Tab-Nav inkl. neuem „Vorlaufzeit"-Tab). Routen `/`, `/konfigurator`, `/warenkorb`, `/bestaetigung`, `/admin` + `/admin/{dashboard,tage,oeffnungszeiten,vorlaufzeit,zutaten,gutscheine}`. Alle Seiten als Stubs angelegt. Dev-Server + Build verifiziert.
 - **Präsentations-Bausteine (Task 6):** 11 shadcn-Primitives portiert, `PizzaSVG` + `toppings`, `QrCode`, `SelectInput`, `SvgBarChart`/`SvgDonutChart`, `AsyncBoundary`. `PizzaCard` neu — nutzt selbst-enthaltene `PizzaSVG` statt Figma-Fotos. Radix `label`/`progress` ergänzt.
 - **Hooks (Task 5):** `useAsync` (generischer Lade-/Fehler-Hook mit `reload`) und `useCart` (Context-Provider, localStorage-persistent) — getestet.
