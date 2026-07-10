@@ -1,12 +1,17 @@
 import type React from "react";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router";
-import { getMenu, getIngredients } from "@/lib/data/store";
+import { X } from "lucide-react";
+import { getMenu, getIngredients, getConfig, getSauces } from "@/lib/data/store";
 import { useAsync } from "@/hooks/use-async";
 import { useCart } from "@/hooks/use-cart";
+import { useFavorites } from "@/hooks/use-favorites";
+import { resolveSauce } from "@/lib/sauces";
+import { availableServiceModes } from "@/lib/slots";
 import { BASE_PRICE } from "@/lib/pricing";
 import type { PizzaTemplate } from "@/types";
 import { PizzaCard } from "@/components/pizza/pizza-card";
+import { PizzaSVG } from "@/components/pizza/pizza-svg";
 import { AsyncBoundary } from "@/components/common/async-boundary";
 import { Separator } from "@/components/ui/separator";
 
@@ -14,8 +19,18 @@ import { Separator } from "@/components/ui/separator";
 export default function MenuPage(): React.ReactElement {
   const menu = useAsync(getMenu);
   const ingredients = useAsync(getIngredients);
+  const config = useAsync(getConfig);
+  const sauces = useAsync(getSauces);
   const { addToCart, count } = useCart();
+  const { favorites, remove } = useFavorites();
   const navigate = useNavigate();
+
+  const modes = config.data ? availableServiceModes(config.data) : [];
+  const serviceLabel =
+    modes.length === 2 ? "Vor Ort & Abholung"
+    : modes[0] === "takeaway" ? "Nur Abholung"
+    : modes[0] === "dinein" ? "Nur Vor Ort"
+    : "Aktuell geschlossen";
 
   return (
     <div className="pb-24">
@@ -23,7 +38,7 @@ export default function MenuPage(): React.ReactElement {
       <div className="px-5 pt-10 pb-6">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
           <p className="text-[10px] font-black tracking-[0.3em] uppercase text-primary mb-3">
-            Pizzeria · Nur Abholung
+            Pizzeria · {serviceLabel}
           </p>
           <h1 className="text-4xl font-black leading-none tracking-tight mb-1">
             Unsere<br />
@@ -36,6 +51,30 @@ export default function MenuPage(): React.ReactElement {
       </div>
 
       <Separator />
+
+      {/* Favoriten */}
+      {favorites.length > 0 && (
+        <div className="px-4 pt-5">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2">Meine Favoriten</p>
+          <div className="grid grid-cols-2 gap-3">
+            {favorites.map((f) => {
+              const color = resolveSauce(sauces.data ?? [], f.sauceId)?.color;
+              return (
+                <div key={f.id} className="rounded-2xl border border-border bg-card p-3 relative">
+                  <button type="button" className="absolute top-2 right-2 text-muted-foreground hover:text-destructive" onClick={() => remove(f.id)}><X size={13} /></button>
+                  <div className="h-24 mx-auto aspect-square"><PizzaSVG selected={f.ingredientIds} sauceColor={color} /></div>
+                  <p className="font-black text-sm leading-tight mt-2">{f.name}</p>
+                  <button type="button"
+                    onClick={() => addToCart(f.name, f.ingredientIds, f.sauceId)}
+                    className="mt-2 w-full bg-primary/10 border border-primary/20 rounded-lg py-2 text-xs font-bold text-primary text-center hover:bg-primary hover:text-white transition-all">
+                    + In den Warenkorb
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* 2 × 2 Pizza-Grid */}
       <AsyncBoundary
