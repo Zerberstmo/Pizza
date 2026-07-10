@@ -6,6 +6,7 @@
 
 ## 2026-07-10
 
+- **Auth (Task A3):** `useAuth`-Hook + `AuthProvider` (`Frontend/src/hooks/use-auth.tsx`) — Mock-Session über `sessionStorage` (Key `pizza-auth`, speichert `user.id`), aufgelöst gegen `getUsers()` beim Start (`loading`-Flag). `login`/`logout`/`updateOwnProfile` (patcht nur `firstName`/`lastName`/`phone`/`password`, `username`/`role`/`id` unantastbar). Als äußerster Provider in `app.tsx` eingehängt. TDD, 4 neue Tests grün, Build sauber. TEIL-B TODO: Supabase-Auth.
 - **Teil-A-Erweiterung (Tasks 1–12):** Soßen (admin-verwaltbar unter `/admin/sossen`, färben die `PizzaSVG`-Vorschau, im pauschalen 10€-Preis enthalten), Favoriten (max. 5 eigene Pizzen, `useFavorites`/localStorage, nutzbar in Konfigurator + Speisekarte), Service-Modus (Vor Ort / Abholen, admin-schaltbar unter `/admin/service`, wirkt auf Checkout, Bestätigung und Speisekarten-Header). Build sauber, 35 Unit-Tests grün, keine Altlasten.
 
 ## 2026-07-09
