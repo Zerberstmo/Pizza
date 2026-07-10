@@ -27,7 +27,8 @@ export default function MenuPage(): React.ReactElement {
 
   const modes = config.data ? availableServiceModes(config.data) : [];
   const serviceLabel =
-    modes.length === 2 ? "Vor Ort & Abholung"
+    config.loading ? "Vorbestellen" // neutral, solange Config lädt (kein "Aktuell geschlossen"-Flackern)
+    : modes.length === 2 ? "Vor Ort & Abholung"
     : modes[0] === "takeaway" ? "Nur Abholung"
     : modes[0] === "dinein" ? "Nur Vor Ort"
     : "Aktuell geschlossen";
