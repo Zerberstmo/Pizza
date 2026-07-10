@@ -3,13 +3,14 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router";
 import { ArrowLeft, X, Plus, ChefHat, Phone, Calendar, Clock, FileText, Ticket, Check, AlertCircle } from "lucide-react";
-import { getConfig, getIngredients, getVouchers, createOrder } from "@/lib/data/store";
+import { getConfig, getIngredients, getVouchers, getSauces, createOrder } from "@/lib/data/store";
 import { useAsync } from "@/hooks/use-async";
 import { useCart } from "@/hooks/use-cart";
 import { cn } from "@/lib/utils";
 import { BASE_PRICE, formatPrice, computeSubtotal, computeDiscount, computeTotal, validateVoucher } from "@/lib/pricing";
-import { getSelectableDates, getAvailableTimes, formatDateLabel } from "@/lib/slots";
-import type { Customer, VoucherDef } from "@/types";
+import { getSelectableDates, getAvailableTimes, formatDateLabel, availableServiceModes } from "@/lib/slots";
+import { resolveSauce } from "@/lib/sauces";
+import type { Customer, ServiceMode, VoucherDef } from "@/types";
 import { PizzaSVG } from "@/components/pizza/pizza-svg";
 import { SelectInput } from "@/components/common/select-input";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ export default function CheckoutPage(): React.ReactElement {
   const navigate = useNavigate();
   const cfg = useAsync(getConfig);
   const { data: ingredients } = useAsync(getIngredients);
+  const { data: sauces } = useAsync(getSauces);
 
   const [customer, setCustomer] = useState<Customer>({ firstName: "", lastName: "", phone: "" });
   const [notes, setNotes] = useState("");
@@ -35,6 +37,7 @@ export default function CheckoutPage(): React.ReactElement {
   const [voucherCode, setVoucherCode] = useState("");
   const [appliedVoucher, setAppliedVoucher] = useState<VoucherDef | null>(null);
   const [voucherMessage, setVoucherMessage] = useState<VoucherMessage | null>(null);
+  const [serviceMode, setServiceMode] = useState<ServiceMode | "">("");
 
   const config = cfg.data;
   const availableDates = config ? getSelectableDates(config, new Date()) : [];
@@ -44,13 +47,18 @@ export default function CheckoutPage(): React.ReactElement {
   const noDates = !cfg.loading && availableDates.length === 0;
   const noTimes = availableTimes.length === 0;
 
+  const modes = config ? availableServiceModes(config) : [];
+  const noService = !cfg.loading && modes.length === 0;
+  // Default-Modus setzen, sobald verfügbar (z. B. nach dem Laden der Config)
+  if (modes.length > 0 && !serviceMode) setServiceMode(modes[0]);
+
   const subtotal = computeSubtotal(cart.length);
   const discount = computeDiscount(subtotal, appliedVoucher);
   const total = computeTotal(subtotal, discount);
 
   const canOrder =
     customer.firstName.trim() && customer.lastName.trim() && customer.phone.trim() &&
-    pickupDate && pickupTime && cart.length > 0;
+    pickupDate && pickupTime && cart.length > 0 && !!serviceMode;
 
   const applyVoucher = async () => {
     const vouchers = await getVouchers();
@@ -70,7 +78,7 @@ export default function CheckoutPage(): React.ReactElement {
   };
 
   const placeOrder = async () => {
-    if (!canOrder || noDates) return;
+    if (!canOrder || noDates || noService || !serviceMode) return;
     const order = await createOrder({
       items: cart,
       customer,
@@ -78,6 +86,7 @@ export default function CheckoutPage(): React.ReactElement {
       pickupDate,
       pickupTime,
       voucherCode: appliedVoucher?.code,
+      serviceMode,
     });
     clearCart();
     navigate("/bestaetigung", { state: order });
@@ -95,6 +104,7 @@ export default function CheckoutPage(): React.ReactElement {
   }
 
   const ingName = (id: string) => (ingredients ?? []).find((x) => x.id === id)?.name;
+  const sauceName = (id?: string) => resolveSauce(sauces ?? [], id)?.name;
 
   return (
     <div className="pb-36">
@@ -123,7 +133,7 @@ export default function CheckoutPage(): React.ReactElement {
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm">{item.pizzaName}</p>
                     <p className="text-xs text-muted-foreground truncate">
-                      {item.ingredientIds.map(ingName).filter(Boolean).join(", ") || "Käse & Sauce"}
+                      {[sauceName(item.sauceId), ...item.ingredientIds.map(ingName)].filter(Boolean).join(", ") || "Käse & Sauce"}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
@@ -179,10 +189,26 @@ export default function CheckoutPage(): React.ReactElement {
 
         {/* Abholung */}
         <Card>
-          <CardHeader><CardTitle>Abholung</CardTitle></CardHeader>
+          <CardHeader><CardTitle>{serviceMode === "dinein" ? "Vor Ort essen" : "Abholung"}</CardTitle></CardHeader>
           <CardContent className="space-y-3">
+            {modes.length === 2 && (
+              <div className="flex gap-2">
+                {(["dinein", "takeaway"] as const).map((m) => (
+                  <button key={m} type="button" onClick={() => setServiceMode(m)}
+                    className={"flex-1 rounded-lg border px-3 py-2 text-sm font-semibold transition-all " +
+                      (serviceMode === m ? "border-primary/50 bg-primary/10 text-primary" : "border-border bg-card text-foreground")}>
+                    {m === "dinein" ? "Vor Ort essen" : "Abholen"}
+                  </button>
+                ))}
+              </div>
+            )}
             {cfg.loading ? (
               <p className="text-xs text-muted-foreground">Lädt…</p>
+            ) : noService ? (
+              <div className="bg-destructive/8 border border-destructive/20 rounded-xl px-4 py-3">
+                <p className="text-sm text-destructive font-semibold">Aktuell kein Service verfügbar.</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Bitte zu einem späteren Zeitpunkt erneut versuchen.</p>
+              </div>
             ) : noDates ? (
               <div className="bg-destructive/8 border border-destructive/20 rounded-xl px-4 py-3">
                 <p className="text-sm text-destructive font-semibold">Aktuell keine Bestelltage verfügbar.</p>
@@ -285,8 +311,8 @@ export default function CheckoutPage(): React.ReactElement {
 
       <div className="fixed bottom-[68px] left-0 right-0 z-40 px-4 pb-2 max-w-lg mx-auto">
         <Button size="lg" className="w-full font-black text-base shadow-2xl shadow-primary/25"
-          disabled={!canOrder || noDates} onClick={placeOrder}>
-          {cart.length} Pizza{cart.length !== 1 ? "en" : ""} bestellen — {formatPrice(total)}
+          disabled={!canOrder || noDates || noService} onClick={placeOrder}>
+          {cart.length} Pizza{cart.length !== 1 ? "en" : ""} {serviceMode === "dinein" ? "vor Ort" : "abholen"} — {formatPrice(total)}
         </Button>
       </div>
     </div>
