@@ -1,5 +1,5 @@
-import type { AppConfig, IngredientItem, NewOrder, OrderData, PizzaTemplate, VoucherDef } from "@/types";
-import { INGREDIENTS_DEFAULT, TEMPLATES, VOUCHERS_INIT, DEFAULT_CONFIG, ADMIN_PASSWORD, WEEK_DATA, PIE_DATA } from "./seed";
+import type { AppConfig, IngredientItem, NewOrder, OrderData, PizzaTemplate, VoucherDef, Sauce } from "@/types";
+import { INGREDIENTS_DEFAULT, TEMPLATES, VOUCHERS_INIT, DEFAULT_CONFIG, ADMIN_PASSWORD, WEEK_DATA, PIE_DATA, SAUCES_DEFAULT } from "./seed";
 import { computeSubtotal, computeDiscount, computeTotal, validateVoucher } from "@/lib/pricing";
 
 // Async Datenschicht — die Naht, die in Teil-B gegen Supabase getauscht wird.
@@ -22,11 +22,13 @@ export const getMenu = () => delay(TEMPLATES.slice(0, 4) as PizzaTemplate[]);
 export const getIngredients = () => delay(read<IngredientItem[]>("pizza-ingredients", INGREDIENTS_DEFAULT));
 export const getVouchers = () => delay(read<VoucherDef[]>("pizza-vouchers", VOUCHERS_INIT));
 export const getConfig = () => delay(read<AppConfig>("pizza-config", DEFAULT_CONFIG));
+export const getSauces = () => delay(read<Sauce[]>("pizza-sauces", SAUCES_DEFAULT));
 export const getDashboardStats = () => delay({ week: WEEK_DATA, toppings: PIE_DATA });
 
 export const saveIngredients = (list: IngredientItem[]) => delay(write("pizza-ingredients", list));
 export const saveVouchers = (list: VoucherDef[]) => delay(write("pizza-vouchers", list));
 export const saveConfig = (config: AppConfig) => delay(write("pizza-config", config));
+export const saveSauces = (list: Sauce[]) => delay(write("pizza-sauces", list));
 
 export async function createOrder(input: NewOrder): Promise<OrderData> {
   const vouchers = read<VoucherDef[]>("pizza-vouchers", VOUCHERS_INIT);
@@ -49,6 +51,7 @@ export async function createOrder(input: NewOrder): Promise<OrderData> {
     notes: input.notes,
     pickupDate: input.pickupDate,
     pickupTime: input.pickupTime,
+    serviceMode: input.serviceMode ?? "takeaway",
     voucherCode: applied?.code,
   };
   const orders = read<OrderData[]>("pizza-orders", []);

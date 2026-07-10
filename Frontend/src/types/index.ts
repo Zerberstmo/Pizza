@@ -39,6 +39,7 @@ export interface CartItem {
   cartId: string;
   pizzaName: string;
   ingredientIds: string[];
+  sauceId?: string;
 }
 
 export interface Hours {
@@ -50,7 +51,10 @@ export interface AppConfig {
   days: Record<string, boolean>;
   hours: Hours;
   leadTimeDays: number;
+  service: { dineIn: boolean; takeaway: boolean };
 }
+
+export type ServiceMode = "dinein" | "takeaway";
 
 export interface NewOrder {
   items: CartItem[];
@@ -59,6 +63,7 @@ export interface NewOrder {
   pickupDate: string;
   pickupTime: string;
   voucherCode?: string;
+  serviceMode?: ServiceMode;
 }
 
 export interface OrderData {
@@ -73,4 +78,20 @@ export interface OrderData {
   pickupTime: string;
   notes: string;
   voucherCode?: string;
+  serviceMode: ServiceMode;
+}
+
+export interface Sauce {
+  id: string;
+  name: string;
+  emoji: string;
+  color: string;
+  available: boolean;
+}
+
+export interface FavoritePizza {
+  id: string;
+  name: string;
+  ingredientIds: string[];
+  sauceId: string;
 }

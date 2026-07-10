@@ -1,4 +1,4 @@
-import type { AppConfig, IngredientItem, PizzaTemplate, VoucherDef } from "@/types";
+import type { AppConfig, IngredientItem, PizzaTemplate, VoucherDef, Sauce } from "@/types";
 
 // Quelle: `Frontend vorlage/src/app/App.tsx` (Konstanten 1:1 übernommen).
 // TEIL-B TODO: Diese Seed-Daten werden durch Supabase-Tabellen ersetzt.
@@ -68,6 +68,14 @@ export const TEMPLATES: PizzaTemplate[] = [
     ingredientIds: ["gorgonzola", "extra-kaese", "rucola"] },
 ];
 
+export const SAUCES_DEFAULT: Sauce[] = [
+  { id: "tomate", name: "Tomate",        emoji: "🍅", color: "#B03818", available: true },
+  { id: "creme",  name: "Crème fraîche", emoji: "🥛", color: "#ECE3C8", available: true },
+  { id: "bbq",    name: "BBQ",           emoji: "🍖", color: "#7A3B1E", available: true },
+  { id: "pesto",  name: "Pesto",         emoji: "🌿", color: "#4B7A2F", available: true },
+  { id: "keine",  name: "Ohne Soße",     emoji: "🚫", color: "#E8C070", available: true },
+];
+
 export const VOUCHERS_INIT: VoucherDef[] = [
   { id: "v1", name: "Willkommen",  code: "WELCOME10", type: "percent",    value: 10, expiresAt: "2026-12-31", active: true,  maxUses: 100, uses: 23 },
   { id: "v2", name: "Sommer",      code: "SOMMER15",  type: "percent",    value: 15, expiresAt: "2026-08-31", active: true,  maxUses: 50,  uses: 12 },
@@ -89,6 +97,7 @@ export const DEFAULT_CONFIG: AppConfig = {
   days: { Montag: true, Dienstag: true, Mittwoch: false, Donnerstag: true, Freitag: true, Samstag: true, Sonntag: false },
   hours: { from: "11:00", to: "21:00" },
   leadTimeDays: 3,
+  service: { dineIn: false, takeaway: true },
 };
 
 export const ADMIN_PASSWORD = "pizza"; // TEIL-B TODO: durch Supabase-Auth ersetzen
