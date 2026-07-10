@@ -1,5 +1,5 @@
-import type { AppConfig, IngredientItem, NewOrder, OrderData, PizzaTemplate, VoucherDef, Sauce } from "@/types";
-import { INGREDIENTS_DEFAULT, TEMPLATES, VOUCHERS_INIT, DEFAULT_CONFIG, ADMIN_PASSWORD, WEEK_DATA, PIE_DATA, SAUCES_DEFAULT } from "./seed";
+import type { AppConfig, IngredientItem, NewOrder, OrderData, PizzaTemplate, VoucherDef, Sauce, User } from "@/types";
+import { INGREDIENTS_DEFAULT, TEMPLATES, VOUCHERS_INIT, DEFAULT_CONFIG, ADMIN_PASSWORD, WEEK_DATA, PIE_DATA, SAUCES_DEFAULT, USERS_DEFAULT } from "./seed";
 import { computeSubtotal, computeDiscount, computeTotal, validateVoucher } from "@/lib/pricing";
 
 // Async Datenschicht — die Naht, die in Teil-B gegen Supabase getauscht wird.
@@ -29,6 +29,16 @@ export const saveIngredients = (list: IngredientItem[]) => delay(write("pizza-in
 export const saveVouchers = (list: VoucherDef[]) => delay(write("pizza-vouchers", list));
 export const saveConfig = (config: AppConfig) => delay(write("pizza-config", config));
 export const saveSauces = (list: Sauce[]) => delay(write("pizza-sauces", list));
+
+export const getUsers = () => delay(read<User[]>("pizza-users", USERS_DEFAULT));
+export const saveUsers = (list: User[]) => delay(write("pizza-users", list));
+
+// TEIL-B TODO: durch Supabase-Auth ersetzen (serverseitige Prüfung, gehashte Passwörter).
+export async function verifyLogin(username: string, password: string): Promise<User | null> {
+  const users = read<User[]>("pizza-users", USERS_DEFAULT);
+  const u = users.find((x) => x.username === username && x.password === password && x.active);
+  return delay(u ?? null);
+}
 
 export async function createOrder(input: NewOrder): Promise<OrderData> {
   const vouchers = read<VoucherDef[]>("pizza-vouchers", VOUCHERS_INIT);

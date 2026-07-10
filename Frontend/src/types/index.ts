@@ -95,3 +95,16 @@ export interface FavoritePizza {
   ingredientIds: string[];
   sauceId: string;
 }
+
+export type Role = "customer" | "admin";
+
+export interface User {
+  id: string;
+  username: string;   // Login-Kennung, eindeutig, admin-vergeben, unveränderlich
+  password: string;   // TEIL-B TODO: Klartext nur im Mock → Supabase-Hash
+  firstName: string;
+  lastName: string;
+  phone: string;
+  role: Role;
+  active: boolean;
+}
