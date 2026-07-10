@@ -23,4 +23,9 @@ describe("useCart", () => {
     act(() => result.current.addToCart("Hawaii", []));
     expect(localStorage.getItem("pizza-cart")).toContain("Hawaii");
   });
+  it("übernimmt die sauceId", () => {
+    const { result } = renderHook(() => useCart(), { wrapper });
+    act(() => result.current.addToCart("Eigene Pizza", ["salami"], "pesto"));
+    expect(result.current.cart[0].sauceId).toBe("pesto");
+  });
 });

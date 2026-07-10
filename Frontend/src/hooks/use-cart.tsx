@@ -6,7 +6,7 @@ const KEY = "pizza-cart";
 
 interface CartContextValue {
   cart: CartItem[];
-  addToCart(pizzaName: string, ingredientIds: string[]): void;
+  addToCart(pizzaName: string, ingredientIds: string[], sauceId?: string): void;
   removeFromCart(cartId: string): void;
   clearCart(): void;
   count: number;
@@ -22,8 +22,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(KEY, JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = (pizzaName: string, ingredientIds: string[]) =>
-    setCart((p) => [...p, { cartId: uid(), pizzaName, ingredientIds }]);
+  const addToCart = (pizzaName: string, ingredientIds: string[], sauceId?: string) =>
+    setCart((p) => [...p, { cartId: uid(), pizzaName, ingredientIds, sauceId }]);
   const removeFromCart = (cartId: string) => setCart((p) => p.filter((x) => x.cartId !== cartId));
   const clearCart = () => setCart([]);
 
