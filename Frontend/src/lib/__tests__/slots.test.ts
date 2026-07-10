@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { getSelectableDates, getAvailableTimes, isSlotAllowed, formatDateLabel } from "@/lib/slots";
+import { getSelectableDates, getAvailableTimes, isSlotAllowed, formatDateLabel, availableServiceModes } from "@/lib/slots";
 import type { AppConfig } from "@/types";
 
 const allDays = { Montag: true, Dienstag: true, Mittwoch: true, Donnerstag: true, Freitag: true, Samstag: true, Sonntag: true };
@@ -30,5 +30,12 @@ describe("slots", () => {
   });
   it("formatDateLabel formats german weekday + date", () => {
     expect(formatDateLabel("2026-07-12")).toBe("So, 12.07.2026");
+  });
+  it("availableServiceModes spiegelt die Config", () => {
+    const base = cfg(3);
+    expect(availableServiceModes({ ...base, service: { dineIn: true,  takeaway: true  } })).toEqual(["dinein", "takeaway"]);
+    expect(availableServiceModes({ ...base, service: { dineIn: false, takeaway: true  } })).toEqual(["takeaway"]);
+    expect(availableServiceModes({ ...base, service: { dineIn: true,  takeaway: false } })).toEqual(["dinein"]);
+    expect(availableServiceModes({ ...base, service: { dineIn: false, takeaway: false } })).toEqual([]);
   });
 });

@@ -1,4 +1,4 @@
-import type { AppConfig, Hours } from "@/types";
+import type { AppConfig, Hours, ServiceMode } from "@/types";
 
 export const DAYS_OF_WEEK = ["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"] as const;
 export const JS_DAY_MAP: Record<number, string> = { 0:"Sonntag",1:"Montag",2:"Dienstag",3:"Mittwoch",4:"Donnerstag",5:"Freitag",6:"Samstag" };
@@ -45,4 +45,11 @@ export function formatDateLabel(dateStr: string): string {
 export function isSlotAllowed(dateStr: string, time: string, config: AppConfig, now: Date): boolean {
   return getSelectableDates(config, now).includes(dateStr)
     && getAvailableTimes(config.hours).includes(time);
+}
+
+export function availableServiceModes(config: AppConfig): ServiceMode[] {
+  const modes: ServiceMode[] = [];
+  if (config.service.dineIn) modes.push("dinein");
+  if (config.service.takeaway) modes.push("takeaway");
+  return modes;
 }
