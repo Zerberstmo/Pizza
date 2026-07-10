@@ -6,6 +6,10 @@
 
 ## 2026-07-09
 
+- **Teil-A abgeschlossen (Tasks 12–18):** Admin-Login + Session-Guard (Mock-Auth, `useAdminAuth`), Admin-Dashboard (async Kennzahlen/Charts), Admin-Verwaltung für Tage/Öffnungszeiten/**Vorlaufzeit**/Zutaten/Gutscheine (alle persistent). Gemeinsames Load/Save/Flash-Muster in `useConfigEditor` extrahiert. E2E-Happy-Path (Playwright, System-Chrome) geschrieben — Ausführung in dieser Umgebung mangels Browser blockiert, dokumentiert. `Frontend/README.md`, ADR-0001 (Capacitor), ADR-0002 (Supabase), ADR-0003 (CallMeBot) angelegt. Build + 24 Unit-Tests grün, keine Altlasten (kein MUI/Emotion/figma:asset).
+- **Bestätigung (Task 11):** `confirmation-page` — Order via Router-State, `QrCode`, Redirect zu `/` ohne State.
+- **Checkout (Task 10):** `checkout-page` — Vorlaufzeit-Slots aus Config, Gutschein via `validateVoucher`, Bestellung via `createOrder` → Bestätigung.
+- **Konfigurator (Task 9):** `configurator-page` portiert — Zutaten async, `selected`-State lokal, Live-`PizzaSVG`, Empfehlungen via ausgelagerter `lib/recommendations.ts` (`getRecs`), Kategorien aus den Daten abgeleitet (kein Seed-Import in der Seite). „+ Warenkorb" legt „Eigene Pizza" an und navigiert zu `/warenkorb`.
 - **Speisekarte (Task 8):** `menu-page` portiert — Menü + Zutaten async über `useAsync`/`AsyncBoundary`, `PizzaCard`-Kacheln, „In den Warenkorb" via `useCart`, Warenkorb-Hinweisleiste mit Navigation zu `/warenkorb`.
 - **Routing-Gerüst (Task 7):** react-router mit Kunden-Layout (`app-layout` + `BottomNav`) und Admin-Layout (`admin-shell`, Tab-Nav inkl. neuem „Vorlaufzeit"-Tab). Routen `/`, `/konfigurator`, `/warenkorb`, `/bestaetigung`, `/admin` + `/admin/{dashboard,tage,oeffnungszeiten,vorlaufzeit,zutaten,gutscheine}`. Alle Seiten als Stubs angelegt. Dev-Server + Build verifiziert.
 - **Präsentations-Bausteine (Task 6):** 11 shadcn-Primitives portiert, `PizzaSVG` + `toppings`, `QrCode`, `SelectInput`, `SvgBarChart`/`SvgDonutChart`, `AsyncBoundary`. `PizzaCard` neu — nutzt selbst-enthaltene `PizzaSVG` statt Figma-Fotos. Radix `label`/`progress` ergänzt.
