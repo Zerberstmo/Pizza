@@ -2,7 +2,8 @@ import type React from "react";
 import { motion } from "motion/react";
 import { useLocation, useNavigate, Navigate } from "react-router";
 import { Check } from "lucide-react";
-import { getIngredients } from "@/lib/data/store";
+import { getIngredients, getSauces } from "@/lib/data/store";
+import { resolveSauce } from "@/lib/sauces";
 import { useAsync } from "@/hooks/use-async";
 import { formatPrice } from "@/lib/pricing";
 import { formatDateLabel } from "@/lib/slots";
@@ -19,10 +20,12 @@ export default function ConfirmationPage(): React.ReactElement {
   const navigate = useNavigate();
   const order = location.state as OrderData | null;
   const { data: ingredients } = useAsync(getIngredients);
+  const { data: sauces } = useAsync(getSauces);
 
   if (!order) return <Navigate to="/" replace />;
 
   const ingName = (id: string) => (ingredients ?? []).find((x) => x.id === id)?.name;
+  const sauceName = (id?: string) => resolveSauce(sauces ?? [], id)?.name;
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 pb-24">
@@ -62,7 +65,7 @@ export default function ConfirmationPage(): React.ReactElement {
             </div>
             <Separator />
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Abholung</span>
+              <span className="text-muted-foreground">{order.serviceMode === "dinein" ? "Vor Ort" : "Abholung"}</span>
               <span className="font-semibold">{formatDateLabel(order.pickupDate)} · {order.pickupTime} Uhr</span>
             </div>
             <Separator />
@@ -74,7 +77,7 @@ export default function ConfirmationPage(): React.ReactElement {
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm">{item.pizzaName}</p>
                     <p className="text-xs text-muted-foreground truncate">
-                      {item.ingredientIds.map(ingName).filter(Boolean).join(", ") || "Käse & Sauce"}
+                      {[sauceName(item.sauceId), ...item.ingredientIds.map(ingName)].filter(Boolean).join(", ") || "Käse & Sauce"}
                     </p>
                   </div>
                   <span className="text-primary font-bold shrink-0">10 €</span>
