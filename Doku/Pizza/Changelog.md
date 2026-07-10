@@ -4,6 +4,10 @@
 
 <!-- Neue Einträge oben einfügen -->
 
+## 2026-07-10
+
+- **Teil-A-Erweiterung (Tasks 1–12):** Soßen (admin-verwaltbar unter `/admin/sossen`, färben die `PizzaSVG`-Vorschau, im pauschalen 10€-Preis enthalten), Favoriten (max. 5 eigene Pizzen, `useFavorites`/localStorage, nutzbar in Konfigurator + Speisekarte), Service-Modus (Vor Ort / Abholen, admin-schaltbar unter `/admin/service`, wirkt auf Checkout, Bestätigung und Speisekarten-Header). Build sauber, 35 Unit-Tests grün, keine Altlasten.
+
 ## 2026-07-09
 
 - **Teil-A abgeschlossen (Tasks 12–18):** Admin-Login + Session-Guard (Mock-Auth, `useAdminAuth`), Admin-Dashboard (async Kennzahlen/Charts), Admin-Verwaltung für Tage/Öffnungszeiten/**Vorlaufzeit**/Zutaten/Gutscheine (alle persistent). Gemeinsames Load/Save/Flash-Muster in `useConfigEditor` extrahiert. E2E-Happy-Path (Playwright, System-Chrome) geschrieben — Ausführung in dieser Umgebung mangels Browser blockiert, dokumentiert. `Frontend/README.md`, ADR-0001 (Capacitor), ADR-0002 (Supabase), ADR-0003 (CallMeBot) angelegt. Build + 24 Unit-Tests grün, keine Altlasten (kein MUI/Emotion/figma:asset).

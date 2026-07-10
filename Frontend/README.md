@@ -38,8 +38,27 @@ Die UI bleibt dabei unverändert; nur `store.ts` wird ersetzt.
 ## Admin
 
 - Zugang: unten „Admin" → Passwort `pizza` (Mock, `seed.ts` — **Teil-B: echte Supabase-Auth**).
-- Konfigurierbar: Bestelltage, Öffnungszeiten, **Vorlaufzeit** (Default 3 Tage), Zutaten, Gutscheine.
+- Konfigurierbar: Bestelltage, Öffnungszeiten, **Vorlaufzeit** (Default 3 Tage), Zutaten, Gutscheine, **Soßen**, **Service-Modus**.
 - **Vorlaufzeit:** Frühester Abholtag = heute + Vorlaufzeit. Wirkt direkt auf die Datumsauswahl im Checkout.
+
+## Soßen
+
+Admin-verwaltbar unter `/admin/sossen`. Jede Soße hat eine Farbe, die die `PizzaSVG`-Vorschau
+im Konfigurator/Warenkorb einfärbt (`resolveSauce()` in `lib/sauces.ts` löst die Soßen-id auf,
+mit Fallback auf die erste verfügbare Soße). Die Soße ist im pauschalen 10€-Pizzapreis enthalten,
+sie ändert den Preis nicht.
+
+## Favoriten
+
+Bis zu 5 eigene Pizzen lassen sich als Favorit speichern (`useFavorites`, `FavoritesProvider`,
+localStorage-persistent unter dem Key `pizza-favorites`). Nutzbar im Konfigurator (Speichern)
+und auf der Speisekarte (`favorites-bar.tsx`, schnelles Hinzufügen zum Warenkorb).
+
+## Service-Modus
+
+Admin-schaltbar unter `/admin/service` (Vor Ort / Abholen, `availableServiceModes()` in
+`lib/slots.ts`). Wirkt auf Checkout (Auswahl, falls beide Modi aktiv), Bestätigungsseite und
+den Speisekarten-Header.
 
 ## E2E-Hinweis
 
