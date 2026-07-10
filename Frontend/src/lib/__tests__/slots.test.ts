@@ -3,7 +3,7 @@ import { getSelectableDates, getAvailableTimes, isSlotAllowed, formatDateLabel }
 import type { AppConfig } from "@/types";
 
 const allDays = { Montag: true, Dienstag: true, Mittwoch: true, Donnerstag: true, Freitag: true, Samstag: true, Sonntag: true };
-const cfg = (leadTimeDays: number, days = allDays): AppConfig => ({ days, hours: { from: "11:00", to: "12:00" }, leadTimeDays });
+const cfg = (leadTimeDays: number, days = allDays): AppConfig => ({ days, hours: { from: "11:00", to: "12:00" }, leadTimeDays, service: { dineIn: false, takeaway: true } });
 
 describe("slots", () => {
   it("lead time 3: earliest date is today+3", () => {
