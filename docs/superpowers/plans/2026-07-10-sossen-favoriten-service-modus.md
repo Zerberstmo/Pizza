@@ -724,14 +724,14 @@ Soßen-Auswahl-Block direkt über den Zutaten-Kategorien einfügen (innerhalb de
     navigate("/warenkorb");
   };
 ```
+Dafür den Hook um `favorites` erweitern (für den Default-Namen): `const { favorites, add: addFavorite, isFull } = useFavorites();`.
 „Als Favorit speichern"-Button in die Sticky-CTA-Card neben „+ Warenkorb" einfügen (im `CardContent` der fixierten Karte, vor dem bestehenden Button):
 ```tsx
             <Button
               variant="outline"
               disabled={selected.length === 0 || isFull}
               onClick={() => {
-                const name = `Meine Pizza ${/* nächste Nummer egal, einfach Zeitstempelfrei */ ""}`.trim() || "Meine Pizza";
-                const ok = addFavorite("Meine Pizza", selected, sauceId);
+                const ok = addFavorite(`Eigene Pizza ${favorites.length + 1}`, selected, sauceId);
                 setFavMsg(ok ? "Als Favorit gespeichert." : "Max. 5 Favoriten – lösche zuerst einen.");
                 setTimeout(() => setFavMsg(""), 2000);
               }}
@@ -740,7 +740,7 @@ Soßen-Auswahl-Block direkt über den Zutaten-Kategorien einfügen (innerhalb de
               ♥ Favorit
             </Button>
 ```
-> Vereinfachung (ponytail): Der Favoritenname ist zunächst fix „Meine Pizza". Eine Namens-Eingabe kann später ergänzt werden; `add(name, …)` akzeptiert bereits einen beliebigen Namen. Optional `{favMsg && <p className="text-xs text-muted-foreground">{favMsg}</p>}` unter den Buttons anzeigen.
+> Vereinfachung (ponytail): Der Favoritenname ist automatisch „Eigene Pizza N". Eine freie Namens-Eingabe kann später ergänzt werden; `add(name, …)` akzeptiert bereits einen beliebigen Namen. Zeige den Hinweis unter den Buttons: `{favMsg && <p className="text-xs text-muted-foreground text-center">{favMsg}</p>}`.
 
 - [ ] **Step 4: Build → grün**
 
