@@ -45,7 +45,7 @@ export default function MenuPage(): React.ReactElement {
             <span className="text-primary">Speisekarte.</span>
           </h1>
           <p className="text-muted-foreground text-sm mt-2">
-            Jede Pizza <span className="text-primary font-bold">10 €</span> · Bezahlung bei Abholung
+            Jede Pizza <span className="text-primary font-bold">10 €</span> · Bezahlung in bar
           </p>
         </motion.div>
       </div>
