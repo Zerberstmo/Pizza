@@ -3,13 +3,17 @@ import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useNavigate } from "react-router";
 import { ArrowLeft, X, Check } from "lucide-react";
-import { getIngredients } from "@/lib/data/store";
+import { getIngredients, getSauces } from "@/lib/data/store";
 import { useAsync } from "@/hooks/use-async";
 import { useCart } from "@/hooks/use-cart";
+import { useFavorites } from "@/hooks/use-favorites";
 import { getRecs } from "@/lib/recommendations";
+import { resolveSauce } from "@/lib/sauces";
 import { cn } from "@/lib/utils";
-import type { IngredientItem } from "@/types";
+import type { FavoritePizza, IngredientItem } from "@/types";
 import { PizzaSVG } from "@/components/pizza/pizza-svg";
+import { SaucePicker } from "@/components/pizza/sauce-picker";
+import { FavoritesBar } from "@/components/pizza/favorites-bar";
 import { AsyncBoundary } from "@/components/common/async-boundary";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,18 +22,28 @@ import { Card, CardContent } from "@/components/ui/card";
 // Konfigurator. Portiert aus App.tsx:645-771; Zutaten async, selected lokal.
 export default function ConfiguratorPage(): React.ReactElement {
   const { data, loading, error } = useAsync(getIngredients);
+  const { data: sauces } = useAsync(getSauces);
   const { addToCart } = useCart();
+  const { favorites, add: addFavorite, isFull } = useFavorites();
   const navigate = useNavigate();
   const [selected, setSelected] = useState<string[]>([]);
+  const [sauceId, setSauceId] = useState<string>("");
+  const [favMsg, setFavMsg] = useState<string>("");
+
+  // Default-Soße setzen, sobald geladen und noch keine gewählt.
+  const availableSauces = (sauces ?? []).filter((s) => s.available);
+  if (availableSauces.length > 0 && !sauceId) setSauceId(availableSauces[0].id);
 
   const toggle = (id: string) =>
     setSelected((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
 
   const recs = useMemo(() => getRecs(selected), [selected]);
 
+  const sauceColor = resolveSauce(sauces ?? [], sauceId)?.color;
+
   const addOwnPizza = () => {
     if (selected.length === 0) return;
-    addToCart("Eigene Pizza", selected);
+    addToCart("Eigene Pizza", selected, sauceId);
     setSelected([]);
     navigate("/warenkorb");
   };
@@ -55,6 +69,7 @@ export default function ConfiguratorPage(): React.ReactElement {
           }, []);
           return (
             <div className="px-4 mt-5">
+              <FavoritesBar onLoad={(fav: FavoritePizza) => { setSelected(fav.ingredientIds); setSauceId(fav.sauceId); }} />
               {/* Live-Vorschau */}
               <div className="flex items-start gap-4 mb-5">
                 <div className="w-36 h-36 shrink-0">
@@ -65,7 +80,7 @@ export default function ConfiguratorPage(): React.ReactElement {
                     transition={{ duration: 0.18 }}
                     className="w-full h-full"
                   >
-                    <PizzaSVG selected={selected} />
+                    <PizzaSVG selected={selected} sauceColor={sauceColor} />
                   </motion.div>
                 </div>
                 <div className="flex-1 pt-1 min-w-0">
@@ -115,6 +130,13 @@ export default function ConfiguratorPage(): React.ReactElement {
                 )}
               </AnimatePresence>
 
+              {availableSauces.length > 0 && (
+                <div className="mb-5">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2">Soße</p>
+                  <SaucePicker sauces={availableSauces} value={sauceId} onChange={setSauceId} />
+                </div>
+              )}
+
               {/* Zutaten-Chips nach Kategorie */}
               {categories.map((cat) => {
                 const items = ingredients.filter((i) => i.category === cat);
@@ -161,10 +183,23 @@ export default function ConfiguratorPage(): React.ReactElement {
               </p>
               <p className="font-black text-xl text-primary leading-tight">10,00 €</p>
             </div>
+            <Button
+              variant="outline"
+              disabled={selected.length === 0 || isFull}
+              onClick={() => {
+                const ok = addFavorite(`Eigene Pizza ${favorites.length + 1}`, selected, sauceId);
+                setFavMsg(ok ? "Als Favorit gespeichert." : "Max. 5 Favoriten – lösche zuerst einen.");
+                setTimeout(() => setFavMsg(""), 2000);
+              }}
+              className="gap-1.5"
+            >
+              ♥ Favorit
+            </Button>
             <Button onClick={addOwnPizza} disabled={selected.length === 0} className="gap-2 shadow-lg shadow-primary/20">
               + Warenkorb
             </Button>
           </CardContent>
+          {favMsg && <p className="text-xs text-muted-foreground text-center pb-2">{favMsg}</p>}
         </Card>
       </div>
     </div>
