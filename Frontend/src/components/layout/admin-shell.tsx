@@ -1,7 +1,7 @@
 import type React from "react";
 import { NavLink, Outlet, Navigate, useNavigate } from "react-router";
 import { motion } from "motion/react";
-import { BarChart2, Calendar, Clock, Timer, Package, Droplet, Tag, ChefHat, LogOut } from "lucide-react";
+import { BarChart2, Calendar, Clock, Timer, Package, Droplet, Tag, ChefHat, LogOut, Store } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAdminAuth } from "@/hooks/use-admin-auth";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ const NAV: Array<{ to: string; icon: React.ElementType; label: string }> = [
   { to: "/admin/tage",            icon: Calendar,  label: "Bestelltage"    },
   { to: "/admin/oeffnungszeiten", icon: Clock,     label: "Öffnungszeiten" },
   { to: "/admin/vorlaufzeit",     icon: Timer,     label: "Vorlaufzeit"    },
+  { to: "/admin/service",         icon: Store,     label: "Service"       },
   { to: "/admin/zutaten",         icon: Package,   label: "Zutaten"        },
   { to: "/admin/sossen",          icon: Droplet,   label: "Soßen"          },
   { to: "/admin/gutscheine",      icon: Tag,       label: "Gutscheine"     },

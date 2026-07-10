@@ -13,6 +13,7 @@ import LeadTimePage from "@/pages/admin/lead-time-page";
 import IngredientsPage from "@/pages/admin/ingredients-page";
 import SaucesPage from "@/pages/admin/sauces-page";
 import VouchersPage from "@/pages/admin/vouchers-page";
+import ServicePage from "@/pages/admin/service-page";
 
 export const router = createBrowserRouter([
   {
@@ -33,6 +34,7 @@ export const router = createBrowserRouter([
       { path: "tage", element: <DaysPage /> },
       { path: "oeffnungszeiten", element: <HoursPage /> },
       { path: "vorlaufzeit", element: <LeadTimePage /> },
+      { path: "service", element: <ServicePage /> },
       { path: "zutaten", element: <IngredientsPage /> },
       { path: "sossen", element: <SaucesPage /> },
       { path: "gutscheine", element: <VouchersPage /> },
