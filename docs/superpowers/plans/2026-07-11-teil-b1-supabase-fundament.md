@@ -349,7 +349,10 @@ Deno.serve(async (req) => {
         first_name: body.firstName ?? "", last_name: body.lastName ?? "", phone: body.phone ?? "",
         role: body.role ?? "customer", active: true,
       }).eq("id", created.user!.id);
-      if (pErr) return json({ error: pErr.message }, 400);
+      if (pErr) {
+        await admin.auth.admin.deleteUser(created.user!.id); // Rollback: kein verwaister Auth-User
+        return json({ error: pErr.message }, 400);
+      }
       return json({ ok: true });
     }
     if (body.action === "delete") {
