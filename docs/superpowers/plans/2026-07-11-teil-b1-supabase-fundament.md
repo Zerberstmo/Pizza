@@ -338,11 +338,18 @@ Deno.serve(async (req) => {
   const body = await req.json().catch(() => ({}));
   try {
     if (body.action === "create") {
-      const { error } = await admin.auth.admin.createUser({
+      const { data: created, error } = await admin.auth.admin.createUser({
         email: body.email, password: body.password, email_confirm: true,
-        user_metadata: { first_name: body.firstName ?? "", last_name: body.lastName ?? "", phone: body.phone ?? "", role: body.role ?? "customer" },
+        user_metadata: { first_name: body.firstName ?? "", last_name: body.lastName ?? "", phone: body.phone ?? "" },
       });
       if (error) return json({ error: error.message }, 400);
+      // Rolle/Details explizit setzen: der handle_new_user-Trigger erzwingt role='customer';
+      // service_role darf sie via protect_profile_columns-Trigger ändern.
+      const { error: pErr } = await admin.from("profiles").update({
+        first_name: body.firstName ?? "", last_name: body.lastName ?? "", phone: body.phone ?? "",
+        role: body.role ?? "customer", active: true,
+      }).eq("id", created.user!.id);
+      if (pErr) return json({ error: pErr.message }, 400);
       return json({ ok: true });
     }
     if (body.action === "delete") {
@@ -700,7 +707,7 @@ begin
     coalesce(new.raw_user_meta_data->>'first_name',''),
     coalesce(new.raw_user_meta_data->>'last_name',''),
     coalesce(new.raw_user_meta_data->>'phone',''),
-    coalesce(new.raw_user_meta_data->>'role','customer'));
+    'customer'); -- SICHERHEIT: Rolle nie aus Metadata; Promotion via service_role/Admin.
   return new;
 end; $$;
 ```
@@ -872,7 +879,8 @@ Expected: Build grün; reine Logik-Tests grün.
   4. Bootstrap-Admin: Dashboard → Authentication → Add user (E-Mail + Passwort für „Mo"), dann SQL: `update public.profiles set role='admin' where email='<mo-email>';`.
   5. `Frontend/.env.example` → `.env.local` kopieren, `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY` (Dashboard → Settings → API) eintragen.
   6. `cd Frontend && bun run dev` → mit Mos E-Mail einloggen → Klick-Test (Menü lädt aus DB, Bestellung landet in `orders`, Admin legt Nutzer an).
-  **Sicherheitshinweis:** service_role-Key nie ins Repo/Frontend; RLS ist die Grenze; Preis-/Vorlauf-Validierung ist noch client-seitig (B4 härtet sie).
+  7. **Öffentliche Registrierung deaktivieren:** Dashboard → Authentication → Providers/Settings → „Allow new users to sign up" **AUS** (nur Admin legt via Edge Function an; verhindert Self-Signup).
+  **Sicherheitshinweis:** service_role-Key nie ins Repo/Frontend; RLS ist die Grenze; `handle_new_user` erzwingt `role='customer'` (Rolle nie aus Client-Metadata) + `protect_profile_columns`-Trigger verhindert Selbst-Eskalation; Preis-/Vorlauf-Validierung ist noch client-seitig (B4 härtet sie).
 
 - [ ] **Step 3: ADR-0006** (Template `Doku/Pizza/Templates/_adr.md`): „Cutover Teil-A-Mocks → Supabase (B1)". Problem, Optionen (supabase-js hinter der Naht / eigenes Backend-API / weiter mocken), Entscheidung supabase-js + RLS + eine Edge Function, Begründung (Naht zahlt sich aus, minimaler Neucode), Nachteile (nicht in dieser Umgebung testbar; Client-Validierung bis B4), Auswirkungen (Auth E-Mail statt Benutzername; B2–B4 folgen).
 

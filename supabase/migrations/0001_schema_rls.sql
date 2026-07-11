@@ -22,7 +22,7 @@ begin
     coalesce(new.raw_user_meta_data->>'first_name',''),
     coalesce(new.raw_user_meta_data->>'last_name',''),
     coalesce(new.raw_user_meta_data->>'phone',''),
-    coalesce(new.raw_user_meta_data->>'role','customer')
+    'customer' -- SICHERHEIT: Rolle NIE aus client-kontrolliertem Metadata (Signup wäre sonst Admin-Eskalation). Promotion nur via service_role/Admin.
   );
   return new;
 end; $$;
@@ -106,7 +106,8 @@ create policy orders_admin_update on public.orders for update using (public.is_a
 create function public.protect_profile_columns() returns trigger
 language plpgsql security definer set search_path = public as $$
 begin
-  if not public.is_admin() then
+  -- Admins (via App) und service_role (Edge Function) dürfen role/active setzen; sonst zurücksetzen.
+  if not (public.is_admin() or auth.role() = 'service_role') then
     new.role := old.role;
     new.active := old.active;
   end if;
