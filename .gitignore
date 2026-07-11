@@ -45,3 +45,7 @@ Thumbs.db
 android/
 ios/
 .capacitor/
+
+# Supabase
+supabase/.temp/
+supabase/.branches/
