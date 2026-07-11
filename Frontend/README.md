@@ -43,7 +43,7 @@ Logins. Start-Admin: Benutzername `Mo`, Passwort `pizza` (im Profil änderbar).
 - **Profil** (`/profil`): eigenen Namen/Telefon/Passwort bearbeiten, Benutzername read-only.
 - **Admin-Nutzerverwaltung** (`/admin/nutzer`): Nutzer anlegen, Rolle setzen, aktiv/inaktiv
   schalten, löschen, Passwort zurücksetzen. Ein Admin kann sich nicht selbst aussperren
-  (letzter aktiver Admin ist geschützt).
+  oder löschen (Selbstschutz).
 - **Sicherheitshinweis:** Passwörter liegen **im Klartext** in `localStorage`
   (`lib/auth.ts`, Key `pizza-users`) — reiner Mock, nur lokal, siehe
   [ADR-0005](../Doku/Pizza/Entscheidungen/ADR-0005-mock-auth-naht.md).

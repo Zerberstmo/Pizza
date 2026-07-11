@@ -25,7 +25,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let active = true;
     getUsers().then((users) => {
       if (!active) return;
-      setCurrentUser(users.find((u) => u.id === id && u.active) ?? null);
+      const found = users.find((u) => u.id === id && u.active) ?? null;
+      if (!found) sessionStorage.removeItem(KEY);
+      setCurrentUser(found);
       setLoading(false);
     });
     return () => { active = false; };

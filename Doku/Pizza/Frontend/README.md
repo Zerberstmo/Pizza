@@ -36,7 +36,7 @@ kein separates Admin-Passwort mehr.
 
 `pages/admin/users-page.tsx` (`/admin/nutzer`): Nutzer anlegen (eindeutiger Benutzername),
 Rolle setzen, aktiv/inaktiv schalten, löschen, Passwort zurücksetzen. Ein Admin kann sich nicht
-selbst deaktivieren/löschen bzw. den letzten aktiven Admin entfernen (Selbstschutz).
+selbst deaktivieren oder löschen (Selbstschutz).
 
 ## Architektur
 

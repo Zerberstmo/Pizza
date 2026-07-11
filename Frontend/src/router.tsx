@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter, Navigate } from "react-router";
 import AppLayout from "@/components/layout/app-layout";
 import AdminLayout from "@/components/layout/admin-shell";
 import LoginPage from "@/pages/login/login-page";
@@ -34,6 +34,7 @@ export const router = createBrowserRouter([
     path: "/admin",
     element: <RequireAdmin><AdminLayout /></RequireAdmin>,
     children: [
+      { index: true, element: <Navigate to="/admin/dashboard" replace /> },
       { path: "dashboard", element: <DashboardPage /> },
       { path: "tage", element: <DaysPage /> },
       { path: "oeffnungszeiten", element: <HoursPage /> },
