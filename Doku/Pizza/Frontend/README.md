@@ -6,19 +6,43 @@
 
 - **Speisekarte** `/` — `pages/menu/menu-page.tsx`: async Menü, `PizzaCard`, „In den Warenkorb", Favoriten-Leiste, Service-Modus-Hinweis im Header.
 - **Konfigurator** `/konfigurator` — eigene Pizza, Live-`PizzaSVG` (inkl. Soßen-Färbung), Soßen-Auswahl (`SaucePicker`), Empfehlungen (`getRecs`), als Favorit speichern.
-- **Warenkorb/Checkout** `/warenkorb` — Kundendaten, **Vorlaufzeit-Slots**, Service-Modus (Vor Ort/Abholen), Gutschein, Bestellung.
+- **Warenkorb/Checkout** `/warenkorb` — Kundendaten (vorausgefüllt aus Profil, falls eingeloggt), **Vorlaufzeit-Slots**, Service-Modus (Vor Ort/Abholen), Gutschein, Bestellung.
 - **Bestätigung** `/bestaetigung` — Bestellnummer + QR, gewählter Service-Modus + Soße, Order via Router-State.
+- **Login** `/login` — ein Login für alle Rollen, Redirect nach Rolle (Kunde → `/`, Admin → `/admin/dashboard`).
+- **Profil** `/profil` (Guard via `RequireAuth`) — eigenen Namen/Telefon/Passwort bearbeiten, Benutzername read-only.
 
-## Admin (`/admin/*`, Guard via `useAdminAuth`)
+## Accounts & Login
 
-Dashboard · Bestelltage · Öffnungszeiten · **Vorlaufzeit** · Zutaten · Gutscheine · **Soßen** (`/admin/sossen`) · **Service** (`/admin/service`).
+Ein gemeinsames Login-Gate (`/login`) für Kunden und Admin — die **Rolle** (`customer`/`admin`)
+im Nutzerdatensatz entscheidet über den Zugang, nicht separate Logins. Start-Admin:
+Benutzername `Mo`, Passwort `pizza` (im Profil änderbar). Datenschicht: `lib/auth.ts`
+(`getUsers`/`saveUsers`/`verifyLogin`), Session-State über `hooks/use-auth.tsx`
+(`sessionStorage`, Key `pizza-auth`). Guards: `RequireAuth`/`RequireCustomer`/`RequireAdmin`
+(`components/layout/require-auth.tsx`), Rollen-Redirect via `redirectFor()`.
+
+**Sicherheitshinweis:** Passwörter liegen **im Klartext** im `localStorage`-Datensatz
+(Key `pizza-users`) — bewusste, dokumentierte Mock-Grenze nur für die lokale Entwicklung,
+siehe [ADR-0005](../Entscheidungen/ADR-0005-mock-auth-naht.md).
+**Teil-B ersetzt die gesamte Auth-Schicht durch Supabase-Auth** (gehashte Passwörter, RLS).
+
+## Admin (`/admin/*`, Guard via `RequireAdmin`)
+
+Dashboard · Bestelltage · Öffnungszeiten · **Vorlaufzeit** · Zutaten · Gutscheine · **Soßen** (`/admin/sossen`) · **Service** (`/admin/service`) · **Nutzer** (`/admin/nutzer`).
 Config-Seiten teilen sich `useConfigEditor` (laden → bearbeiten → speichern).
+Zugang erfolgt über das gemeinsame Login (`/login`) mit einem Account der Rolle `admin` —
+kein separates Admin-Passwort mehr.
+
+## Admin-Nutzerverwaltung
+
+`pages/admin/users-page.tsx` (`/admin/nutzer`): Nutzer anlegen (eindeutiger Benutzername),
+Rolle setzen, aktiv/inaktiv schalten, löschen, Passwort zurücksetzen. Ein Admin kann sich nicht
+selbst deaktivieren/löschen bzw. den letzten aktiven Admin entfernen (Selbstschutz).
 
 ## Architektur
 
 - **Datenschicht:** `lib/data/store.ts` (async, localStorage-Naht → Teil-B Supabase). Seiten importieren keine Seed-Konstanten.
-- **Reine Logik (getestet):** `lib/pricing.ts` (Preis/Gutschein), `lib/slots.ts` (Slots/Vorlaufzeit/`availableServiceModes`), `lib/sauces.ts` (`resolveSauce`), `lib/recommendations.ts`.
-- **Hooks:** `useAsync`, `useCart` (localStorage), `useFavorites` (localStorage, max. 5), `useConfigEditor`, `useAdminAuth` (Mock/sessionStorage).
+- **Reine Logik (getestet):** `lib/pricing.ts` (Preis/Gutschein), `lib/slots.ts` (Slots/Vorlaufzeit/`availableServiceModes`), `lib/sauces.ts` (`resolveSauce`), `lib/auth.ts` (`getUsers`/`saveUsers`/`verifyLogin`), `lib/recommendations.ts`.
+- **Hooks:** `useAsync`, `useCart` (localStorage), `useFavorites` (localStorage, max. 5), `useConfigEditor`, `useAuth` (Mock/sessionStorage, `AuthProvider`).
 - **Bausteine:** `components/ui` (shadcn), `pizza` (SVG/Card/`SaucePicker`/`favorites-bar`), `common` (QR, Select, Charts, AsyncBoundary), `layout` (BottomNav, AdminShell).
 - **Routing:** `react-router` (`router.tsx`), Kunden-Layout + Admin-Layout.
 
@@ -43,12 +67,14 @@ und Speisekarten-Header spiegeln den gewählten bzw. verfügbaren Modus.
 
 ## Tests
 
-`bun test src` (bun:test + happy-dom): Preis-, Slot-/Service-, Soßen-, Store-, useCart- und
-useFavorites-Logik. E2E: `tests/e2e/order.spec.ts` (Playwright).
+`bun test src` (bun:test + happy-dom, 49 Tests): Preis-, Slot-/Service-, Soßen-, Store-, useCart-,
+useFavorites- und Auth-Logik (`verifyLogin`, `useAuth`, `usernameTaken`, `redirectFor`).
+E2E: `tests/e2e/order.spec.ts` (Playwright).
 
 ## Entscheidungen
 
 [ADR-0001 Capacitor](../Entscheidungen/ADR-0001-mobile-capacitor.md) ·
 [ADR-0002 Supabase](../Entscheidungen/ADR-0002-backend-supabase.md) ·
 [ADR-0003 CallMeBot](../Entscheidungen/ADR-0003-whatsapp-callmebot.md) ·
-[ADR-0004 bun:test](../Entscheidungen/ADR-0004-bun-test-statt-vitest.md)
+[ADR-0004 bun:test](../Entscheidungen/ADR-0004-bun-test-statt-vitest.md) ·
+[ADR-0005 Mock-Auth-Naht](../Entscheidungen/ADR-0005-mock-auth-naht.md)

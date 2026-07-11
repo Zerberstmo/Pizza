@@ -23,7 +23,7 @@ src/
 │   ├── pricing.ts · slots.ts            reine, getestete Logik (Preis/Gutschein, Slots/Vorlaufzeit)
 │   ├── recommendations.ts               Zutaten-Empfehlungen
 │   └── data/{seed,store}.ts             async Datenschicht (localStorage-Naht)
-├── hooks/                               useAsync, useCart, useConfigEditor, useAdminAuth
+├── hooks/                               useAsync, useCart, useConfigEditor, useAuth
 ├── components/{ui,pizza,common,layout}  Primitives, Pizza-SVG, Charts, Layouts
 └── pages/{menu,configurator,checkout,confirmation,admin}
 tests/e2e/                               Playwright Happy-Path
@@ -35,10 +35,24 @@ Alle Daten laufen **ausschließlich** über `lib/data/store.ts` (async).
 Aktuell Mock/`localStorage` mit künstlichem Delay — **das ist die Naht für Teil-B (Supabase).**
 Die UI bleibt dabei unverändert; nur `store.ts` wird ersetzt.
 
+## Accounts & Login
+
+Ein Login (`/login`) für alle Nutzer — die **Rolle** entscheidet über den Zugang, nicht separate
+Logins. Start-Admin: Benutzername `Mo`, Passwort `pizza` (im Profil änderbar).
+
+- **Profil** (`/profil`): eigenen Namen/Telefon/Passwort bearbeiten, Benutzername read-only.
+- **Admin-Nutzerverwaltung** (`/admin/nutzer`): Nutzer anlegen, Rolle setzen, aktiv/inaktiv
+  schalten, löschen, Passwort zurücksetzen. Ein Admin kann sich nicht selbst aussperren
+  (letzter aktiver Admin ist geschützt).
+- **Sicherheitshinweis:** Passwörter liegen **im Klartext** in `localStorage`
+  (`lib/auth.ts`, Key `pizza-users`) — reiner Mock, nur lokal, siehe
+  [ADR-0005](../Doku/Pizza/Entscheidungen/ADR-0005-mock-auth-naht.md).
+  **Teil-B ersetzt dies durch echte Supabase-Auth** (gehashte Passwörter, RLS).
+
 ## Admin
 
-- Zugang: unten „Admin" → Passwort `pizza` (Mock, `seed.ts` — **Teil-B: echte Supabase-Auth**).
-- Konfigurierbar: Bestelltage, Öffnungszeiten, **Vorlaufzeit** (Default 3 Tage), Zutaten, Gutscheine, **Soßen**, **Service-Modus**.
+- Zugang: über Login (`/login`) mit einem Account der Rolle `admin`; kein separates Admin-Passwort mehr.
+- Konfigurierbar: Bestelltage, Öffnungszeiten, **Vorlaufzeit** (Default 3 Tage), Zutaten, Gutscheine, **Soßen**, **Service-Modus**, **Nutzer** (`/admin/nutzer`).
 - **Vorlaufzeit:** Frühester Abholtag = heute + Vorlaufzeit. Wirkt direkt auf die Datumsauswahl im Checkout.
 
 ## Soßen

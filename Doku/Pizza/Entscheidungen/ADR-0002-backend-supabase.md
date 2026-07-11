@@ -32,8 +32,8 @@ Realtime out-of-the-box — passend für Bestellungen, Admin-Auth und Live-Statu
 
 ## Auswirkungen
 
-Teil-B: Schema/Migrationen, echte Admin-Auth (ersetzt `verifyAdminPassword`/`ADMIN_PASSWORD`),
-serverseitige Vorlauf-/Preis-Validierung, Bestellstatus + Realtime.
+Teil-B: Schema/Migrationen, echte Supabase-Auth (ersetzt den `localStorage`-Nutzer-Mock aus
+[ADR-0005](ADR-0005-mock-auth-naht.md)), serverseitige Vorlauf-/Preis-Validierung, Bestellstatus + Realtime.
 
 ## Alternativen
 

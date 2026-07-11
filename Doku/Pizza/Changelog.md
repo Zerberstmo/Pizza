@@ -6,6 +6,16 @@
 
 ## 2026-07-10
 
+- **Nutzer-Accounts (Tasks A1–A8):** rollenbasiertes Login-Gate (`/login`, ersetzt das alte
+  Admin-Mock-Passwort vollständig — `useAdminAuth`/`ADMIN_PASSWORD` entfernt), Profil-Selbstbearbeitung
+  (`/profil`: Name/Telefon/Passwort, Benutzername read-only), Admin-Nutzerverwaltung
+  (`/admin/nutzer`: anlegen, Rolle, aktiv/inaktiv, löschen, Passwort zurücksetzen,
+  Admin kann sich nicht selbst aussperren), Checkout-Vorausfüllung aus dem Profil.
+  Start-Admin `Mo`/`pizza` (im Profil änderbar). Datenschicht `lib/auth.ts`
+  (`getUsers`/`saveUsers`/`verifyLogin`) + `hooks/use-auth.tsx` als `localStorage`-Mock
+  (Klartext-Passwörter — bewusste, dokumentierte Teil-A-Grenze, siehe
+  [ADR-0005](Entscheidungen/ADR-0005-mock-auth-naht.md); Teil-B ersetzt durch Supabase-Auth).
+  Build + 49 Unit-Tests grün, `sauber`-Check bestanden (keine Altlasten der alten Admin-Auth).
 - **Auth (Task A3):** `useAuth`-Hook + `AuthProvider` (`Frontend/src/hooks/use-auth.tsx`) — Mock-Session über `sessionStorage` (Key `pizza-auth`, speichert `user.id`), aufgelöst gegen `getUsers()` beim Start (`loading`-Flag). `login`/`logout`/`updateOwnProfile` (patcht nur `firstName`/`lastName`/`phone`/`password`, `username`/`role`/`id` unantastbar). Als äußerster Provider in `app.tsx` eingehängt. TDD, 4 neue Tests grün, Build sauber. TEIL-B TODO: Supabase-Auth.
 - **Teil-A-Erweiterung (Tasks 1–12):** Soßen (admin-verwaltbar unter `/admin/sossen`, färben die `PizzaSVG`-Vorschau, im pauschalen 10€-Preis enthalten), Favoriten (max. 5 eigene Pizzen, `useFavorites`/localStorage, nutzbar in Konfigurator + Speisekarte), Service-Modus (Vor Ort / Abholen, admin-schaltbar unter `/admin/service`, wirkt auf Checkout, Bestätigung und Speisekarten-Header). Build sauber, 35 Unit-Tests grün, keine Altlasten.
 
