@@ -1,5 +1,5 @@
 import type { AppConfig, IngredientItem, NewOrder, OrderData, PizzaTemplate, VoucherDef, Sauce, User } from "@/types";
-import { INGREDIENTS_DEFAULT, TEMPLATES, VOUCHERS_INIT, DEFAULT_CONFIG, ADMIN_PASSWORD, WEEK_DATA, PIE_DATA, SAUCES_DEFAULT, USERS_DEFAULT } from "./seed";
+import { INGREDIENTS_DEFAULT, TEMPLATES, VOUCHERS_INIT, DEFAULT_CONFIG, WEEK_DATA, PIE_DATA, SAUCES_DEFAULT, USERS_DEFAULT } from "./seed";
 import { computeSubtotal, computeDiscount, computeTotal, validateVoucher } from "@/lib/pricing";
 
 // Async Datenschicht — die Naht, die in Teil-B gegen Supabase getauscht wird.
@@ -68,5 +68,3 @@ export async function createOrder(input: NewOrder): Promise<OrderData> {
   write("pizza-orders", [order, ...orders]); // TEIL-B: → Supabase insert + Realtime + WhatsApp
   return delay(order);
 }
-
-export const verifyAdminPassword = (pw: string) => delay(pw === ADMIN_PASSWORD);

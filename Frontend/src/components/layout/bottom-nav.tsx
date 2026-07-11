@@ -1,6 +1,6 @@
 import type React from "react";
 import { NavLink } from "react-router";
-import { Home, ChefHat, ShoppingCart, Settings } from "lucide-react";
+import { Home, ChefHat, ShoppingCart, CircleUser } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/hooks/use-cart";
 
@@ -54,9 +54,9 @@ export function BottomNav(): React.ReactElement {
           )}
         </NavLink>
 
-        <NavLink to="/admin" className={({ isActive }) => cn(base, isActive ? active : idle)}>
-          <Settings size={21} strokeWidth={2} />
-          <span className="text-[10px] font-semibold">Admin</span>
+        <NavLink to="/profil" className={({ isActive }) => cn(base, isActive ? active : idle)}>
+          <CircleUser size={21} strokeWidth={2} />
+          <span className="text-[10px] font-semibold">Profil</span>
         </NavLink>
       </div>
     </nav>

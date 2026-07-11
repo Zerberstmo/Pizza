@@ -100,8 +100,6 @@ export const DEFAULT_CONFIG: AppConfig = {
   service: { dineIn: false, takeaway: true },
 };
 
-export const ADMIN_PASSWORD = "pizza"; // TEIL-B TODO: durch Supabase-Auth ersetzen
-
 // TEIL-B TODO: Nutzer + Passwörter kommen in Teil-B aus Supabase-Auth (gehasht, serverseitig).
 export const USERS_DEFAULT: User[] = [
   { id: "u1", username: "Mo", password: "pizza", firstName: "Mo", lastName: "", phone: "", role: "admin", active: true },

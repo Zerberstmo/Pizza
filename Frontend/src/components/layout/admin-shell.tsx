@@ -1,9 +1,9 @@
 import type React from "react";
-import { NavLink, Outlet, Navigate, useNavigate } from "react-router";
+import { NavLink, Outlet, useNavigate } from "react-router";
 import { motion } from "motion/react";
-import { BarChart2, Calendar, Clock, Timer, Package, Droplet, Tag, ChefHat, LogOut, Store } from "lucide-react";
+import { BarChart2, Calendar, Clock, Timer, Package, Droplet, Tag, Users, ChefHat, LogOut, Store, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useAdminAuth } from "@/hooks/use-admin-auth";
+import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 
 // Admin-Layout mit Tab-Navigation. Portiert aus App.tsx:1179-1223,
@@ -17,17 +17,16 @@ const NAV: Array<{ to: string; icon: React.ElementType; label: string }> = [
   { to: "/admin/zutaten",         icon: Package,   label: "Zutaten"        },
   { to: "/admin/sossen",          icon: Droplet,   label: "Soßen"          },
   { to: "/admin/gutscheine",      icon: Tag,       label: "Gutscheine"     },
+  { to: "/admin/nutzer",          icon: Users,     label: "Nutzer"         },
 ];
 
 export default function AdminLayout(): React.ReactElement {
   const navigate = useNavigate();
-  const { isAdmin, logout } = useAdminAuth();
-
-  if (!isAdmin) return <Navigate to="/admin" replace />;
+  const { currentUser, logout } = useAuth();
 
   const handleLogout = () => {
     logout();
-    navigate("/");
+    navigate("/login", { replace: true });
   };
 
   return (
@@ -37,9 +36,14 @@ export default function AdminLayout(): React.ReactElement {
           <ChefHat size={16} className="text-primary" />
           <span className="font-black text-sm">Pizza Admin</span>
         </div>
-        <Button variant="ghost" size="sm" onClick={handleLogout} className="text-xs text-muted-foreground gap-1.5 h-7">
-          <LogOut size={11} /> Abmelden
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="sm" onClick={() => navigate("/profil")} className="text-xs text-muted-foreground gap-1.5 h-7">
+            <User size={11} /> {currentUser?.username}
+          </Button>
+          <Button variant="ghost" size="sm" onClick={handleLogout} className="text-xs text-muted-foreground gap-1.5 h-7">
+            <LogOut size={11} /> Abmelden
+          </Button>
+        </div>
       </header>
       <div className="sticky top-[49px] z-40 bg-sidebar border-b border-sidebar-border overflow-x-auto">
         <div className="flex gap-0.5 px-2 py-1.5 min-w-max">

@@ -3,12 +3,11 @@ import AppLayout from "@/components/layout/app-layout";
 import AdminLayout from "@/components/layout/admin-shell";
 import LoginPage from "@/pages/login/login-page";
 import ProfilePage from "@/pages/profile/profile-page";
-import { RequireAuth } from "@/components/layout/require-auth";
+import { RequireAuth, RequireCustomer, RequireAdmin } from "@/components/layout/require-auth";
 import MenuPage from "@/pages/menu/menu-page";
 import ConfiguratorPage from "@/pages/configurator/configurator-page";
 import CheckoutPage from "@/pages/checkout/checkout-page";
 import ConfirmationPage from "@/pages/confirmation/confirmation-page";
-import AdminLoginPage from "@/pages/admin/login-page";
 import DashboardPage from "@/pages/admin/dashboard-page";
 import DaysPage from "@/pages/admin/days-page";
 import HoursPage from "@/pages/admin/hours-page";
@@ -22,7 +21,7 @@ export const router = createBrowserRouter([
   { path: "/login", element: <LoginPage /> },
   { path: "/profil", element: <RequireAuth><ProfilePage /></RequireAuth> },
   {
-    element: <AppLayout />,
+    element: <RequireCustomer><AppLayout /></RequireCustomer>,
     children: [
       { path: "/", element: <MenuPage /> },
       { path: "/konfigurator", element: <ConfiguratorPage /> },
@@ -30,10 +29,9 @@ export const router = createBrowserRouter([
       { path: "/bestaetigung", element: <ConfirmationPage /> },
     ],
   },
-  { path: "/admin", element: <AdminLoginPage /> },
   {
     path: "/admin",
-    element: <AdminLayout />,
+    element: <RequireAdmin><AdminLayout /></RequireAdmin>,
     children: [
       { path: "dashboard", element: <DashboardPage /> },
       { path: "tage", element: <DaysPage /> },
