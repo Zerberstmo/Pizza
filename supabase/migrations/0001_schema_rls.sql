@@ -101,3 +101,17 @@ create policy config_admin on public.app_config for all using (public.is_admin()
 create policy orders_insert_own on public.orders for insert with check (user_id = auth.uid());
 create policy orders_select_own on public.orders for select using (user_id = auth.uid() or public.is_admin());
 create policy orders_admin_update on public.orders for update using (public.is_admin()) with check (public.is_admin());
+
+-- ── Schutz: Nicht-Admins dürfen role/active der eigenen Zeile nicht ändern ──
+create function public.protect_profile_columns() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if not public.is_admin() then
+    new.role := old.role;
+    new.active := old.active;
+  end if;
+  return new;
+end; $$;
+
+create trigger profiles_protect before update on public.profiles
+  for each row execute function public.protect_profile_columns();
