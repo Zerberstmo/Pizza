@@ -79,7 +79,7 @@ alter table public.vouchers    enable row level security;
 alter table public.app_config  enable row level security;
 alter table public.orders      enable row level security;
 
--- profiles: eigene Zeile lesen/ändern (role/active bleiben clientseitig unberührt; harte Absicherung = B4/Trigger optional); Admins alles.
+-- profiles: eigene Zeile lesen/ändern; role/active werden durch protect_profile_columns-Trigger (s. u.) hart abgesichert; Admins alles.
 create policy profiles_select_self_or_admin on public.profiles for select
   using (id = auth.uid() or public.is_admin());
 create policy profiles_update_self_or_admin on public.profiles for update
