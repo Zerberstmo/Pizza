@@ -1,6 +1,9 @@
 import { createBrowserRouter } from "react-router";
 import AppLayout from "@/components/layout/app-layout";
 import AdminLayout from "@/components/layout/admin-shell";
+import LoginPage from "@/pages/login/login-page";
+import ProfilePage from "@/pages/profile/profile-page";
+import { RequireAuth } from "@/components/layout/require-auth";
 import MenuPage from "@/pages/menu/menu-page";
 import ConfiguratorPage from "@/pages/configurator/configurator-page";
 import CheckoutPage from "@/pages/checkout/checkout-page";
@@ -16,6 +19,8 @@ import VouchersPage from "@/pages/admin/vouchers-page";
 import ServicePage from "@/pages/admin/service-page";
 
 export const router = createBrowserRouter([
+  { path: "/login", element: <LoginPage /> },
+  { path: "/profil", element: <RequireAuth><ProfilePage /></RequireAuth> },
   {
     element: <AppLayout />,
     children: [
