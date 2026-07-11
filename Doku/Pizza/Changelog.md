@@ -4,10 +4,6 @@
 
 <!-- Neue Einträge oben einfügen -->
 
-## 2026-07-11
-
-- **Auth-Cutover (Task A5):** Rollenbasiertes Login-Gate scharf geschaltet — `router.tsx` umschließt Kunden-Layout mit `RequireCustomer`, Admin-Layout mit `RequireAdmin`; alte `{ path: "/admin", element: <AdminLoginPage /> }`-Route entfernt. `admin-shell.tsx` nutzt `useAuth` statt `useAdminAuth` (interner `isAdmin`-Check entfällt, Guard übernimmt), Header zeigt Benutzernamen mit Link zu `/profil`, Logout → `/login`, Tab-Nav um „Nutzer"-Eintrag (`/admin/nutzer`, Route folgt erst in Task A7) ergänzt. `bottom-nav.tsx`: „Admin"-Tab → „Profil"-Tab (`/profil`, `CircleUser`). Alte Mock-Admin-Auth vollständig entfernt: `verifyAdminPassword` (store.ts) und `ADMIN_PASSWORD` (seed.ts) gelöscht, Dateien `hooks/use-admin-auth.ts` + `pages/admin/login-page.tsx` per `git rm` entfernt. Ein atomarer Commit (Löschungen hätten sonst Referenzen gebrochen). Build sauber, 49 Unit-Tests grün, `grep useAdminAuth\|verifyAdminPassword\|ADMIN_PASSWORD src` → sauber.
-
 ## 2026-07-10
 
 - **Auth (Task A3):** `useAuth`-Hook + `AuthProvider` (`Frontend/src/hooks/use-auth.tsx`) — Mock-Session über `sessionStorage` (Key `pizza-auth`, speichert `user.id`), aufgelöst gegen `getUsers()` beim Start (`loading`-Flag). `login`/`logout`/`updateOwnProfile` (patcht nur `firstName`/`lastName`/`phone`/`password`, `username`/`role`/`id` unantastbar). Als äußerster Provider in `app.tsx` eingehängt. TDD, 4 neue Tests grün, Build sauber. TEIL-B TODO: Supabase-Auth.

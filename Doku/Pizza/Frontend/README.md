@@ -8,32 +8,19 @@
 - **Konfigurator** `/konfigurator` — eigene Pizza, Live-`PizzaSVG` (inkl. Soßen-Färbung), Soßen-Auswahl (`SaucePicker`), Empfehlungen (`getRecs`), als Favorit speichern.
 - **Warenkorb/Checkout** `/warenkorb` — Kundendaten, **Vorlaufzeit-Slots**, Service-Modus (Vor Ort/Abholen), Gutschein, Bestellung.
 - **Bestätigung** `/bestaetigung` — Bestellnummer + QR, gewählter Service-Modus + Soße, Order via Router-State.
-- **Login** `/login` — `pages/login/login-page.tsx`: Benutzername/Passwort gegen `verifyLogin()`, leitet je nach Rolle weiter (`admin` → `/admin/dashboard`, `customer` → `/`).
-- **Profil** `/profil` — `pages/profile/profile-page.tsx`: eigene Stammdaten bearbeiten (`updateOwnProfile`), erreichbar für jede eingeloggte Rolle.
 
-## Auth & Rollen-Gate (rollenbasiert, Cutover Task A5)
-
-Rollenbasierte Session (`User.role`: `admin` | `customer`) statt der alten Mock-Admin-Auth. `useAuth`/`AuthProvider`
-(`hooks/use-auth.tsx`) hält die Session in `sessionStorage`. Guards in `components/layout/require-auth.tsx`:
-`RequireAuth` (nur eingeloggt), `RequireCustomer` (Rolle `customer`, umschließt das Kunden-Layout),
-`RequireAdmin` (Rolle `admin`, umschließt das Admin-Layout) — Weiterleitung via `redirectFor()` (`lib/auth.ts`).
-Ohne Login führt jede Route zu `/login`; die alte Mock-Admin-Auth (`useAdminAuth`, `verifyAdminPassword`,
-`ADMIN_PASSWORD`, `pages/admin/login-page.tsx`) wurde ersatzlos entfernt.
-
-## Admin (`/admin/*`, Guard via `RequireAdmin`)
+## Admin (`/admin/*`, Guard via `useAdminAuth`)
 
 Dashboard · Bestelltage · Öffnungszeiten · **Vorlaufzeit** · Zutaten · Gutscheine · **Soßen** (`/admin/sossen`) · **Service** (`/admin/service`).
-Config-Seiten teilen sich `useConfigEditor` (laden → bearbeiten → speichern). Header zeigt den eingeloggten
-Benutzernamen (Link zu `/profil`) + Abmelden (→ `/login`). Tab-Nav enthält einen „Nutzer"-Eintrag
-(`/admin/nutzer`) als Vorgriff auf Task A7 — die Route selbst folgt erst dort.
+Config-Seiten teilen sich `useConfigEditor` (laden → bearbeiten → speichern).
 
 ## Architektur
 
 - **Datenschicht:** `lib/data/store.ts` (async, localStorage-Naht → Teil-B Supabase). Seiten importieren keine Seed-Konstanten.
-- **Reine Logik (getestet):** `lib/pricing.ts` (Preis/Gutschein), `lib/slots.ts` (Slots/Vorlaufzeit/`availableServiceModes`), `lib/sauces.ts` (`resolveSauce`), `lib/auth.ts` (`redirectFor`).
-- **Hooks:** `useAsync`, `useCart` (localStorage), `useFavorites` (localStorage, max. 5), `useConfigEditor`, `useAuth` (Session/sessionStorage, rollenbasiert).
-- **Bausteine:** `components/ui` (shadcn), `pizza` (SVG/Card/`SaucePicker`/`favorites-bar`), `common` (QR, Select, Charts, AsyncBoundary), `layout` (BottomNav, AdminShell, `require-auth.tsx`).
-- **Routing:** `react-router` (`router.tsx`), Kunden-Layout (`RequireCustomer`) + Admin-Layout (`RequireAdmin`), `/login` + `/profil` außerhalb der Layouts.
+- **Reine Logik (getestet):** `lib/pricing.ts` (Preis/Gutschein), `lib/slots.ts` (Slots/Vorlaufzeit/`availableServiceModes`), `lib/sauces.ts` (`resolveSauce`), `lib/recommendations.ts`.
+- **Hooks:** `useAsync`, `useCart` (localStorage), `useFavorites` (localStorage, max. 5), `useConfigEditor`, `useAdminAuth` (Mock/sessionStorage).
+- **Bausteine:** `components/ui` (shadcn), `pizza` (SVG/Card/`SaucePicker`/`favorites-bar`), `common` (QR, Select, Charts, AsyncBoundary), `layout` (BottomNav, AdminShell).
+- **Routing:** `react-router` (`router.tsx`), Kunden-Layout + Admin-Layout.
 
 ## Soßen
 
