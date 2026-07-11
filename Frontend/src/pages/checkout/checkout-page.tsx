@@ -5,6 +5,7 @@ import { useNavigate } from "react-router";
 import { ArrowLeft, X, Plus, ChefHat, Phone, Calendar, Clock, FileText, Ticket, Check, AlertCircle } from "lucide-react";
 import { getConfig, getIngredients, getVouchers, getSauces, createOrder } from "@/lib/data/store";
 import { useAsync } from "@/hooks/use-async";
+import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/hooks/use-cart";
 import { cn } from "@/lib/utils";
 import { BASE_PRICE, formatPrice, computeSubtotal, computeDiscount, computeTotal, validateVoucher } from "@/lib/pricing";
@@ -26,11 +27,16 @@ interface VoucherMessage { ok: boolean; text: string; }
 export default function CheckoutPage(): React.ReactElement {
   const { cart, removeFromCart, clearCart } = useCart();
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const cfg = useAsync(getConfig);
   const { data: ingredients } = useAsync(getIngredients);
   const { data: sauces } = useAsync(getSauces);
 
-  const [customer, setCustomer] = useState<Customer>({ firstName: "", lastName: "", phone: "" });
+  const [customer, setCustomer] = useState<Customer>(() => ({
+    firstName: currentUser?.firstName ?? "",
+    lastName: currentUser?.lastName ?? "",
+    phone: currentUser?.phone ?? "",
+  }));
   const [notes, setNotes] = useState("");
   const [pickupDate, setPickupDate] = useState("");
   const [pickupTime, setPickupTime] = useState("");
