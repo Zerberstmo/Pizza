@@ -1,13 +1,13 @@
 import { describe, it, expect } from "bun:test";
-import { usernameTaken, redirectFor } from "@/lib/auth";
+import { emailTaken, redirectFor } from "@/lib/auth";
 import type { User } from "@/types";
 
-const admin: User = { id: "1", username: "Mo", password: "p", firstName: "", lastName: "", phone: "", role: "admin", active: true };
-const cust: User  = { id: "2", username: "Kim", password: "p", firstName: "", lastName: "", phone: "", role: "customer", active: true };
+const admin: User = { id: "1", email: "mo@pizza.de", firstName: "", lastName: "", phone: "", role: "admin", active: true };
+const cust: User  = { id: "2", email: "kim@pizza.de", firstName: "", lastName: "", phone: "", role: "customer", active: true };
 
-describe("usernameTaken", () => {
-  it("erkennt vergebenen Namen", () => expect(usernameTaken([admin], "Mo")).toBe(true));
-  it("freier Name", () => expect(usernameTaken([admin], "Kim")).toBe(false));
+describe("emailTaken", () => {
+  it("erkennt vergebene E-Mail (case-insensitiv)", () => expect(emailTaken([admin], "MO@pizza.de")).toBe(true));
+  it("freie E-Mail", () => expect(emailTaken([admin], "kim@pizza.de")).toBe(false));
 });
 
 describe("redirectFor", () => {

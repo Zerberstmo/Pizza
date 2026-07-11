@@ -12,20 +12,23 @@ import { Card, CardContent } from "@/components/ui/card";
 
 export default function LoginPage(): React.ReactElement {
   const navigate = useNavigate();
-  const { login } = useAuth();
-  const [username, setUsername] = useState("");
+  const { login, requestPasswordReset } = useAuth();
+  const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [show, setShow] = useState(false);
-  const [err, setErr] = useState(false);
+  const [err, setErr] = useState<string>("");
+  const [info, setInfo] = useState<string>("");
 
   const attempt = async () => {
-    const user = await login(username.trim(), pw);
-    if (user) {
-      navigate(user.role === "admin" ? "/admin/dashboard" : "/", { replace: true });
-    } else {
-      setErr(true);
-      setTimeout(() => setErr(false), 1800);
-    }
+    const { user, error } = await login(email.trim(), pw);
+    if (user) navigate(user.role === "admin" ? "/admin/dashboard" : "/", { replace: true });
+    else { setErr(error ?? "Login fehlgeschlagen."); setTimeout(() => setErr(""), 2500); }
+  };
+  const forgot = async () => {
+    if (!email.trim()) { setErr("Bitte E-Mail eingeben."); setTimeout(() => setErr(""), 2500); return; }
+    await requestPasswordReset(email.trim());
+    setInfo("Falls das Konto existiert, wurde eine E-Mail zum Zurücksetzen gesendet.");
+    setTimeout(() => setInfo(""), 4000);
   };
 
   return (
@@ -43,9 +46,9 @@ export default function LoginPage(): React.ReactElement {
         <Card>
           <CardContent className="pt-5 space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="un">Benutzername</Label>
-              <Input id="un" placeholder="z.B. Mo" value={username}
-                onChange={(e) => setUsername(e.target.value)}
+              <Label htmlFor="em">E-Mail</Label>
+              <Input id="em" type="email" placeholder="du@example.de" value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && attempt()} />
             </div>
             <div className="space-y-1.5">
@@ -59,9 +62,13 @@ export default function LoginPage(): React.ReactElement {
                   {show ? <EyeOff size={14} /> : <Eye size={14} />}
                 </Button>
               </div>
-              {err && <p className="text-destructive text-xs flex items-center gap-1.5"><AlertCircle size={11} /> Falscher Benutzername oder Passwort</p>}
+              {err && <p className="text-destructive text-xs flex items-center gap-1.5"><AlertCircle size={11} /> {err}</p>}
             </div>
             <Button className="w-full gap-2" onClick={attempt}><LogIn size={15} /> Anmelden</Button>
+            <div className="text-center space-y-1">
+              <button onClick={forgot} className="text-xs text-muted-foreground hover:text-foreground">Passwort vergessen?</button>
+              {info && <p className="text-xs text-green-400">{info}</p>}
+            </div>
           </CardContent>
         </Card>
       </motion.div>

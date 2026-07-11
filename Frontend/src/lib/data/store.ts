@@ -1,14 +1,11 @@
 import type { AppConfig, IngredientItem, NewOrder, OrderData, PizzaTemplate, VoucherDef, Sauce, User } from "@/types";
-import { TEMPLATES, USERS_DEFAULT, WEEK_DATA, PIE_DATA } from "./seed";
+import { TEMPLATES, WEEK_DATA, PIE_DATA } from "./seed";
 import { computeSubtotal, computeDiscount, computeTotal, validateVoucher } from "@/lib/pricing";
 import { supabase } from "@/lib/supabase";
 // Hinweis: INGREDIENTS_DEFAULT/SAUCES_DEFAULT/VOUCHERS_INIT/DEFAULT_CONFIG werden NICHT mehr importiert
 // (Daten kommen jetzt aus Supabase). noUnusedLocals=true → ungenutzte Imports brächen den Build.
 
-// ── localStorage-Mock nur noch für die (in Task 6 ersetzte) Auth ──
 const delay = <T>(v: T): Promise<T> => new Promise((r) => setTimeout(() => r(v), 120));
-function read<T>(key: string, fallback: T): T { const raw = localStorage.getItem(key); return raw ? (JSON.parse(raw) as T) : fallback; }
-function write<T>(key: string, val: T): void { localStorage.setItem(key, JSON.stringify(val)); }
 
 const genId = () => `#${Math.floor(10000 + Math.random() * 90000)}`;
 
@@ -88,10 +85,23 @@ export async function createOrder(input: NewOrder): Promise<OrderData> {
   return order;
 }
 
-// ── (TASK 6 ersetzt diese Mock-Auth) ──
-export const getUsers = () => delay(read<User[]>("pizza-users", USERS_DEFAULT));
-export const saveUsers = (list: User[]) => delay(write("pizza-users", list));
-export async function verifyLogin(username: string, password: string): Promise<User | null> {
-  const users = read<User[]>("pizza-users", USERS_DEFAULT);
-  return delay(users.find((x) => x.username === username && x.password === password && x.active) ?? null);
+// ── Nutzer/Profile → Supabase (`profiles`-Tabelle + Edge Function `admin-users`) ──
+export async function getProfiles(): Promise<User[]> {
+  const { data, error } = await supabase.from("profiles").select("*");
+  if (error) throw error;
+  return (data ?? []).map((r) => ({ id: r.id, email: r.email ?? "", firstName: r.first_name, lastName: r.last_name, phone: r.phone, role: r.role, active: r.active }));
 }
+export async function setProfileActive(id: string, active: boolean): Promise<void> {
+  const { error } = await supabase.from("profiles").update({ active }).eq("id", id);
+  if (error) throw error;
+}
+async function invokeAdmin(body: Record<string, unknown>): Promise<string | null> {
+  const { data, error } = await supabase.functions.invoke("admin-users", { body });
+  if (error) return error.message;
+  if (data && (data as { error?: string }).error) return (data as { error: string }).error;
+  return null;
+}
+export const adminCreateUser = (input: { email: string; password: string; firstName: string; lastName: string; phone: string; role: User["role"] }) =>
+  invokeAdmin({ action: "create", ...input });
+export const adminDeleteUser = (id: string) => invokeAdmin({ action: "delete", userId: id }).then((e) => { if (e) throw new Error(e); });
+export const adminResetPassword = (id: string, password: string) => invokeAdmin({ action: "reset", userId: id, password }).then((e) => { if (e) throw new Error(e); });

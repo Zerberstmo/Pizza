@@ -1,7 +1,7 @@
 import type { User } from "@/types";
 
-export function usernameTaken(users: User[], username: string): boolean {
-  return users.some((u) => u.username === username);
+export function emailTaken(users: User[], email: string): boolean {
+  return users.some((u) => u.email.toLowerCase() === email.toLowerCase());
 }
 
 export type GuardKind = "auth" | "customer" | "admin";

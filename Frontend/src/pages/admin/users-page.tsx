@@ -2,10 +2,10 @@ import type React from "react";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Plus, X, AlertCircle, KeyRound } from "lucide-react";
-import { getUsers, saveUsers } from "@/lib/data/store";
+import { getProfiles, setProfileActive, adminCreateUser, adminDeleteUser, adminResetPassword } from "@/lib/data/store";
 import { useAsync } from "@/hooks/use-async";
 import { useAuth } from "@/hooks/use-auth";
-import { usernameTaken } from "@/lib/auth";
+import { emailTaken } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import type { Role, User } from "@/types";
 import { AsyncBoundary } from "@/components/common/async-boundary";
@@ -17,12 +17,11 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const uid = () => Math.random().toString(36).slice(2, 9);
-const EMPTY = { username: "", firstName: "", lastName: "", phone: "", password: "", role: "customer" as Role };
+const EMPTY = { email: "", firstName: "", lastName: "", phone: "", password: "", role: "customer" as Role };
 
-// Admin: Nutzerverwaltung. Muster der Zutaten-Seite; persistiert via saveUsers.
+// Admin: Nutzerverwaltung gegen Supabase (`profiles` + Edge Function `admin-users`).
 export default function UsersPage(): React.ReactElement {
-  const { data, loading, error } = useAsync(getUsers);
+  const { data, loading, error } = useAsync(getProfiles);
   const { currentUser } = useAuth();
   const [list, setList] = useState<User[] | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -33,23 +32,37 @@ export default function UsersPage(): React.ReactElement {
 
   useEffect(() => { if (data) setList(data); }, [data]);
 
-  const mutate = (next: User[]) => { setList(next); void saveUsers(next); };
-
-  const addUser = () => {
+  const addUser = async () => {
     if (!list) return;
-    if (!form.username.trim() || !form.password.trim()) { setFormErr("Benutzername und Passwort sind Pflicht."); return; }
-    if (usernameTaken(list, form.username.trim())) { setFormErr("Dieser Benutzername existiert bereits."); return; }
-    mutate([...list, {
-      id: uid(), username: form.username.trim(), password: form.password,
+    if (!form.email.trim() || !form.password.trim()) { setFormErr("E-Mail und Passwort sind Pflicht."); return; }
+    if (emailTaken(list, form.email.trim())) { setFormErr("Diese E-Mail existiert bereits."); return; }
+    const errMsg = await adminCreateUser({
+      email: form.email.trim(), password: form.password,
       firstName: form.firstName.trim(), lastName: form.lastName.trim(), phone: form.phone.trim(),
-      role: form.role, active: true,
-    }]);
+      role: form.role,
+    });
+    if (errMsg) { setFormErr(errMsg); return; }
     setForm(EMPTY); setFormErr(""); setShowForm(false);
+    const fresh = await getProfiles();
+    setList(fresh);
   };
 
-  const applyReset = (u: User) => {
-    if (!list || !resetPw.trim()) return;
-    mutate(list.map((x) => (x.id === u.id ? { ...x, password: resetPw } : x)));
+  const toggleActive = async (u: User) => {
+    if (!list) return;
+    const next = !u.active;
+    await setProfileActive(u.id, next);
+    setList(list.map((x) => (x.id === u.id ? { ...x, active: next } : x)));
+  };
+
+  const removeUser = async (u: User) => {
+    if (!list) return;
+    await adminDeleteUser(u.id);
+    setList(list.filter((x) => x.id !== u.id));
+  };
+
+  const applyReset = async (u: User) => {
+    if (!resetPw.trim()) return;
+    await adminResetPassword(u.id, resetPw);
     setResetId(null); setResetPw("");
   };
 
@@ -68,8 +81,8 @@ export default function UsersPage(): React.ReactElement {
               <CardContent className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <Label>Benutzername</Label>
-                    <Input value={form.username} onChange={(e) => setForm((f) => ({ ...f, username: e.target.value }))} />
+                    <Label>E-Mail</Label>
+                    <Input type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />
                   </div>
                   <div className="space-y-1.5">
                     <Label>Rolle</Label>
@@ -120,7 +133,7 @@ export default function UsersPage(): React.ReactElement {
                     <div className="flex items-center gap-3">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-mono font-bold text-sm">{u.username}</span>
+                          <span className="font-mono font-bold text-sm">{u.email}</span>
                           <Badge variant={u.role === "admin" ? "success" : "secondary"}>{u.role === "admin" ? "Admin" : "Kunde"}</Badge>
                           {isSelf && <span className="text-[10px] text-muted-foreground">(du)</span>}
                         </div>
@@ -134,9 +147,9 @@ export default function UsersPage(): React.ReactElement {
                           <KeyRound size={13} />
                         </Button>
                         <Switch checked={u.active} disabled={isSelf}
-                          onCheckedChange={() => mutate(users.map((x) => x.id === u.id ? { ...x, active: !x.active } : x))} />
+                          onCheckedChange={() => void toggleActive(u)} />
                         <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" disabled={isSelf}
-                          onClick={() => mutate(users.filter((x) => x.id !== u.id))}>
+                          onClick={() => void removeUser(u)}>
                           <X size={12} />
                         </Button>
                       </div>
@@ -144,7 +157,7 @@ export default function UsersPage(): React.ReactElement {
                     {resetId === u.id && (
                       <div className="flex gap-2">
                         <Input placeholder="Neues Passwort" value={resetPw} onChange={(e) => setResetPw(e.target.value)} />
-                        <Button variant="secondary" className="shrink-0" onClick={() => applyReset(u)}>Setzen</Button>
+                        <Button variant="secondary" className="shrink-0" onClick={() => void applyReset(u)}>Setzen</Button>
                       </div>
                     )}
                   </CardContent>

@@ -1,4 +1,4 @@
-import type { AppConfig, IngredientItem, PizzaTemplate, VoucherDef, Sauce, User } from "@/types";
+import type { AppConfig, IngredientItem, PizzaTemplate, VoucherDef, Sauce } from "@/types";
 
 // Quelle: `Frontend vorlage/src/app/App.tsx` (Konstanten 1:1 übernommen).
 // TEIL-B TODO: Diese Seed-Daten werden durch Supabase-Tabellen ersetzt.
@@ -99,8 +99,3 @@ export const DEFAULT_CONFIG: AppConfig = {
   leadTimeDays: 3,
   service: { dineIn: false, takeaway: true },
 };
-
-// TEIL-B TODO: Nutzer + Passwörter kommen in Teil-B aus Supabase-Auth (gehasht, serverseitig).
-export const USERS_DEFAULT: User[] = [
-  { id: "u1", username: "Mo", password: "pizza", firstName: "Mo", lastName: "", phone: "", role: "admin", active: true },
-];

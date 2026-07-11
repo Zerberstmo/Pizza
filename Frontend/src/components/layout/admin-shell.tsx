@@ -24,8 +24,8 @@ export default function AdminLayout(): React.ReactElement {
   const navigate = useNavigate();
   const { currentUser, logout } = useAuth();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate("/login", { replace: true });
   };
 
@@ -38,7 +38,7 @@ export default function AdminLayout(): React.ReactElement {
         </div>
         <div className="flex items-center gap-1">
           <Button variant="ghost" size="sm" onClick={() => navigate("/profil")} className="text-xs text-muted-foreground gap-1.5 h-7">
-            <User size={11} /> {currentUser?.username}
+            <User size={11} /> {currentUser?.email}
           </Button>
           <Button variant="ghost" size="sm" onClick={handleLogout} className="text-xs text-muted-foreground gap-1.5 h-7">
             <LogOut size={11} /> Abmelden

@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function ProfilePage(): React.ReactElement {
   const navigate = useNavigate();
-  const { currentUser, updateOwnProfile, logout } = useAuth();
+  const { currentUser, updateOwnProfile, updatePassword, logout } = useAuth();
   const [firstName, setFirstName] = useState(currentUser?.firstName ?? "");
   const [lastName, setLastName] = useState(currentUser?.lastName ?? "");
   const [phone, setPhone] = useState(currentUser?.phone ?? "");
@@ -20,15 +20,14 @@ export default function ProfilePage(): React.ReactElement {
 
   const save = async () => {
     if (pw && pw !== pw2) { setMsg("Passwörter stimmen nicht überein."); return; }
-    const patch: { firstName: string; lastName: string; phone: string; password?: string } = { firstName, lastName, phone };
-    if (pw) patch.password = pw;
-    await updateOwnProfile(patch);
+    await updateOwnProfile({ firstName, lastName, phone });
+    if (pw) await updatePassword(pw);
     setPw(""); setPw2("");
     setMsg("Gespeichert.");
     setTimeout(() => setMsg(""), 2000);
   };
 
-  const doLogout = () => { logout(); navigate("/login", { replace: true }); };
+  const doLogout = async () => { await logout(); navigate("/login", { replace: true }); };
 
   return (
     <div className="min-h-screen pb-10">
@@ -44,8 +43,8 @@ export default function ProfilePage(): React.ReactElement {
           <CardHeader><CardTitle>Konto</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             <div className="space-y-1.5">
-              <Label>Benutzername</Label>
-              <Input value={currentUser?.username ?? ""} disabled />
+              <Label>E-Mail</Label>
+              <Input value={currentUser?.email ?? ""} disabled />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
