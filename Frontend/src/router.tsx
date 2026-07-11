@@ -16,6 +16,7 @@ import IngredientsPage from "@/pages/admin/ingredients-page";
 import SaucesPage from "@/pages/admin/sauces-page";
 import VouchersPage from "@/pages/admin/vouchers-page";
 import ServicePage from "@/pages/admin/service-page";
+import UsersPage from "@/pages/admin/users-page";
 
 export const router = createBrowserRouter([
   { path: "/login", element: <LoginPage /> },
@@ -41,6 +42,7 @@ export const router = createBrowserRouter([
       { path: "zutaten", element: <IngredientsPage /> },
       { path: "sossen", element: <SaucesPage /> },
       { path: "gutscheine", element: <VouchersPage /> },
+      { path: "nutzer", element: <UsersPage /> },
     ],
   },
 ]);
