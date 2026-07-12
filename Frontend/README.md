@@ -31,23 +31,41 @@ tests/e2e/                               Playwright Happy-Path
 
 ## Daten (wichtig)
 
-Alle Daten laufen **ausschließlich** über `lib/data/store.ts` (async).
-Aktuell Mock/`localStorage` mit künstlichem Delay — **das ist die Naht für Teil-B (Supabase).**
-Die UI bleibt dabei unverändert; nur `store.ts` wird ersetzt.
+Alle Daten laufen **ausschließlich** über `lib/data/store.ts` (async). Seit Teil-B1 ist das
+kein Mock mehr, sondern echtes Supabase-Postgres (RLS-abgesichert) — siehe Abschnitt
+„Supabase (Teil-B1)" unten. Die UI blieb beim Umstieg unverändert; nur `store.ts` wurde ersetzt.
 
 ## Accounts & Login
 
 Ein Login (`/login`) für alle Nutzer — die **Rolle** entscheidet über den Zugang, nicht separate
-Logins. Start-Admin: Benutzername `Mo`, Passwort `pizza` (im Profil änderbar).
+Logins. **Auth ist jetzt E-Mail-basiert** (Supabase Auth, seit Teil-B1; vorher Benutzername-Mock).
+Start-Admin „Mo" wird gemäß [SETUP-Supabase.md](../Doku/Pizza/SETUP-Supabase.md) per Dashboard
+angelegt und per SQL zu `admin` befördert.
 
-- **Profil** (`/profil`): eigenen Namen/Telefon/Passwort bearbeiten, Benutzername read-only.
+- **Profil** (`/profil`): eigenen Namen/Telefon/Passwort bearbeiten.
 - **Admin-Nutzerverwaltung** (`/admin/nutzer`): Nutzer anlegen, Rolle setzen, aktiv/inaktiv
-  schalten, löschen, Passwort zurücksetzen. Ein Admin kann sich nicht selbst aussperren
-  oder löschen (Selbstschutz).
-- **Sicherheitshinweis:** Passwörter liegen **im Klartext** in `localStorage`
-  (`lib/auth.ts`, Key `pizza-users`) — reiner Mock, nur lokal, siehe
-  [ADR-0005](../Doku/Pizza/Entscheidungen/ADR-0005-mock-auth-naht.md).
-  **Teil-B ersetzt dies durch echte Supabase-Auth** (gehashte Passwörter, RLS).
+  schalten, löschen, Passwort zurücksetzen — läuft über die Edge Function `admin-users`
+  (service_role, serverseitig). Ein Admin kann sich nicht selbst aussperren oder löschen
+  (Selbstschutz).
+- Passwort-Reset per E-Mail-Link verfügbar.
+- Der frühere localStorage-Mock (Klartext-Passwörter, [ADR-0005](../Doku/Pizza/Entscheidungen/ADR-0005-mock-auth-naht.md))
+  ist vollständig entfernt; Passwörter werden von Supabase gehasht verwaltet.
+
+## Supabase (Teil-B1)
+
+Domänendaten, Bestellungen und Auth laufen über ein echtes Supabase-Projekt
+(siehe [ADR-0006](../Doku/Pizza/Entscheidungen/ADR-0006-supabase-cutover.md)).
+
+- **Setup:** vollständige Schritt-für-Schritt-Anleitung (Projekt anlegen, Migrationen, Edge
+  Function deployen, Bootstrap-Admin, Env, Klick-Test, Signup deaktivieren) in
+  [Doku/Pizza/SETUP-Supabase.md](../Doku/Pizza/SETUP-Supabase.md).
+- **Env:** `.env.example` nach `.env.local` kopieren, `VITE_SUPABASE_URL` +
+  `VITE_SUPABASE_ANON_KEY` (Dashboard → Settings → API) eintragen. Der `service_role`-Key gehört
+  **nie** ins Frontend/Repo — er läuft nur in der Edge Function `admin-users`.
+- **Auth ist jetzt E-Mail-basiert** — kein Benutzername-Login mehr.
+- Diese Entwicklungsumgebung hat keinen Netzwerkzugriff auf Supabase — verifiziert wurden hier
+  nur Build/Typecheck + reine Logik-Tests. Ausführung gegen ein echtes Projekt erfolgt durch den
+  Betreiber gemäß SETUP-Anleitung.
 
 ## Admin
 

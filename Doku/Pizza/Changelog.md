@@ -4,6 +4,25 @@
 
 <!-- Neue Einträge oben einfügen -->
 
+## 2026-07-11
+
+- **Teil-B1: Supabase-Cutover (Tasks 1–8):** Umstieg von den Teil-A-Mocks auf ein echtes
+  Supabase-Backend hinter der bestehenden Naht (`store.ts`/`use-auth.tsx`), siehe
+  [ADR-0006](Entscheidungen/ADR-0006-supabase-cutover.md). Supabase-Client + `.env.local`-Keys;
+  SQL-Migrationen `0001` (Schema + RLS, inkl. `protect_profile_columns`-Trigger und
+  `handle_new_user`, das die Rolle serverseitig auf `customer` erzwingt), `0002` (Seed), `0003`
+  (`profiles.email`); Edge Function `admin-users` (Anlegen/Löschen/Passwort-Reset via
+  `service_role`); alle Domänendaten + Bestellungen laufen jetzt über Supabase-Postgres statt
+  localStorage. **Auth-Umstellung auf E-Mail** (statt Benutzername) — Login-, Profil- und
+  Admin-Nutzerverwaltungsseiten sowie `useAuth` sprechen jetzt Supabase Auth; neue
+  Passwort-Reset-Seite. Der localStorage-Mock aus [ADR-0005](Entscheidungen/ADR-0005-mock-auth-naht.md)
+  (inkl. Klartext-Passwörter) ist vollständig entfernt. Start-Admin „Mo" wird per Dashboard
+  angelegt und per SQL zu `admin` befördert (siehe [SETUP-Supabase.md](SETUP-Supabase.md)).
+  Hier nur Build/Typecheck + reine Logik-Tests verifiziert (`bun run build` grün, `bun test src`
+  36/36 grün) — diese Umgebung hat keinen Netzwerkzugriff auf Supabase; die Ausführung gegen ein
+  echtes Projekt (Migrationen, Edge Function, Klick-Test) obliegt dem Betreiber gemäß
+  [SETUP-Supabase.md](SETUP-Supabase.md).
+
 ## 2026-07-10
 
 - **Nutzer-Accounts (Tasks A1–A8):** rollenbasiertes Login-Gate (`/login`, ersetzt das alte
