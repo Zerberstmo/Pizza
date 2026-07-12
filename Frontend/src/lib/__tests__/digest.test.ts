@@ -1,5 +1,6 @@
 import { describe, it, expect } from "bun:test";
 import { filterTodaysPickups, formatDigest, type DigestOrder } from "@/lib/digest";
+import { formatPrepList, type PrepOrder } from "@/lib/digest";
 
 const mk = (o: Partial<DigestOrder>): DigestOrder => ({
   pickupDate: "2026-07-12", pickupTime: "17:30", customerName: "Max Mustermann",
@@ -49,5 +50,44 @@ describe("formatDigest", () => {
   it("Notiz nur wenn vorhanden", () => {
     expect(formatDigest([mk({ notes: "extra scharf" })], "Sa 12.07.")).toContain("Notiz: extra scharf");
     expect(formatDigest([mk({ notes: "" })], "Sa 12.07.")).not.toContain("Notiz:");
+  });
+});
+
+const ingNames = { i_sal: "Salami", i_mush: "Champignons", i_pap: "Paprika" };
+const sauNames = { s_tom: "Tomate", s_bbq: "BBQ" };
+
+describe("formatPrepList", () => {
+  it("leeres Array → leerer String", () => {
+    expect(formatPrepList([], ingNames, sauNames, "Fr 13.07.")).toBe("");
+  });
+  it("aggregiert Zutaten/Soßen und zählt Teige", () => {
+    const orders: PrepOrder[] = [
+      { items: [ { ingredientIds: ["i_sal", "i_mush"], sauceId: "s_tom" }, { ingredientIds: ["i_sal"], sauceId: "s_bbq" } ] },
+      { items: [ { ingredientIds: ["i_sal", "i_pap"], sauceId: "s_tom" } ] },
+    ];
+    const msg = formatPrepList(orders, ingNames, sauNames, "Fr 13.07.");
+    expect(msg).toContain("🧾 Einkauf/Vorbereitung für morgen, Fr 13.07.");
+    expect(msg).toContain("3 Pizzen (= 3 Teige)");
+    expect(msg).toContain("3× Salami");
+    expect(msg).toContain("1× Champignons");
+    expect(msg).toContain("1× Paprika");
+    expect(msg).toContain("2× Tomate");
+    expect(msg).toContain("1× BBQ");
+  });
+  it("Sortierung: Menge desc, dann Name asc; leerer Soßen-Abschnitt weggelassen", () => {
+    const orders: PrepOrder[] = [
+      { items: [ { ingredientIds: ["i_pap", "i_mush"] }, { ingredientIds: ["i_mush"] } ] },
+    ];
+    const msg = formatPrepList(orders, ingNames, sauNames, "Fr 13.07.");
+    expect(msg.indexOf("Champignons")).toBeLessThan(msg.indexOf("Paprika"));
+    expect(msg).not.toContain("Soßen:");
+  });
+  it("unbekannte id → Fallback auf die id", () => {
+    const orders: PrepOrder[] = [{ items: [{ ingredientIds: ["i_unknown"] }] }];
+    expect(formatPrepList(orders, ingNames, sauNames, "Fr 13.07.")).toContain("1× i_unknown");
+  });
+  it("Einzahl bei genau einer Pizza", () => {
+    const orders: PrepOrder[] = [{ items: [{ ingredientIds: ["i_sal"], sauceId: "s_tom" }] }];
+    expect(formatPrepList(orders, ingNames, sauNames, "Fr 13.07.")).toContain("1 Pizza (= 1 Teig)");
   });
 });

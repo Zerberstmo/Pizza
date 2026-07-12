@@ -30,6 +30,9 @@ Dauer-Pings. Keine Meta-Verifizierung, keine laufenden API-Kosten.
 ## Umsetzung (B3)
 
 - **Trigger:** `pg_cron` stündlich → Edge Function `daily-digest` (Deno), Stunden-Gate 18 Uhr Berlin.
+  Der Lauf sendet **zwei** Nachrichten (Teil-B5): den Tages-Digest (heutige Abholungen) und — falls
+  es Bestellungen für morgen gibt — eine Vorbereitungs-/Einkaufsliste für morgen (idempotent über
+  `notify_config.last_prep_date`).
 - **Empfänger/Key/An-Aus:** in der Tabelle `notify_config` (Single-Row, **admin-only RLS** — der
   API-Key ist nicht öffentlich lesbar), editierbar unter `/admin/benachrichtigungen`. Die Edge
   Function liest sie per `service_role`.
