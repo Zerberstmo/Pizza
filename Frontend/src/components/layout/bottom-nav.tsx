@@ -1,6 +1,6 @@
 import type React from "react";
 import { NavLink } from "react-router";
-import { Home, ChefHat, ShoppingCart, CircleUser } from "lucide-react";
+import { Home, ChefHat, ShoppingCart, ClipboardList, CircleUser } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/hooks/use-cart";
 
@@ -50,6 +50,15 @@ export function BottomNav(): React.ReactElement {
                 )}
               </div>
               <span className="text-[10px] font-semibold">Warenkorb</span>
+            </>
+          )}
+        </NavLink>
+
+        <NavLink to="/meine-bestellungen" className={({ isActive }) => cn(base, isActive ? active : idle)}>
+          {({ isActive }) => (
+            <>
+              <ClipboardList size={21} strokeWidth={isActive ? 2.5 : 2} />
+              <span className="text-[10px] font-semibold">Bestellungen</span>
             </>
           )}
         </NavLink>

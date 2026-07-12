@@ -9,6 +9,7 @@ import MenuPage from "@/pages/menu/menu-page";
 import ConfiguratorPage from "@/pages/configurator/configurator-page";
 import CheckoutPage from "@/pages/checkout/checkout-page";
 import ConfirmationPage from "@/pages/confirmation/confirmation-page";
+import MyOrdersPage from "@/pages/orders/my-orders-page";
 import DashboardPage from "@/pages/admin/dashboard-page";
 import DaysPage from "@/pages/admin/days-page";
 import HoursPage from "@/pages/admin/hours-page";
@@ -30,6 +31,7 @@ export const router = createBrowserRouter([
       { path: "/konfigurator", element: <ConfiguratorPage /> },
       { path: "/warenkorb", element: <CheckoutPage /> },
       { path: "/bestaetigung", element: <ConfirmationPage /> },
+      { path: "/meine-bestellungen", element: <MyOrdersPage /> },
     ],
   },
   {
