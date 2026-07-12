@@ -6,6 +6,13 @@
 
 ## 2026-07-12
 
+- **Härtung: Gutschein-Nutzungslimit serverseitig erzwungen:** der `validate_order`-Trigger
+  (Migration `0007`, ersetzt die Gutschein-Prüfung aus `0005`) prüft und zählt Einlösungen jetzt
+  **atomar** (`limit 1 for update`, race-sicher); ein aufgebrauchter Gutschein (`uses >= max_uses`)
+  wird wie ein ungültiger behandelt → stiller Voll-Preis, keine Ablehnung (`max_uses <= 0` =
+  unbegrenzt). `validateVoucher` prüft das Limit ebenfalls (Client-Parität, sonst zeigt der Checkout
+  einen Rabatt, den der Server verwirft). Schließt die von den B3/B4-Reviews geflaggte Lücke der
+  unbegrenzten Wiederverwendung. Build + 50 Tests grün; Migration führt der Betreiber aus.
 - **Teil-B3: täglicher WhatsApp-Bestell-Digest:** statt eines Pings pro Bestellung schickt ein
   `pg_cron`-getriggerter (stündlicher) Edge-Function-Job `daily-digest` **einmal um 18 Uhr
   (Europe/Berlin, DST-sicher via Stunden-Gate)** eine WhatsApp mit allen **heute abzuholenden**
