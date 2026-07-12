@@ -1,7 +1,7 @@
 import type React from "react";
 import { NavLink, Outlet, useNavigate } from "react-router";
 import { motion } from "motion/react";
-import { BarChart2, Calendar, Clock, Timer, Package, Droplet, Tag, Users, ChefHat, LogOut, Store, User } from "lucide-react";
+import { BarChart2, Calendar, Clock, Timer, Package, Droplet, Tag, Users, ChefHat, LogOut, Store, User, ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 // Admin-Layout mit Tab-Navigation. Portiert aus App.tsx:1179-1223,
 // Navigation via react-router NavLink; Vorlaufzeit-Tab neu ergänzt.
 const NAV: Array<{ to: string; icon: React.ElementType; label: string }> = [
+  { to: "/admin/bestellungen",    icon: ClipboardList, label: "Bestellungen"  },
   { to: "/admin/dashboard",       icon: BarChart2, label: "Dashboard"      },
   { to: "/admin/tage",            icon: Calendar,  label: "Bestelltage"    },
   { to: "/admin/oeffnungszeiten", icon: Clock,     label: "Öffnungszeiten" },

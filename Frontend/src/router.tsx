@@ -10,6 +10,7 @@ import ConfiguratorPage from "@/pages/configurator/configurator-page";
 import CheckoutPage from "@/pages/checkout/checkout-page";
 import ConfirmationPage from "@/pages/confirmation/confirmation-page";
 import MyOrdersPage from "@/pages/orders/my-orders-page";
+import OrdersPage from "@/pages/admin/orders-page";
 import DashboardPage from "@/pages/admin/dashboard-page";
 import DaysPage from "@/pages/admin/days-page";
 import HoursPage from "@/pages/admin/hours-page";
@@ -39,6 +40,7 @@ export const router = createBrowserRouter([
     element: <RequireAdmin><AdminLayout /></RequireAdmin>,
     children: [
       { index: true, element: <Navigate to="/admin/dashboard" replace /> },
+      { path: "bestellungen", element: <OrdersPage /> },
       { path: "dashboard", element: <DashboardPage /> },
       { path: "tage", element: <DaysPage /> },
       { path: "oeffnungszeiten", element: <HoursPage /> },
