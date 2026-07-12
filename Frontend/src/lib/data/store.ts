@@ -1,4 +1,4 @@
-import type { AppConfig, IngredientItem, NewOrder, OrderData, PizzaTemplate, VoucherDef, Sauce, User } from "@/types";
+import type { AppConfig, IngredientItem, NewOrder, OrderData, OrderRow, OrderStatus, PizzaTemplate, VoucherDef, Sauce, User } from "@/types";
 import { TEMPLATES, WEEK_DATA, PIE_DATA } from "./seed";
 import { computeSubtotal, computeDiscount, computeTotal, validateVoucher } from "@/lib/pricing";
 import { supabase } from "@/lib/supabase";
@@ -105,3 +105,32 @@ export const adminCreateUser = (input: { email: string; password: string; firstN
   invokeAdmin({ action: "create", ...input });
 export const adminDeleteUser = (id: string) => invokeAdmin({ action: "delete", userId: id }).then((e) => { if (e) throw new Error(e); });
 export const adminResetPassword = (id: string, password: string) => invokeAdmin({ action: "reset", userId: id, password }).then((e) => { if (e) throw new Error(e); });
+
+// ── Bestellungen (B2) ──
+function rowToOrder(r: any): OrderRow {
+  return {
+    id: r.id, items: r.items, total: Number(r.total), serviceMode: r.service_mode,
+    pickupDate: r.pickup_date, pickupTime: r.pickup_time, notes: r.notes ?? "",
+    status: r.status, createdAt: r.created_at, userId: r.user_id ?? null,
+  };
+}
+
+export async function getOrders(): Promise<OrderRow[]> {
+  const { data, error } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map(rowToOrder);
+}
+
+export async function getMyOrders(): Promise<OrderRow[]> {
+  const { data: sess } = await supabase.auth.getUser();
+  const uid = sess.user?.id;
+  if (!uid) return [];
+  const { data, error } = await supabase.from("orders").select("*").eq("user_id", uid).order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map(rowToOrder);
+}
+
+export async function updateOrderStatus(id: string, status: OrderStatus): Promise<void> {
+  const { error } = await supabase.from("orders").update({ status }).eq("id", id);
+  if (error) throw error;
+}
