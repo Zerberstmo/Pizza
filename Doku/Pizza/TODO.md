@@ -9,9 +9,11 @@
 | P1 | Teil-A-Erweiterung (Soßen/Favoriten/Service) | erledigt | Teil-A |
 | P1 | Nutzer-Accounts (Teil-A-Mock) | erledigt | Teil-A |
 | P1 | Teil-B1 (Supabase-Fundament + Auth): Client/Schema/RLS, Edge Function `admin-users`, Domänendaten + Bestellungen aus Supabase, E-Mail-Auth (Login/Profil/Admin-Nutzerverwaltung/Passwort-Reset) — Mock entfernt | erledigt | Teil-A |
-| P0 | Supabase-Setup durch Betreiber ausführen + Klick-Test (siehe [SETUP-Supabase.md](SETUP-Supabase.md)) | offen | Teil-B1 |
-| P1 | Teil-B2–B4: Bestell-Status + Realtime, WhatsApp via CallMeBot, serverseitige Vorlauf-/Preis-Validierung, Telefon-Validierung | offen | Teil-B1 |
-| — | B3-Klarstellung (User 2026-07-12): WhatsApp ist KEIN Ping pro Bestellung, sondern **ein Tages-Digest ~18:00 mit allen Bestellungen des Tages** (geplanter Cron/Scheduled-Job, nicht bei-Insert). ADR-0003 beim B3-Design entsprechend anpassen. | Notiz | — |
-| P2 | B1-Härtung (Final-Review): `vouchers.uses` bei Bestellung erhöhen + `maxUses` durchsetzen (B4); `auth.role()` (deprecated) durch `request.jwt.claims`-Claim ersetzen; Admin-Nutzeraktionen (löschen/reset/toggle) Fehler anzeigen; Edge-Function CORS auf Frontend-Origin, Input-Validierung; Reset-Seite Enter-submit/Doppelklick-Schutz | offen | Teil-B1 |
+| P0 | Supabase-Setup durch Betreiber ausführen + Klick-Test (siehe [SETUP-Supabase.md](SETUP-Supabase.md)): Migrationen `0001`–`0006`; Realtime für `orders` aktivieren (B2); Extensions `pg_cron`+`pg_net`; Edge Functions `admin-users` + `daily-digest` deployen; `cron.schedule` für den Digest anlegen; CallMeBot-Empfänger in `/admin/benachrichtigungen` eintragen; Start-Admin „Mo", Self-Signup deaktivieren, `.env.local` füllen | offen | Teil-B1..B4 |
+| P1 | Teil-B2: Bestell-Status + Realtime (Migration 0004, `my-orders`/Admin-Status, `use-orders-realtime`) | erledigt | Teil-B1 |
+| P1 | Teil-B4: serverseitige Preis-/Vorlauf-Validierung (Trigger `validate_order`, Migration 0005) | erledigt | Teil-B1 |
+| P1 | Teil-B3: täglicher WhatsApp-Digest ~18:00 (Cron→Edge Function `daily-digest`→CallMeBot, Migration 0006, `/admin/benachrichtigungen`) — kein Ping pro Bestellung; ADR-0003 angepasst | erledigt | Teil-B1, Teil-B2 |
+| P2 | B1/B3-Härtung (Final-Reviews): `vouchers.uses` bei Bestellung erhöhen + `maxUses` durchsetzen (vom `validate_order`-Trigger noch NICHT erzwungen → Gutschein aktuell unbegrenzt wiederverwendbar); `auth.role()` (deprecated) durch `request.jwt.claims`-Claim ersetzen; Admin-Nutzeraktionen (löschen/reset/toggle) Fehler anzeigen; Edge-Function CORS auf Frontend-Origin, Input-Validierung; Reset-Seite Enter-submit/Doppelklick-Schutz; optional `pickup_date`/`pickup_time`-Format-CHECK auf `orders` (Defense-in-Depth) | offen | Teil-B1..B4 |
+| P3 | Telefon-Validierung im Checkout (ursprünglich für Teil-B angedacht, noch offen) | offen | Teil-B1 |
 | P2 | E2E in Umgebung mit Browser ausführen (Playwright-Happy-Path grün bestätigen) | offen | Teil-A |
 | P2 | Teil-C: Capacitor iOS/Android (QR/Push, Icons/Splash, Store) | offen | Teil-B |

@@ -67,6 +67,19 @@ Domänendaten, Bestellungen und Auth laufen über ein echtes Supabase-Projekt
   nur Build/Typecheck + reine Logik-Tests. Ausführung gegen ein echtes Projekt erfolgt durch den
   Betreiber gemäß SETUP-Anleitung.
 
+## Bestellungen: Status, Validierung & Digest (Teil-B2/B4/B3)
+
+- **Status + Realtime (B2):** Bestellungen haben einen Status (`eingegangen`/`in_arbeit`/`fertig`/
+  `abgeholt`/`storniert`, Migration `0004`). Kunde sieht seine Bestellungen unter `/bestellungen`
+  mit Badge, Admin ändert den Status unter `/admin/bestellungen`; Live-Update via Supabase-Realtime
+  (`hooks/use-orders-realtime.ts`) — **Betreiber muss Realtime für `orders` aktivieren**.
+- **Serverseitige Validierung (B4):** der Postgres-Trigger `validate_order` (Migration `0005`)
+  erzwingt Preis + Abhol-Slot beim Insert; der Checkout zeigt einen serverseitigen Reject als
+  Fehlermeldung. Manipulierte Preise/ungültige Slots werden korrigiert/abgelehnt.
+- **Täglicher Digest (B3):** Edge Function `daily-digest` (per `pg_cron`) schickt 18 Uhr (Berlin)
+  alle heutigen Abholungen per WhatsApp (CallMeBot). Empfänger/Key/An-Aus unter
+  `/admin/benachrichtigungen` (Tabelle `notify_config`, admin-only). Reine Logik in `lib/digest.ts`.
+
 ## Admin
 
 - Zugang: über Login (`/login`) mit einem Account der Rolle `admin`; kein separates Admin-Passwort mehr.

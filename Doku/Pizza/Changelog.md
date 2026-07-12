@@ -4,6 +4,35 @@
 
 <!-- Neue Einträge oben einfügen -->
 
+## 2026-07-12
+
+- **Teil-B3: täglicher WhatsApp-Bestell-Digest:** statt eines Pings pro Bestellung schickt ein
+  `pg_cron`-getriggerter (stündlicher) Edge-Function-Job `daily-digest` **einmal um 18 Uhr
+  (Europe/Berlin, DST-sicher via Stunden-Gate)** eine WhatsApp mit allen **heute abzuholenden**
+  Bestellungen an CallMeBot — Name, Telefon, Abholzeit, Pizzen, Summe, nach Uhrzeit sortiert.
+  Idempotent über `notify_config.last_digest_date`; bei 0 Bestellungen kein Versand. Empfänger-Nummer,
+  CallMeBot-API-Key und An/Aus sind in der Admin-Seite **/admin/benachrichtigungen** editierbar
+  (Tabelle `notify_config`, **admin-only RLS** — der API-Key ist nicht öffentlich lesbar). Kundendaten
+  (`customer_name`/`customer_phone`) werden jetzt in `orders` gespeichert (Migration `0006`). Reine
+  Formatier-/Filter-Logik (`lib/digest.ts` `formatDigest`/`filterTodaysPickups`) getestet; die Edge
+  Function spiegelt sie (Deno-Copy). ADR-0003 von „Push pro Bestellung" auf Digest umgeschrieben.
+  Hier nur Build + Tests verifiziert (`bun test src` 48 grün); Migration `0006`, Edge Function und
+  `cron.schedule` führt der Betreiber aus (siehe [SETUP-Supabase.md](SETUP-Supabase.md)).
+- **Teil-B4: serverseitige Preis-/Vorlauf-Validierung:** Postgres-`BEFORE INSERT`-Trigger
+  `validate_order` (Migration `0005`) berechnet Preis/Gutschein serverseitig neu und weist ungültige
+  Abhol-Slots ab (Vorlaufzeit, Wochentag, Uhrzeit, Service-Modus). Manipulierte `total`/`discount`
+  werden korrigiert; ungültiger Gutschein → stiller Voll-Preis ohne Ablehnung; leere Bestellung/
+  unbekannter Service-Modus/fehlende Konfig → Ablehnung (fail-closed). Checkout fängt einen
+  serverseitigen Reject sauber ab (Fehlermeldung statt Absturz). Schließt das in B1 dokumentierte
+  Client-Manipulations-Restrisiko. Nur Build verifiziert; Betreiber führt `0005` aus.
+- **Teil-B2: Bestell-Status + Realtime:** `orders.status` auf fünf Werte begrenzt (Migration `0004`:
+  `eingegangen`/`in_arbeit`/`fertig`/`abgeholt`/`storniert`); Statuslogik in `lib/order-status.ts`.
+  Kunde sieht seine Bestellungen unter **/bestellungen** (`my-orders-page`) mit Status-Badge, Admin
+  ändert den Status unter **/admin/bestellungen**. Live-Aktualisierung via Supabase-Realtime
+  (`hooks/use-orders-realtime.ts`, `postgres_changes`); `useAsync` lädt bei Realtime-Reload ohne
+  Spinner-Flackern (nur beim ersten Laden). **Betreiber muss Realtime für die Tabelle `orders`
+  aktivieren**, sonst bleibt die Live-Aktualisierung wirkungslos.
+
 ## 2026-07-11
 
 - **Teil-B1: Supabase-Cutover (Tasks 1–8):** Umstieg von den Teil-A-Mocks auf ein echtes

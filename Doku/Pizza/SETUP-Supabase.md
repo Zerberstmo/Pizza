@@ -1,4 +1,4 @@
-# SETUP — Supabase-Cutover (Teil-B1)
+# SETUP — Supabase (Teil-B)
 
 > Schritt-für-Schritt-Anleitung für den Betreiber, um die App gegen ein echtes Supabase-Projekt
 > laufen zu lassen. In dieser Entwicklungsumgebung ist kein Zugriff auf Supabase möglich — die
@@ -10,8 +10,10 @@ Auf [supabase.com](https://supabase.com) einloggen → „New Project" → Name,
 
 ## 2. Migrationen ausführen
 
-Reihenfolge ist wichtig: `0001_schema_rls.sql` → `0002_seed.sql` → `0003_profiles_email.sql`
-(liegen in `supabase/migrations/`).
+Reihenfolge ist wichtig, alle liegen in `supabase/migrations/`:
+`0001_schema_rls.sql` → `0002_seed.sql` → `0003_profiles_email.sql` → `0004_order_status.sql`
+(B2: Status-Werte) → `0005_validate_order.sql` (B4: serverseitiger Preis-/Slot-Trigger) →
+`0006_digest.sql` (B3: Kundendaten in `orders` + `notify_config`).
 
 **Option A — Supabase CLI:**
 
@@ -22,17 +24,48 @@ supabase db push
 
 **Option B — SQL-Editor im Dashboard:**
 
-Dashboard → SQL Editor → Inhalt von `0001_schema_rls.sql` einfügen und ausführen, danach
-`0002_seed.sql`, danach `0003_profiles_email.sql`. Jede Datei einzeln, in dieser Reihenfolge.
+Dashboard → SQL Editor → Migrationen `0001` … `0006` **einzeln in dieser Reihenfolge** einfügen
+und ausführen.
 
-## 3. Edge Function deployen
+## 3. Edge Functions deployen
 
 ```bash
 supabase functions deploy admin-users
+supabase functions deploy daily-digest
 ```
 
-Die Function (`supabase/functions/admin-users`) läuft mit dem `service_role`-Key **serverseitig**
-und übernimmt Anlegen/Löschen/Passwort-Reset von Nutzern durch Admins.
+- `admin-users` (`supabase/functions/admin-users`) läuft mit dem `service_role`-Key **serverseitig**
+  und übernimmt Anlegen/Löschen/Passwort-Reset von Nutzern durch Admins.
+- `daily-digest` (`supabase/functions/daily-digest`, B3) baut den täglichen Bestell-Digest und
+  schickt ihn an CallMeBot. Wird per `pg_cron` getriggert (Schritt 4b); braucht keine Extra-Secrets
+  (`SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` stellt Supabase bereit).
+
+## 3b. Realtime für `orders` aktivieren (Teil-B2)
+
+Dashboard → Database → Replication (bzw. Table Editor → `orders` → „Enable Realtime"): die Tabelle
+`public.orders` zur Realtime-Publikation hinzufügen. **Ohne diesen Schritt** aktualisieren sich die
+Bestell-Seiten (Kunde `/bestellungen`, Admin `/admin/bestellungen`) nicht live.
+
+## 3c. Täglicher Digest per pg_cron (Teil-B3)
+
+Extensions aktivieren (Dashboard → Database → Extensions): **`pg_cron`** und **`pg_net`**.
+Dann im SQL-Editor den Job anlegen — `<PROJECT>` und `<SERVICE_ROLE_KEY>` durch die echten Werte
+ersetzen (Dashboard → Settings → API):
+
+```sql
+select cron.schedule('daily-digest-hourly', '0 * * * *', $$
+  select net.http_post(
+    url := 'https://<PROJECT>.functions.supabase.co/daily-digest',
+    headers := jsonb_build_object('Authorization', 'Bearer <SERVICE_ROLE_KEY>')
+  );
+$$);
+```
+
+Der Job feuert stündlich; die Edge Function sendet nur um **18 Uhr Europe/Berlin** (Stunden-Gate,
+DST-sicher) und nur, wenn ein Empfänger hinterlegt und „Digest aktiv" gesetzt ist (Schritt 8).
+
+Zum Testen den Job manuell auslösen (sendet nur, falls es gerade 18 Uhr Berlin ist):
+`select net.http_post(url := 'https://<PROJECT>.functions.supabase.co/daily-digest', headers := jsonb_build_object('Authorization','Bearer <SERVICE_ROLE_KEY>'));`
 
 ## 4. Bootstrap-Admin „Mo" anlegen
 
@@ -78,6 +111,16 @@ Dashboard → Authentication → Providers/Settings → **„Allow new users to 
 Nutzer werden ausschließlich vom Admin über die Edge Function angelegt — Self-Signup ist nicht
 vorgesehen und muss nach dem Setup deaktiviert werden.
 
+## 8. WhatsApp-Digest-Empfänger einrichten (Teil-B3)
+
+1. Der Empfänger registriert sich einmalig bei **CallMeBot**: die CallMeBot-WhatsApp-Nummer als
+   Kontakt speichern und die Freigabe-Nachricht senden (Anleitung: <https://www.callmebot.com/blog/free-api-whatsapp-messages/>).
+   CallMeBot antwortet mit einem **API-Key**, der an genau diese Nummer gebunden ist.
+2. Als Admin einloggen → **/admin/benachrichtigungen** → Empfänger-Nummer + API-Key eintragen,
+   **„Digest aktiv"** einschalten, speichern.
+3. Empfänger später wechseln = Nummer **und** deren API-Key in derselben Maske aktualisieren
+   (jede Nummer hat ihren eigenen CallMeBot-Key).
+
 ## Sicherheitshinweise
 
 - Der `service_role`-Key darf **nie** ins Repo oder ins Frontend gelangen — er lebt ausschließlich
@@ -89,6 +132,9 @@ vorgesehen und muss nach dem Setup deaktiviert werden.
   ausgeschlossen.
 - Der Trigger `protect_profile_columns` verhindert, dass Nutzer sich selbst schützenswerte Spalten
   (u. a. `role`) über ein direktes Profil-Update setzen.
-- Die Preis-/Vorlaufzeit-Validierung läuft aktuell noch **client-seitig** (`lib/pricing.ts`,
-  `lib/slots.ts`) — eine serverseitige Härtung ist für Teil-B4 vorgesehen, siehe
-  [TODO.md](TODO.md).
+- **Preis-/Slot-Validierung ist serverseitig erzwungen** (Teil-B4, Trigger `validate_order` in
+  `0005`): der Client rechnet weiter vor, aber der `BEFORE INSERT`-Trigger berechnet Preis/Gutschein
+  neu und lehnt ungültige Abhol-Slots ab — manipulierte `total`/`discount` haben keine Wirkung.
+- Die `notify_config`-Tabelle (B3) enthält den CallMeBot-API-Key und ist per **admin-only RLS**
+  abgesichert; nur Admins (und die `service_role`-Edge-Function) lesen sie — der Key gelangt nie an
+  öffentliche Clients.
