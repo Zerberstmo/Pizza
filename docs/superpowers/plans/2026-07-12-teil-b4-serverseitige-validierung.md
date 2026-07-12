@@ -82,6 +82,9 @@ begin
 
   -- ── Abhol-Slot prüfen (raise → Insert scheitert) ──
   select days, hours, lead_time_days, service into cfg from public.app_config where id = 1;
+  if not found then
+    raise exception 'Konfiguration fehlt'; -- fail closed statt Slot-Checks stillschweigend zu überspringen
+  end if;
 
   if new.pickup_date::date < current_date + cfg.lead_time_days then
     raise exception 'Abholtag zu früh (Vorlaufzeit)';
@@ -99,6 +102,9 @@ begin
     raise exception 'Uhrzeit außerhalb der Öffnungszeiten';
   end if;
 
+  if new.service_mode not in ('dinein', 'takeaway') then
+    raise exception 'Ungültiger Service-Modus'; -- erschöpfend: sonst umgeht ein Fremdwert die Service-Gate
+  end if;
   if new.service_mode = 'dinein' and not coalesce((cfg.service ->> 'dineIn')::boolean, false) then
     raise exception 'Service-Modus nicht verfügbar';
   end if;
