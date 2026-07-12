@@ -44,3 +44,42 @@ export function formatDigest(orders: DigestOrder[], dateLabel: string): string {
 
   return `${header}\n\n${blocks.join("\n\n")}`;
 }
+
+export interface PrepItem { ingredientIds: string[]; sauceId?: string }
+export interface PrepOrder { items: PrepItem[] }
+
+// Aggregierte Einkaufs-/Vorbereitungsliste für einen Tag (Teil-B5). Rein & deterministisch;
+// die Edge Function spiegelt diese Funktion als Deno-Copy — bei Änderungen synchron halten.
+export function formatPrepList(
+  orders: PrepOrder[],
+  ingredientNames: Record<string, string>,
+  sauceNames: Record<string, string>,
+  dateLabel: string,
+): string {
+  if (orders.length === 0) return "";
+
+  let doughCount = 0;
+  const ing: Record<string, number> = {};
+  const sau: Record<string, number> = {};
+  for (const o of orders) {
+    for (const it of o.items) {
+      doughCount++;
+      for (const id of it.ingredientIds) ing[id] = (ing[id] ?? 0) + 1;
+      if (it.sauceId) sau[it.sauceId] = (sau[it.sauceId] ?? 0) + 1;
+    }
+  }
+
+  const section = (title: string, counts: Record<string, number>, names: Record<string, string>): string => {
+    const entries = Object.entries(counts);
+    if (entries.length === 0) return "";
+    const lines = entries
+      .map(([id, c]) => ({ name: names[id] ?? id, c }))
+      .sort((a, b) => b.c - a.c || a.name.localeCompare(b.name))
+      .map((e) => `  ${e.c}× ${e.name}`);
+    return `\n\n${title}:\n${lines.join("\n")}`;
+  };
+
+  const doughLabel = `${doughCount} ${doughCount === 1 ? "Pizza" : "Pizzen"} (= ${doughCount} ${doughCount === 1 ? "Teig" : "Teige"})`;
+  const header = `🧾 Einkauf/Vorbereitung für morgen, ${dateLabel}\n${doughLabel}`;
+  return header + section("Zutaten", ing, ingredientNames) + section("Soßen", sau, sauceNames);
+}
