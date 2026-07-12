@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate } from "react-router";
 import AppLayout from "@/components/layout/app-layout";
 import AdminLayout from "@/components/layout/admin-shell";
 import LoginPage from "@/pages/login/login-page";
+import ResetPasswordPage from "@/pages/auth/reset-password-page";
 import ProfilePage from "@/pages/profile/profile-page";
 import { RequireAuth, RequireCustomer, RequireAdmin } from "@/components/layout/require-auth";
 import MenuPage from "@/pages/menu/menu-page";
@@ -20,6 +21,7 @@ import UsersPage from "@/pages/admin/users-page";
 
 export const router = createBrowserRouter([
   { path: "/login", element: <LoginPage /> },
+  { path: "/passwort-reset", element: <ResetPasswordPage /> },
   { path: "/profil", element: <RequireAuth><ProfilePage /></RequireAuth> },
   {
     element: <RequireCustomer><AppLayout /></RequireCustomer>,
