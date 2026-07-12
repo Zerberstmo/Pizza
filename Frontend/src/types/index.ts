@@ -107,3 +107,18 @@ export interface User {
   role: Role;
   active: boolean;
 }
+
+export type OrderStatus = "eingegangen" | "in_arbeit" | "fertig" | "abgeholt" | "storniert";
+
+export interface OrderRow {
+  id: string;
+  items: CartItem[];
+  total: number;
+  serviceMode: ServiceMode;
+  pickupDate: string;
+  pickupTime: string;
+  notes: string;
+  status: OrderStatus;
+  createdAt: string;
+  userId: string | null;
+}
