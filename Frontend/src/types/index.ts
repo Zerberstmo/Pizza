@@ -122,3 +122,9 @@ export interface OrderRow {
   createdAt: string;
   userId: string | null;
 }
+
+export interface NotifyConfig {
+  recipientPhone: string;
+  callmebotApikey: string;
+  enabled: boolean;
+}

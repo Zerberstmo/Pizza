@@ -1,4 +1,4 @@
-import type { AppConfig, IngredientItem, NewOrder, OrderData, OrderRow, OrderStatus, PizzaTemplate, VoucherDef, Sauce, User } from "@/types";
+import type { AppConfig, IngredientItem, NewOrder, NotifyConfig, OrderData, OrderRow, OrderStatus, PizzaTemplate, VoucherDef, Sauce, User } from "@/types";
 import { TEMPLATES, WEEK_DATA, PIE_DATA } from "./seed";
 import { computeSubtotal, computeDiscount, computeTotal, validateVoucher } from "@/lib/pricing";
 import { supabase } from "@/lib/supabase";
@@ -80,6 +80,8 @@ export async function createOrder(input: NewOrder): Promise<OrderData> {
     free_ingredient: order.freeIngredient ?? null, service_mode: order.serviceMode,
     pickup_date: order.pickupDate, pickup_time: order.pickupTime, notes: order.notes,
     voucher_code: order.voucherCode ?? null, status: "eingegangen",
+    customer_name: `${input.customer.firstName} ${input.customer.lastName}`.trim(),
+    customer_phone: input.customer.phone,
   });
   if (error) throw error;
   return order;
@@ -132,5 +134,18 @@ export async function getMyOrders(): Promise<OrderRow[]> {
 
 export async function updateOrderStatus(id: string, status: OrderStatus): Promise<void> {
   const { error } = await supabase.from("orders").update({ status }).eq("id", id);
+  if (error) throw error;
+}
+
+// ── Benachrichtigungs-Config (B3, nur Admins per RLS) ──
+export async function getNotifyConfig(): Promise<NotifyConfig> {
+  const { data, error } = await supabase.from("notify_config").select("*").eq("id", 1).single();
+  if (error) throw error;
+  return { recipientPhone: data.recipient_phone, callmebotApikey: data.callmebot_apikey, enabled: data.enabled };
+}
+export async function saveNotifyConfig(cfg: NotifyConfig): Promise<void> {
+  const { error } = await supabase.from("notify_config").upsert({
+    id: 1, recipient_phone: cfg.recipientPhone, callmebot_apikey: cfg.callmebotApikey, enabled: cfg.enabled,
+  });
   if (error) throw error;
 }
