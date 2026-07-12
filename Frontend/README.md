@@ -79,6 +79,9 @@ Domänendaten, Bestellungen und Auth laufen über ein echtes Supabase-Projekt
 - **Täglicher Digest (B3):** Edge Function `daily-digest` (per `pg_cron`) schickt 18 Uhr (Berlin)
   alle heutigen Abholungen per WhatsApp (CallMeBot). Empfänger/Key/An-Aus unter
   `/admin/benachrichtigungen` (Tabelle `notify_config`, admin-only). Reine Logik in `lib/digest.ts`.
+- **Vorbereitungs-/Einkaufs-Digest (B5):** derselbe 18-Uhr-Lauf schickt zusätzlich eine Liste für
+  **morgen** (aggregierte Zutaten/Soßen je Anzahl Pizzen + Teiganzahl, `formatPrepList`), falls es
+  Bestellungen für morgen gibt; idempotent über `notify_config.last_prep_date` (Migration `0008`).
 
 ## Admin
 

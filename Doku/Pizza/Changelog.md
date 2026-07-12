@@ -4,6 +4,20 @@
 
 <!-- Neue Einträge oben einfügen -->
 
+## 2026-07-13
+
+- **Teil-B5: Vorbereitungs-/Einkaufs-Digest:** der bestehende 18-Uhr-`daily-digest`-Lauf schickt
+  **zusätzlich** eine WhatsApp mit dem, was für **morgen** einzukaufen/vorzubereiten ist —
+  aggregiert über alle Bestellungen mit Abholung morgen: je Zutat und je Soße die Anzahl der Pizzen
+  plus die Gesamt-Teiganzahl (`🧾 Einkauf/Vorbereitung für morgen …`). Nur wenn es Bestellungen für
+  morgen gibt; idempotent über den neuen Merker `notify_config.last_prep_date` (Migration `0008`).
+  Kein neuer Cron, keine `app_config`-Prüfung nötig (der `validate_order`-Trigger lässt Bestellungen
+  nur an offenen Tagen zu → „morgen hat Bestellungen" ⇒ morgen offen). Reine Aggregations-/
+  Formatier-Logik `formatPrepList` (`lib/digest.ts`) getestet; die Edge Function spiegelt sie. Der
+  `daily-digest`-Handler wurde so umgebaut, dass Tages-Digest + Vorbereitungsliste unabhängig im
+  selben Lauf laufen (Verhalten des Tages-Digests unverändert). Build + 55 Tests grün; Migration
+  `0008` + Edge-Deploy führt der Betreiber aus.
+
 ## 2026-07-12
 
 - **Härtung: Gutschein-Nutzungslimit serverseitig erzwungen:** der `validate_order`-Trigger
