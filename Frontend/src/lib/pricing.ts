@@ -27,6 +27,8 @@ export function validateVoucher(code: string, vouchers: VoucherDef[], now: Date)
   const found = vouchers.find((v) => v.code === code && v.active);
   if (!found) return { ok: false, message: "Ungültiger Code." };
   if (new Date(found.expiresAt) < now) return { ok: false, message: "Gutschein abgelaufen." };
+  // Parität zum validate_order-Trigger: aufgebraucht → ungültig (max_uses <= 0 = unbegrenzt).
+  if (found.maxUses > 0 && found.uses >= found.maxUses) return { ok: false, message: "Gutschein aufgebraucht." };
   const message = found.type === "ingredient"
     ? `Sonderzutat: ${found.ingredientName} 🎁`
     : "Erfolgreich eingelöst!";
