@@ -56,7 +56,8 @@ Deno.serve(async () => {
   const db = createClient(SUPABASE_URL, SERVICE_ROLE);
 
   // 1) Config lesen; ohne Empfänger/Key oder disabled → nichts tun.
-  const { data: cfg } = await db.from("notify_config").select("*").eq("id", 1).single();
+  const { data: cfg, error: cfgErr } = await db.from("notify_config").select("*").eq("id", 1).single();
+  if (cfgErr) return new Response(`config error: ${cfgErr.message}`, { status: 500 }); // DB-Fehler von "unkonfiguriert" trennen
   if (!cfg || !cfg.enabled || !cfg.recipient_phone || !cfg.callmebot_apikey) {
     return new Response("skip: disabled/unconfigured");
   }
@@ -86,13 +87,20 @@ Deno.serve(async () => {
     return new Response("skip: no pickups today");
   }
 
-  // 6) Senden. Bei CallMeBot-Fehler last_digest_date NICHT setzen → nächster Lauf (bis 18:59) versucht erneut.
+  // 6) Senden. Bei CallMeBot-Fehler/Netzwerkfehler last_digest_date NICHT setzen → nächster Lauf (bis 18:59) versucht erneut.
   const message = formatDigest(orders, dateLabel);
   const url = `https://api.callmebot.com/whatsapp.php?phone=${encodeURIComponent(cfg.recipient_phone)}`
     + `&text=${encodeURIComponent(message)}&apikey=${encodeURIComponent(cfg.callmebot_apikey)}`;
-  const res = await fetch(url);
+  let res: Response;
+  try {
+    res = await fetch(url);
+  } catch (e) {
+    return new Response(`callmebot fetch failed: ${e}`, { status: 502 }); // Datum bleibt ungesetzt → Retry
+  }
   if (!res.ok) return new Response(`callmebot error: ${res.status}`, { status: 502 });
 
-  await db.from("notify_config").update({ last_digest_date: todayIso }).eq("id", 1);
+  // Erst NACH erfolgreichem Versand markieren. Schlägt der Write fehl, sichtbar melden (sonst droht Doppelversand bei Re-Trigger).
+  const { error: markErr } = await db.from("notify_config").update({ last_digest_date: todayIso }).eq("id", 1);
+  if (markErr) return new Response(`sent but mark failed: ${markErr.message}`, { status: 500 });
   return new Response(`sent: ${orders.length} Bestellungen`);
 });
