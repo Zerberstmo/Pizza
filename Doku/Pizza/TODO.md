@@ -13,7 +13,8 @@
 | P1 | Teil-B2: Bestell-Status + Realtime (Migration 0004, `my-orders`/Admin-Status, `use-orders-realtime`) | erledigt | Teil-B1 |
 | P1 | Teil-B4: serverseitige Preis-/Vorlauf-Validierung (Trigger `validate_order`, Migration 0005) | erledigt | Teil-B1 |
 | P1 | Teil-B3: täglicher WhatsApp-Digest ~18:00 (Cron→Edge Function `daily-digest`→CallMeBot, Migration 0006, `/admin/benachrichtigungen`) — kein Ping pro Bestellung; ADR-0003 angepasst | erledigt | Teil-B1, Teil-B2 |
-| P2 | B1/B3-Härtung (Final-Reviews): `vouchers.uses` bei Bestellung erhöhen + `maxUses` durchsetzen (vom `validate_order`-Trigger noch NICHT erzwungen → Gutschein aktuell unbegrenzt wiederverwendbar); `auth.role()` (deprecated) durch `request.jwt.claims`-Claim ersetzen; Admin-Nutzeraktionen (löschen/reset/toggle) Fehler anzeigen; Edge-Function CORS auf Frontend-Origin, Input-Validierung; Reset-Seite Enter-submit/Doppelklick-Schutz; optional `pickup_date`/`pickup_time`-Format-CHECK auf `orders` (Defense-in-Depth) | offen | Teil-B1..B4 |
+| P2 | Rest-Härtung (Final-Reviews): `auth.role()` (deprecated) durch `request.jwt.claims`-Claim ersetzen; Admin-Nutzeraktionen (löschen/reset/toggle) Fehler anzeigen; Edge-Function CORS auf Frontend-Origin, Input-Validierung; Reset-Seite Enter-submit/Doppelklick-Schutz; optional `pickup_date`/`pickup_time`-Format-CHECK auf `orders` (Defense-in-Depth) | offen | Teil-B1..B4 |
+| P2 | ~~`vouchers.uses` erhöhen + `maxUses` durchsetzen~~ | erledigt (Migration 0007, atomar; Client-Parität) | Teil-B4 |
 | P3 | Telefon-Validierung im Checkout (ursprünglich für Teil-B angedacht, noch offen) | offen | Teil-B1 |
 | P2 | E2E in Umgebung mit Browser ausführen (Playwright-Happy-Path grün bestätigen) | offen | Teil-A |
 | P2 | Teil-C: Capacitor iOS/Android (QR/Push, Icons/Splash, Store) | offen | Teil-B |

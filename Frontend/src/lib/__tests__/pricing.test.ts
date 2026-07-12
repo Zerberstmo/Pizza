@@ -26,4 +26,13 @@ describe("pricing", () => {
     const r = validateVoucher("WELCOME10", [percent], new Date("2025-01-01"));
     expect(r.ok).toBe(true);
   });
+  it("validateVoucher: aufgebraucht (uses >= maxUses)", () => {
+    const used = { ...percent, maxUses: 5, uses: 5 };
+    const r = validateVoucher("WELCOME10", [used], new Date("2025-01-01"));
+    expect(r.ok).toBe(false);
+  });
+  it("validateVoucher: maxUses 0 = unbegrenzt bleibt gültig trotz uses", () => {
+    const unlimited = { ...percent, maxUses: 0, uses: 999 };
+    expect(validateVoucher("WELCOME10", [unlimited], new Date("2025-01-01")).ok).toBe(true);
+  });
 });
