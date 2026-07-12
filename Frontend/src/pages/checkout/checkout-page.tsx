@@ -44,6 +44,7 @@ export default function CheckoutPage(): React.ReactElement {
   const [appliedVoucher, setAppliedVoucher] = useState<VoucherDef | null>(null);
   const [voucherMessage, setVoucherMessage] = useState<VoucherMessage | null>(null);
   const [serviceMode, setServiceMode] = useState<ServiceMode | "">("");
+  const [orderError, setOrderError] = useState("");
 
   const config = cfg.data;
   const availableDates = config ? getSelectableDates(config, new Date()) : [];
@@ -85,17 +86,23 @@ export default function CheckoutPage(): React.ReactElement {
 
   const placeOrder = async () => {
     if (!canOrder || noDates || noService || !serviceMode) return;
-    const order = await createOrder({
-      items: cart,
-      customer,
-      notes,
-      pickupDate,
-      pickupTime,
-      voucherCode: appliedVoucher?.code,
-      serviceMode,
-    });
-    clearCart();
-    navigate("/bestaetigung", { state: order });
+    setOrderError("");
+    try {
+      const order = await createOrder({
+        items: cart,
+        customer,
+        notes,
+        pickupDate,
+        pickupTime,
+        voucherCode: appliedVoucher?.code,
+        serviceMode,
+      });
+      clearCart();
+      navigate("/bestaetigung", { state: order });
+    } catch {
+      // Serverseitige Validierung (Trigger validate_order) kann ablehnen → saubere Meldung statt Absturz
+      setOrderError("Bestellung konnte nicht angenommen werden — bitte Angaben prüfen.");
+    }
   };
 
   if (cart.length === 0) {
@@ -316,6 +323,7 @@ export default function CheckoutPage(): React.ReactElement {
       </div>
 
       <div className="fixed bottom-[68px] left-0 right-0 z-40 px-4 pb-2 max-w-lg mx-auto">
+        {orderError && <p className="text-destructive text-xs text-center mb-2">{orderError}</p>}
         <Button size="lg" className="w-full font-black text-base shadow-2xl shadow-primary/25"
           disabled={!canOrder || noDates || noService} onClick={placeOrder}>
           {cart.length} Pizza{cart.length !== 1 ? "en" : ""} {serviceMode === "dinein" ? "vor Ort" : "abholen"} — {formatPrice(total)}
