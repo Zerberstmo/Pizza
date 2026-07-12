@@ -148,10 +148,13 @@ Deno.serve(async () => {
     if (doughCount === 0) {
       status.push("prep: nothing for tomorrow"); // Merker NICHT setzen
     } else {
-      const [{ data: ingRows }, { data: sauceRows }] = await Promise.all([
+      const [{ data: ingRows, error: ingErr }, { data: sauceRows, error: sauceErr }] = await Promise.all([
         db.from("ingredients").select("id, name"),
         db.from("sauces").select("id, name"),
       ]);
+      // Namen-Fehler: abbrechen OHNE zu senden/markieren, sonst ginge die Nachricht mit rohen IDs raus
+      // und last_prep_date würde den Retry verhindern.
+      if (ingErr || sauceErr) return new Response(`prep names error: ${ingErr?.message ?? sauceErr?.message}`, { status: 500 });
       const ingredientNames = Object.fromEntries((ingRows ?? []).map((r) => [r.id, r.name]));
       const sauceNames = Object.fromEntries((sauceRows ?? []).map((r) => [r.id, r.name]));
       const prepMsg = formatPrepList(prepOrders, ingredientNames, sauceNames, tomorrow.dateLabel);
