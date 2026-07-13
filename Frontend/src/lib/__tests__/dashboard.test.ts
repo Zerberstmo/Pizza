@@ -1,0 +1,49 @@
+import { describe, it, expect } from "bun:test";
+import { computeDashboard, type DashboardOrder } from "@/lib/dashboard";
+
+const ing = { i_sal: "Salami", i_mush: "Champignons", i_pap: "Paprika" };
+const o = (over: Partial<DashboardOrder>): DashboardOrder => ({
+  total: 10, status: "eingegangen",
+  items: [{ pizzaName: "Margherita", ingredientIds: ["i_sal"] }], ...over,
+});
+
+describe("computeDashboard", () => {
+  it("leere Liste → Nullwerte", () => {
+    const s = computeDashboard([], ing);
+    expect(s.totalCount).toBe(0);
+    expect(s.totalRevenue).toBe(0);
+    expect(s.avgOrderValue).toBe(0);
+    expect(s.topIngredient).toBeNull();
+    expect(s.topPizzas).toEqual([]);
+    expect(s.topIngredients).toEqual([]);
+  });
+  it("zählt Anzahl/Umsatz/Ø, storniert ausgeschlossen", () => {
+    const s = computeDashboard([
+      o({ total: 20 }), o({ total: 10 }), o({ total: 999, status: "storniert" }),
+    ], ing);
+    expect(s.totalCount).toBe(2);
+    expect(s.totalRevenue).toBe(30);
+    expect(s.avgOrderValue).toBe(15);
+  });
+  it("beliebteste Pizzen: Häufigkeit, Eigene zusammengefasst, sortiert", () => {
+    const s = computeDashboard([
+      o({ items: [{ pizzaName: "Eigene Pizza", ingredientIds: [] }] }),
+      o({ items: [{ pizzaName: "Eigene Pizza", ingredientIds: [] }] }),
+      o({ items: [{ pizzaName: "Margherita", ingredientIds: [] }] }),
+    ], ing);
+    expect(s.topPizzas[0]).toEqual({ day: "Eigene Pizza", n: 2 });
+    expect(s.topPizzas[1]).toEqual({ day: "Margherita", n: 1 });
+  });
+  it("Top-Zutaten mit Namensauflösung + topIngredient", () => {
+    const s = computeDashboard([
+      o({ items: [{ pizzaName: "P", ingredientIds: ["i_sal", "i_mush"] }] }),
+      o({ items: [{ pizzaName: "P", ingredientIds: ["i_sal"] }] }),
+    ], ing);
+    expect(s.topIngredient).toEqual({ name: "Salami", v: 2 });
+    expect(s.topIngredients.map((t) => t.name)).toEqual(["Salami", "Champignons"]);
+  });
+  it("unbekannte Zutaten-id → Fallback auf die id", () => {
+    const s = computeDashboard([o({ items: [{ pizzaName: "P", ingredientIds: ["i_x"] }] })], ing);
+    expect(s.topIngredients[0]).toEqual({ name: "i_x", v: 1 });
+  });
+});

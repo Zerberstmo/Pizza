@@ -1,11 +1,11 @@
 import type { AppConfig, IngredientItem, NewOrder, NotifyConfig, OrderData, OrderRow, OrderStatus, PizzaTemplate, VoucherDef, Sauce, User } from "@/types";
-import { TEMPLATES, WEEK_DATA, PIE_DATA } from "./seed";
+import { TEMPLATES } from "./seed";
 import { computeSubtotal, computeDiscount, computeTotal, validateVoucher } from "@/lib/pricing";
+import { computeDashboard, type DashboardStats } from "@/lib/dashboard";
 import { supabase } from "@/lib/supabase";
 // Hinweis: INGREDIENTS_DEFAULT/SAUCES_DEFAULT/VOUCHERS_INIT/DEFAULT_CONFIG werden NICHT mehr importiert
 // (Daten kommen jetzt aus Supabase). noUnusedLocals=true → ungenutzte Imports brächen den Build.
 
-const delay = <T>(v: T): Promise<T> => new Promise((r) => setTimeout(() => r(v), 120));
 
 const genId = () => `#${Math.floor(10000 + Math.random() * 90000)}`;
 
@@ -57,7 +57,12 @@ export async function saveConfig(config: AppConfig): Promise<void> {
   if (error) throw error;
 }
 
-export const getDashboardStats = () => delay({ week: WEEK_DATA, toppings: PIE_DATA }); // TEIL-B-später: echte Aggregation
+// Dashboard-Kennzahlen aus echten Bestellungen (Admin-RLS) aggregieren.
+export async function getDashboardStats(): Promise<DashboardStats> {
+  const [orders, ingredients] = await Promise.all([getOrders(), getIngredients()]);
+  const names = Object.fromEntries(ingredients.map((i) => [i.id, i.name]));
+  return computeDashboard(orders, names);
+}
 
 // ── Bestellung → Supabase insert (Preislogik client-seitig; Härtung = B4) ──
 export async function createOrder(input: NewOrder): Promise<OrderData> {
