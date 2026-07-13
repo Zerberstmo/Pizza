@@ -12,27 +12,42 @@ Auf [supabase.com](https://supabase.com) einloggen → „New Project" → Name,
 
 Reihenfolge ist wichtig, alle liegen in `supabase/migrations/`:
 `0001_schema_rls.sql` → `0002_seed.sql` → `0003_profiles_email.sql` → `0004_order_status.sql`
-(B2: Status-Werte) → `0005_validate_order.sql` (B4: serverseitiger Preis-/Slot-Trigger) →
-`0006_digest.sql` (B3: Kundendaten in `orders` + `notify_config`).
+(B2: Status) → `0005_validate_order.sql` (B4: Preis-/Slot-Trigger) → `0006_digest.sql` (B3:
+Kundendaten + `notify_config`) → `0007_voucher_max_uses.sql` (Härtung) → `0008_prep_digest.sql`
+(B5: `last_prep_date`) → **`0009_grants.sql`** (Supabase-Standard-Grants, s. u.).
 
-**Option A — Supabase CLI:**
+**CLI ohne globale Installation (empfohlen):** Wir nutzen die CLI über **Bun**, das erspart
+PATH-Gefummel. Statt `supabase …` immer **`bunx supabase …`**:
 
 ```bash
-supabase link --project-ref <projekt-ref>
-supabase db push
+bunx supabase login --token <access-token>      # Token: Dashboard → Account → Access Tokens
+bunx supabase init                               # legt supabase/config.toml an (Editor-Prompts: N)
+bunx supabase link --project-ref <projekt-ref>
+bunx supabase db push                            # fragt nach dem DB-Passwort
 ```
 
-**Option B — SQL-Editor im Dashboard:**
+> **`db push` schlägt mit „function … already exists" fehl?** Dann existieren in der DB schon
+> Objekte, aber die CLI-Historie ist leer (z. B. früher manuell eingespielt). Auf einem Projekt
+> **ohne echte Daten** sauber neu aufsetzen: `bunx supabase db reset --linked --no-seed` (⚠️ löscht
+> alle Daten, spielt danach 0001–0009 frisch ein).
 
-Dashboard → SQL Editor → Migrationen `0001` … `0006` **einzeln in dieser Reihenfolge** einfügen
-und ausführen.
+> **WICHTIG — Grants nach `db reset`:** Ein `db reset` erstellt das `public`-Schema neu und entfernt
+> dabei die Standard-Grants, die Supabase sonst mitbringt. Ohne sie können `anon`/`authenticated`/
+> `service_role` die Tabellen nicht lesen (RLS greift erst **nach** der Tabellen-Berechtigung) → der
+> Login schlägt mit **„Konto deaktiviert"** fehl, weil die `profiles`-Zeile nicht lesbar ist.
+> Migration **`0009_grants.sql`** stellt die Grants wieder her und läuft bei `db push`/`db reset`
+> automatisch mit — sie muss vorhanden sein.
+
+**Alternative — SQL-Editor im Dashboard:** Migrationen `0001` … `0009` einzeln in dieser Reihenfolge
+einfügen und ausführen (Rolle des SQL-Editors ggf. auf `postgres` stellen).
 
 ## 3. Edge Functions deployen
 
 ```bash
-supabase functions deploy admin-users
-supabase functions deploy daily-digest
+bunx supabase functions deploy admin-users
+bunx supabase functions deploy daily-digest
 ```
+> Die Warnung „Docker is not running" ist ok — die CLI nutzt den API-Bundler, kein Docker nötig.
 
 - `admin-users` (`supabase/functions/admin-users`) läuft mit dem `service_role`-Key **serverseitig**
   und übernimmt Anlegen/Löschen/Passwort-Reset von Nutzern durch Admins.
@@ -69,15 +84,24 @@ Zum Testen den Job manuell auslösen (sendet nur, falls es gerade 18 Uhr Berlin 
 
 ## 4. Bootstrap-Admin „Mo" anlegen
 
-1. Dashboard → Authentication → Users → „Add user" → E-Mail + Passwort für „Mo" eintragen.
-2. Danach im SQL-Editor zum Admin befördern:
+1. Dashboard → Authentication → Users → „Add user" → E-Mail + Passwort eintragen, **„Auto Confirm
+   User" aktivieren** (sonst kein sofortiger Login). `handle_new_user` legt automatisch ein
+   `profiles`-Row mit `role='customer'` an.
+2. Danach im SQL-Editor zum Admin befördern.
+
+> **Stolperstein — der `protect_profile_columns`-Trigger.** Er setzt `role`/`active` bei einem
+> UPDATE zurück, wenn der Aufrufer nicht `is_admin()` oder `service_role` ist. Der SQL-Editor erfüllt
+> das i. d. R. **nicht** → ein simples `update … set role='admin'` **verpufft lautlos**. Deshalb den
+> Trigger für diesen einen Update kurz umgehen (Editor-Rolle ggf. auf `postgres` stellen):
 
 ```sql
-update public.profiles set role = 'admin' where email = '<mo-email>';
+alter table public.profiles disable trigger profiles_protect;
+update public.profiles set role = 'admin', active = true where email = '<mo-email>';
+alter table public.profiles enable trigger profiles_protect;
+select email, role, active from public.profiles;  -- Kontrolle: role=admin, active=true
 ```
 
-`handle_new_user` legt beim Anlegen automatisch ein `profiles`-Row mit `role='customer'` an —
-die Beförderung zu `admin` erfolgt bewusst erst danach, per SQL, nie über die Anwendung selbst.
+Die Beförderung zu `admin` erfolgt bewusst per SQL, nie über die Anwendung selbst.
 
 ## 5. Frontend-Env konfigurieren
 

@@ -6,6 +6,14 @@
 
 ## 2026-07-13
 
+- **Betreiber-Setup live gegangen + Setup-Härtung:** Supabase-Projekt real aufgesetzt (Migrationen,
+  Edge Functions `admin-users`/`daily-digest` deployed, `pg_cron`+`pg_net`, Realtime für `orders`,
+  Cron-Job, Admin „Mo"). Dabei zwei Stolpersteine gefunden und behoben: (1) ein `db reset` entfernt
+  die Supabase-Standard-Grants am `public`-Schema → Login schlug mit „Konto deaktiviert" fehl →
+  neue Migration **`0009_grants.sql`** stellt die Grants wieder her (läuft bei `db push`/`reset`
+  automatisch mit); (2) der `protect_profile_columns`-Trigger setzt einen Admin-Promote im SQL-Editor
+  zurück → in `SETUP-Supabase.md` dokumentiert (Trigger kurz umgehen). CLI wird über `bunx supabase`
+  genutzt (kein globaler Install/PATH). `SETUP-Supabase.md` entsprechend überarbeitet.
 - **Teil-B5: Vorbereitungs-/Einkaufs-Digest:** der bestehende 18-Uhr-`daily-digest`-Lauf schickt
   **zusätzlich** eine WhatsApp mit dem, was für **morgen** einzukaufen/vorzubereiten ist —
   aggregiert über alle Bestellungen mit Abholung morgen: je Zutat und je Soße die Anzahl der Pizzen
