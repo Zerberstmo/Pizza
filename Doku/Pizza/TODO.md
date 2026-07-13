@@ -19,7 +19,7 @@
 | P2 | ~~`vouchers.uses` erhöhen + `maxUses` durchsetzen~~ | erledigt (Migration 0007, atomar; Client-Parität) | Teil-B4 |
 | P3 | Telefon-Validierung im Checkout (ursprünglich für Teil-B angedacht, noch offen) | offen | Teil-B1 |
 | P2 | Echter, scanbarer QR auf der Bestätigung → Link zur öffentlichen Bestell-Status-Seite. **Spec freigegeben:** [docs/superpowers/specs/2026-07-13-qr-bestell-status-design.md](../../docs/superpowers/specs/2026-07-13-qr-bestell-status-design.md) (Migration 0010 `public_token`+RPC, `qrcode.react`, Route `/bestellung/:token`). Frontend-Deployment ✅. | in Arbeit (Plan folgt) | Frontend-Deployment |
-| P3 | **Idee: Pizza-Favicon** — Tab-Icon der Seite auf ein Pizza-Icon setzen (`Frontend/index.html`). Kleine Einzelaufgabe. | offen | Frontend-Deployment |
+| P3 | ~~Pizza-Favicon~~ | erledigt (`Frontend/public/favicon.svg`, Markenorange, in `index.html` verlinkt + `theme-color`) | Frontend-Deployment |
 | P2 | **Idee: Kunden-WhatsApp um 15 Uhr am Abholtag** — Kunde erhält am Abholtag ~15:00 eine Erinnerung. ⚠️ **Haken:** CallMeBot kann nur an Empfänger senden, die den Bot selbst autorisiert haben → für Kunden **nicht** nutzbar; braucht anderen Kanal (WhatsApp Business API / Twilio / SMS). Eigenes Design nötig (Kanalwahl + neuer 15-Uhr-Cron + Bestellungen mit Abholung=heute). | offen (Ideenstatus) | Teil-B3 |
 | P3 | **Idee: Zutaten bearbeiten** — bestehende Zutaten im Admin editieren (aktuell wohl nur Anlegen/Toggle). Kleines CRUD-Add. | offen (Ideenstatus) | — |
 | P3 | **Idee: Dashboard-Reset-Button** unter neuem Tab „Einstellungen" (gegen Fehlklick isoliert, Bestätigungsdialog). ❓ Klären: setzt „Reset" **alle Bestellungen** zurück (Daten leeren) oder nur Statistik/Zähler? | offen (Ideenstatus) | — |

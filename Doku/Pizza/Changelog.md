@@ -6,6 +6,10 @@
 
 ## 2026-07-13
 
+- **Pizza-Favicon:** eigenes SVG-Tab-Icon (`Frontend/public/favicon.svg`) im Marken-Orange
+  (`#F97316`, Pizza-Stück mit Kruste/Salami/Basilikum), in `index.html` via
+  `<link rel="icon" type="image/svg+xml">` verlinkt, dazu `theme-color`-Meta. Ersetzt das bisherige
+  Browser-Standard-Icon.
 - **Frontend öffentlich deployed (Vercel):** die App läuft jetzt live auf einer `*.vercel.app`-URL
   (Git-Integration `Zerberstmo/Pizza`, Auto-Deploy auf `main`). Vercel-Konfiguration: **Root
   Directory `Frontend`**, Framework Vite (Bun via `bun.lock` → `bun install` + `bun run build`),
