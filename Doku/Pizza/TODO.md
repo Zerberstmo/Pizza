@@ -18,5 +18,7 @@
 | P2 | Rest-Härtung (Final-Reviews): `auth.role()` (deprecated) durch `request.jwt.claims`-Claim ersetzen; Admin-Nutzeraktionen (löschen/reset/toggle) Fehler anzeigen; Edge-Function CORS auf Frontend-Origin, Input-Validierung; Reset-Seite Enter-submit/Doppelklick-Schutz; optional `pickup_date`/`pickup_time`-Format-CHECK auf `orders` (Defense-in-Depth) | offen | Teil-B1..B4 |
 | P2 | ~~`vouchers.uses` erhöhen + `maxUses` durchsetzen~~ | erledigt (Migration 0007, atomar; Client-Parität) | Teil-B4 |
 | P3 | Telefon-Validierung im Checkout (ursprünglich für Teil-B angedacht, noch offen) | offen | Teil-B1 |
+| P2 | Echter, scanbarer QR auf der Bestätigung → Link zur Bestell-Status-Seite. Aktuell ist `qr-code.tsx` nur ein Pseudo-QR (Deko, nicht scanbar). Braucht: (1) öffentliches Frontend-Deployment; (2) sichere Status-Seite via `public_token uuid` in `orders` + `SECURITY DEFINER`-RPC mit begrenzten Feldern (KEIN Telefon; Bestell-IDs sind ratbar → nicht per ID öffnen); (3) echten QR-Generator + öffentliche Route. Eigenes Sub-Projekt (Brainstorming→Design→Umsetzung). | offen | Frontend-Deployment |
+| P2 | Frontend öffentlich hosten (Vercel/Netlify/Supabase) — Voraussetzung u. a. für scanbare QR-Links; `.env`-Vars dort setzen | offen | Teil-B |
 | P2 | E2E in Umgebung mit Browser ausführen (Playwright-Happy-Path grün bestätigen) | offen | Teil-A |
 | P2 | Teil-C: Capacitor iOS/Android (QR/Push, Icons/Splash, Store) | offen | Teil-B |
