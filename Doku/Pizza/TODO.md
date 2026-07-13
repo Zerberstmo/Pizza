@@ -9,7 +9,7 @@
 | P1 | Teil-A-Erweiterung (Soßen/Favoriten/Service) | erledigt | Teil-A |
 | P1 | Nutzer-Accounts (Teil-A-Mock) | erledigt | Teil-A |
 | P1 | Teil-B1 (Supabase-Fundament + Auth): Client/Schema/RLS, Edge Function `admin-users`, Domänendaten + Bestellungen aus Supabase, E-Mail-Auth (Login/Profil/Admin-Nutzerverwaltung/Passwort-Reset) — Mock entfernt | erledigt | Teil-A |
-| P0 | Supabase-Setup durch Betreiber ausführen + Klick-Test (siehe [SETUP-Supabase.md](SETUP-Supabase.md)): Migrationen `0001`–`0008`; Realtime für `orders` aktivieren (B2); Extensions `pg_cron`+`pg_net`; Edge Functions `admin-users` + `daily-digest` deployen; `cron.schedule` für den Digest anlegen; CallMeBot-Empfänger in `/admin/benachrichtigungen` eintragen; Start-Admin „Mo", Self-Signup deaktivieren, `.env.local` füllen | offen | Teil-B1..B4 |
+| P0 | ~~Supabase-Setup durch Betreiber ausführen + Klick-Test~~ | erledigt (2026-07-13) — Migrationen `0001`–`0009`, Realtime `orders`, `pg_cron`+`pg_net`, Edge Functions `admin-users`+`daily-digest` deployed, Cron `daily-digest-hourly`, Admin „Mo", Self-Signup aus, `.env.local` + Vercel-Env gefüllt, **CallMeBot-Empfänger eingetragen (Digests kommen an)** | Teil-B1..B4 |
 | P1 | Teil-B2: Bestell-Status + Realtime (Migration 0004, `my-orders`/Admin-Status, `use-orders-realtime`) | erledigt | Teil-B1 |
 | P1 | Teil-B4: serverseitige Preis-/Vorlauf-Validierung (Trigger `validate_order`, Migration 0005) | erledigt | Teil-B1 |
 | P1 | Teil-B3: täglicher WhatsApp-Digest ~18:00 (Cron→Edge Function `daily-digest`→CallMeBot, Migration 0006, `/admin/benachrichtigungen`) — kein Ping pro Bestellung; ADR-0003 angepasst | erledigt | Teil-B1, Teil-B2 |
