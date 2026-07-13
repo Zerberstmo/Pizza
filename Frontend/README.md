@@ -88,6 +88,9 @@ Domänendaten, Bestellungen und Auth laufen über ein echtes Supabase-Projekt
 - Zugang: über Login (`/login`) mit einem Account der Rolle `admin`; kein separates Admin-Passwort mehr.
 - Konfigurierbar: Bestelltage, Öffnungszeiten, **Vorlaufzeit** (Default 3 Tage), Zutaten, Gutscheine, **Soßen**, **Service-Modus**, **Nutzer** (`/admin/nutzer`).
 - **Vorlaufzeit:** Frühester Abholtag = heute + Vorlaufzeit. Wirkt direkt auf die Datumsauswahl im Checkout.
+- **Dashboard** (`/admin/dashboard`): echte Gesamt-Kennzahlen aus `orders` (Bestellungen, Umsatz,
+  Ø-Bestellwert, Top-Zutat) + Diagramme beliebteste Pizzen/Zutaten; reine Aggregation `computeDashboard`
+  in `lib/dashboard.ts` (getestet), `storniert` ausgeschlossen.
 
 ## Soßen
 

@@ -6,6 +6,13 @@
 
 ## 2026-07-13
 
+- **Admin-Dashboard auf Live-Daten:** echte Aggregation aus `orders` statt Mock — reine, getestete
+  Funktion `computeDashboard` (`lib/dashboard.ts`) liefert Gesamt-Kennzahlen (Bestellungen, Umsatz,
+  Ø-Bestellwert, Top-Zutat) + Diagramme „Beliebteste Pizzen" (nach `pizzaName`, Eigenkreationen als
+  „Eigene Pizza" zusammengefasst) und „Beliebteste Zutaten" (Top 5, Namen via `ingredients`).
+  `storniert` überall ausgeschlossen; Leerzustand („Noch keine Daten") ergänzt. `getDashboardStats`
+  lädt jetzt echte `orders`+`ingredients`; der Mock (`delay`/`WEEK_DATA`/`PIE_DATA`) ist entfernt.
+  Client-seitig aggregiert, mit bun:test verifiziert (60 Tests grün).
 - **Betreiber-Setup live gegangen + Setup-Härtung:** Supabase-Projekt real aufgesetzt (Migrationen,
   Edge Functions `admin-users`/`daily-digest` deployed, `pg_cron`+`pg_net`, Realtime für `orders`,
   Cron-Job, Admin „Mo"). Dabei zwei Stolpersteine gefunden und behoben: (1) ein `db reset` entfernt
