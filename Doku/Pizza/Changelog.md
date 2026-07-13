@@ -6,6 +6,16 @@
 
 ## 2026-07-13
 
+- **Frontend öffentlich deployed (Vercel):** die App läuft jetzt live auf einer `*.vercel.app`-URL
+  (Git-Integration `Zerberstmo/Pizza`, Auto-Deploy auf `main`). Vercel-Konfiguration: **Root
+  Directory `Frontend`**, Framework Vite (Bun via `bun.lock` → `bun install` + `bun run build`),
+  Output `dist`; SPA-Routing über `Frontend/vercel.json` (Rewrites auf `index.html`). Env-Vars
+  `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY` in den Vercel-Project-Settings (Production).
+  Stolpersteine beim Setup dokumentiert: (1) Root Directory muss `Frontend` sein (sonst 404); (2)
+  Output Directory ist `dist`, nicht `build` (Framework-Preset Vite); (3) **Vite backt `VITE_`-Vars
+  beim Build ein** — nach dem Nachtragen einer Env-Var muss neu gebaut werden, sonst greift der
+  `localhost:54321`/`placeholder-anon-key`-Fallback aus `lib/supabase.ts` (Symptom:
+  `UNAUTHORIZED_INVALID_API_KEY` trotz korrekter URL). Login live verifiziert.
 - **Admin-Dashboard auf Live-Daten:** echte Aggregation aus `orders` statt Mock — reine, getestete
   Funktion `computeDashboard` (`lib/dashboard.ts`) liefert Gesamt-Kennzahlen (Bestellungen, Umsatz,
   Ø-Bestellwert, Top-Zutat) + Diagramme „Beliebteste Pizzen" (nach `pizzaName`, Eigenkreationen als
