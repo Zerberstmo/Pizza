@@ -68,6 +68,7 @@ export interface NewOrder {
 
 export interface OrderData {
   id: string;
+  publicToken: string;
   items: CartItem[];
   subtotal: number;
   total: number;
@@ -121,6 +122,18 @@ export interface OrderRow {
   status: OrderStatus;
   createdAt: string;
   userId: string | null;
+}
+
+export interface PublicOrderStatus {
+  id: string;
+  status: OrderStatus;
+  pickupDate: string;
+  pickupTime: string;
+  serviceMode: ServiceMode;
+  items: CartItem[];
+  total: number;
+  createdAt: string;
+  labels: Record<string, string>;
 }
 
 export interface NotifyConfig {
