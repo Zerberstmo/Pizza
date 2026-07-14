@@ -1,21 +1,28 @@
 import type React from "react";
-import { useCallback } from "react";
-import { getMyOrders } from "@/lib/data/store";
+import { useCallback, useState } from "react";
+import { getMyOrders, getIngredients, getSauces } from "@/lib/data/store";
 import { useAsync } from "@/hooks/use-async";
 import { useAuth } from "@/hooks/use-auth";
 import { useOrdersRealtime } from "@/hooks/use-orders-realtime";
+import { buildLabels } from "@/lib/order-labels";
 import { formatPrice } from "@/lib/pricing";
 import type { OrderRow } from "@/types";
 import { AsyncBoundary } from "@/components/common/async-boundary";
 import { OrderStatusBadge } from "@/components/common/order-status-badge";
 import { PizzaSVG } from "@/components/pizza/pizza-svg";
+import { OrderQrModal } from "@/components/orders/order-qr-modal";
 import { Card, CardContent } from "@/components/ui/card";
 
 export default function MyOrdersPage(): React.ReactElement {
   const { currentUser } = useAuth();
   const { data, loading, error, reload } = useAsync(getMyOrders);
+  const { data: ingredients } = useAsync(getIngredients);
+  const { data: sauces } = useAsync(getSauces);
+  const [selected, setSelected] = useState<OrderRow | null>(null);
   const onChange = useCallback(() => reload(), [reload]);
   useOrdersRealtime(onChange, { userId: currentUser?.id });
+
+  const labels = buildLabels(ingredients ?? [], sauces ?? []);
 
   return (
     <div className="pb-24">
@@ -31,7 +38,7 @@ export default function MyOrdersPage(): React.ReactElement {
         {(orders: OrderRow[]) => (
           <div className="px-4 space-y-3">
             {orders.map((o) => (
-              <Card key={o.id}>
+              <Card key={o.id} className="cursor-pointer transition-colors hover:border-primary/30" onClick={() => setSelected(o)}>
                 <CardContent className="py-4 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="font-black text-primary">{o.id}</span>
@@ -52,6 +59,10 @@ export default function MyOrdersPage(): React.ReactElement {
           </div>
         )}
       </AsyncBoundary>
+
+      {selected && (
+        <OrderQrModal order={selected} labels={labels} onClose={() => setSelected(null)} />
+      )}
     </div>
   );
 }
