@@ -1,8 +1,9 @@
-import type { AppConfig, IngredientItem, NewOrder, NotifyConfig, OrderData, OrderRow, OrderStatus, PizzaTemplate, VoucherDef, Sauce, User } from "@/types";
+import type { AppConfig, IngredientItem, NewOrder, NotifyConfig, OrderData, OrderRow, OrderStatus, PizzaTemplate, VoucherDef, Sauce, User, PublicOrderStatus } from "@/types";
 import { TEMPLATES } from "./seed";
 import { computeSubtotal, computeDiscount, computeTotal, validateVoucher } from "@/lib/pricing";
 import { computeDashboard, type DashboardStats } from "@/lib/dashboard";
 import { supabase } from "@/lib/supabase";
+import { rowToPublicStatus } from "@/lib/public-order";
 // Hinweis: INGREDIENTS_DEFAULT/SAUCES_DEFAULT/VOUCHERS_INIT/DEFAULT_CONFIG werden NICHT mehr importiert
 // (Daten kommen jetzt aus Supabase). noUnusedLocals=true → ungenutzte Imports brächen den Build.
 
@@ -73,14 +74,15 @@ export async function createOrder(input: NewOrder): Promise<OrderData> {
   const subtotal = computeSubtotal(input.items.length);
   const discount = computeDiscount(subtotal, applied);
   const { data: sess } = await supabase.auth.getUser();
+  const publicToken = crypto.randomUUID();
   const order: OrderData = {
-    id: genId(), items: input.items, subtotal, discount, total: computeTotal(subtotal, discount),
+    id: genId(), publicToken, items: input.items, subtotal, discount, total: computeTotal(subtotal, discount),
     freeIngredient: applied?.type === "ingredient" ? applied.ingredientName : undefined,
     customer: input.customer, notes: input.notes, pickupDate: input.pickupDate, pickupTime: input.pickupTime,
     serviceMode: input.serviceMode ?? "takeaway", voucherCode: applied?.code,
   };
   const { error } = await supabase.from("orders").insert({
-    id: order.id, user_id: sess.user?.id ?? null, items: order.items,
+    id: order.id, public_token: order.publicToken, user_id: sess.user?.id ?? null, items: order.items,
     subtotal: order.subtotal, discount: order.discount, total: order.total,
     free_ingredient: order.freeIngredient ?? null, service_mode: order.serviceMode,
     pickup_date: order.pickupDate, pickup_time: order.pickupTime, notes: order.notes,
@@ -90,6 +92,14 @@ export async function createOrder(input: NewOrder): Promise<OrderData> {
   });
   if (error) throw error;
   return order;
+}
+
+// Öffentlicher Bestell-Status über den nicht-ratbaren Token (RPC umgeht RLS feld-begrenzt).
+export async function getOrderStatus(token: string): Promise<PublicOrderStatus | null> {
+  const { data, error } = await supabase.rpc("get_order_status", { p_token: token });
+  if (error) throw error;
+  const row = Array.isArray(data) ? data[0] : data;
+  return row ? rowToPublicStatus(row) : null;
 }
 
 // ── Nutzer/Profile → Supabase (`profiles`-Tabelle + Edge Function `admin-users`) ──
