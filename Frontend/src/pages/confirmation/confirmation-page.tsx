@@ -24,6 +24,8 @@ export default function ConfirmationPage(): React.ReactElement {
 
   if (!order) return <Navigate to="/" replace />;
 
+  const statusUrl = `${window.location.origin}/bestellung/${order.publicToken}`;
+
   const ingName = (id: string) => (ingredients ?? []).find((x) => x.id === id)?.name;
   const sauceName = (id?: string) => resolveSauce(sauces ?? [], id)?.name;
 
@@ -53,7 +55,10 @@ export default function ConfirmationPage(): React.ReactElement {
         <Card>
           <CardContent className="py-5 text-center">
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-3">QR-Code</p>
-            <div className="w-36 h-36 mx-auto"><QrCode data={order.id} /></div>
+            <div className="w-36 h-36 mx-auto"><QrCode data={statusUrl} /></div>
+            <a href={statusUrl} className="mt-3 inline-block text-xs text-primary underline underline-offset-2">
+              Status verfolgen
+            </a>
           </CardContent>
         </Card>
 
