@@ -110,6 +110,25 @@ unterscheiden (Pizza vs `kind:"special"`):
 > der Pizza vs Sonderartikel einheitlich darstellt und an mehreren Stellen wiederverwendet wird.
 > (Detailentscheidung im Phase-1-Plan.)
 
+## Diskretion beim Kunden nach Abholung (Phase 1)
+
+Sonderartikel sind bewusst diskret. Regel für die **kundenseitige** Bestell-Übersicht:
+- Solange die Bestellung noch **nicht abgeholt** ist (`eingegangen`/`in_arbeit`/`fertig`): alles normal
+  sichtbar (die Bestellung muss abgewickelt werden).
+- Sobald **`status = "abgeholt"`**:
+  - Der **Sonderartikel wird in der Kunden-Ansicht ausgeblendet** (die restlichen Pizza-Positionen der
+    Bestellung bleiben sichtbar).
+  - Bestand die Bestellung **nur** aus Sonderartikel(n) (keine Pizza), **verschwindet die ganze
+    Bestellung** aus der Kunden-Übersicht („Meine Bestellungen" Liste + Modal).
+- **Nur kundenseitig** (Vom-User entschieden): der **Admin** sieht weiterhin **alles** (Bestell-Liste,
+  Umsatz, Records). Es ist ein reines **Anzeige-Filtern**, kein Löschen — der Datensatz bleibt in der DB.
+- Betroffene Kunden-Flächen: `my-orders-page` (Liste + `OrderQrModal`). Konsistenz-Überlegung: die
+  öffentliche Status-Seite (`/bestellung/:token`) für eine reine Sonderartikel-Bestellung nach Abholung
+  ebenfalls diskret halten (im Phase-1-Plan festlegen).
+- **Wechselwirkung „Erneut bestellen":** eine ausgeblendete reine Sonderartikel-Bestellung ist nicht
+  reorderbar (nicht sichtbar); beim Reorder einer gemischten Bestellung werden Sonderartikel **nicht**
+  mit-übernommen (sie brauchen ohnehin Code/Grant). Siehe Spec „Erneut bestellen".
+
 ## Admin-Verwaltung (Phase 2)
 
 Neue Admin-Seite „Sonderartikel" (`admin/special-items-page`, neuer Tab + Route):
