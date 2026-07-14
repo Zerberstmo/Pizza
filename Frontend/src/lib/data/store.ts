@@ -126,7 +126,7 @@ export const adminResetPassword = (id: string, password: string) => invokeAdmin(
 // ── Bestellungen (B2) ──
 function rowToOrder(r: any): OrderRow {
   return {
-    id: r.id, items: r.items, total: Number(r.total), serviceMode: r.service_mode,
+    id: r.id, publicToken: r.public_token, items: r.items, total: Number(r.total), serviceMode: r.service_mode,
     pickupDate: r.pickup_date, pickupTime: r.pickup_time, notes: r.notes ?? "",
     status: r.status, createdAt: r.created_at, userId: r.user_id ?? null,
   };
