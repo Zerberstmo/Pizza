@@ -4,6 +4,16 @@
 
 <!-- Neue Einträge oben einfügen -->
 
+## 2026-07-14
+
+- **Zutaten bearbeiten + Kategorie „Sonstiges":** Admin kann bestehende Zutaten jetzt bearbeiten
+  (Stift-Icon je Karte → gemeinsames Add-/Edit-Formular; `id` und Verfügbar-Status bleiben erhalten).
+  Das Kategorie-Dropdown enthält ein festes Grundset inkl. **„Sonstiges"** (`BASE_CATEGORIES`) plus die
+  datengetriebenen Kategorien und eine „＋ Neue Kategorie…"-Option (Freitext; leer → Speichern
+  deaktiviert). Neue Kategorien erscheinen automatisch als Admin-Tab und im Kunden-Konfigurator (beide
+  datengetrieben). Reiner Helfer `mergeCategories` (`lib/ingredient-categories.ts`) getestet (bun:test).
+  Reines Frontend, keine Migration.
+
 ## 2026-07-13
 
 - **Scanbarer QR → öffentliche Bestell-Status-Seite:** echter QR (`qrcode.react`) auf der
