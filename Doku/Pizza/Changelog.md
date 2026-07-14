@@ -6,6 +6,13 @@
 
 ## 2026-07-13
 
+- **Scanbarer QR → öffentliche Bestell-Status-Seite:** echter QR (`qrcode.react`) auf der
+  Bestätigung verlinkt auf `/bestellung/:token` (öffentlich, ohne Login). Neue Spalte
+  `orders.public_token uuid` + SECURITY-DEFINER-RPC `get_order_status` (Migration `0010`), die nur
+  Whitelist-Felder (Nr, Status, Abholzeit, Pizzen, Betrag) + eine `labels`-Namensmap liefert — kein
+  Name/Telefon/Bemerkung. Status-Seite mit Auto-Refresh alle 20 s (stoppt bei abgeholt/storniert).
+  Reine Helfer `describeItem`/`rowToPublicStatus` getestet (bun:test). ADR-0007. Betreiber führt
+  Migration `0010` via `bunx supabase db push` aus.
 - **Pizza-Favicon:** eigenes SVG-Tab-Icon (`Frontend/public/favicon.svg`) im Marken-Orange
   (`#F97316`, Pizza-Stück mit Kruste/Salami/Basilikum), in `index.html` via
   `<link rel="icon" type="image/svg+xml">` verlinkt, dazu `theme-color`-Meta. Ersetzt das bisherige

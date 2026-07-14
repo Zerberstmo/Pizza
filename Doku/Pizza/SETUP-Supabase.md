@@ -14,7 +14,8 @@ Reihenfolge ist wichtig, alle liegen in `supabase/migrations/`:
 `0001_schema_rls.sql` → `0002_seed.sql` → `0003_profiles_email.sql` → `0004_order_status.sql`
 (B2: Status) → `0005_validate_order.sql` (B4: Preis-/Slot-Trigger) → `0006_digest.sql` (B3:
 Kundendaten + `notify_config`) → `0007_voucher_max_uses.sql` (Härtung) → `0008_prep_digest.sql`
-(B5: `last_prep_date`) → **`0009_grants.sql`** (Supabase-Standard-Grants, s. u.).
+(B5: `last_prep_date`) → **`0009_grants.sql`** (Supabase-Standard-Grants, s. u.) →
+**`0010_public_token.sql`** (öffentlicher Bestell-Status: `public_token` + `get_order_status`-RPC).
 
 **CLI ohne globale Installation (empfohlen):** Wir nutzen die CLI über **Bun**, das erspart
 PATH-Gefummel. Statt `supabase …` immer **`bunx supabase …`**:
@@ -29,7 +30,7 @@ bunx supabase db push                            # fragt nach dem DB-Passwort
 > **`db push` schlägt mit „function … already exists" fehl?** Dann existieren in der DB schon
 > Objekte, aber die CLI-Historie ist leer (z. B. früher manuell eingespielt). Auf einem Projekt
 > **ohne echte Daten** sauber neu aufsetzen: `bunx supabase db reset --linked --no-seed` (⚠️ löscht
-> alle Daten, spielt danach 0001–0009 frisch ein).
+> alle Daten, spielt danach 0001–0010 frisch ein).
 
 > **WICHTIG — Grants nach `db reset`:** Ein `db reset` erstellt das `public`-Schema neu und entfernt
 > dabei die Standard-Grants, die Supabase sonst mitbringt. Ohne sie können `anon`/`authenticated`/
@@ -38,7 +39,7 @@ bunx supabase db push                            # fragt nach dem DB-Passwort
 > Migration **`0009_grants.sql`** stellt die Grants wieder her und läuft bei `db push`/`db reset`
 > automatisch mit — sie muss vorhanden sein.
 
-**Alternative — SQL-Editor im Dashboard:** Migrationen `0001` … `0009` einzeln in dieser Reihenfolge
+**Alternative — SQL-Editor im Dashboard:** Migrationen `0001` … `0010` einzeln in dieser Reihenfolge
 einfügen und ausführen (Rolle des SQL-Editors ggf. auf `postgres` stellen).
 
 ## 3. Edge Functions deployen
