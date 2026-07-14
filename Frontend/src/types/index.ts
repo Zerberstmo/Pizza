@@ -113,6 +113,7 @@ export type OrderStatus = "eingegangen" | "in_arbeit" | "fertig" | "abgeholt" | 
 
 export interface OrderRow {
   id: string;
+  publicToken: string;
   items: CartItem[];
   total: number;
   serviceMode: ServiceMode;

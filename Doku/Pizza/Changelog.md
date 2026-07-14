@@ -6,6 +6,12 @@
 
 ## 2026-07-14
 
+- **QR/Status aus „Meine Bestellungen" erneut öffnen:** Klick auf eine Bestellung öffnet ein
+  Overlay-Fenster (`OrderQrModal`) mit QR-Code, „Status verfolgen"-Link, Status, Abholzeit, Pizza-Liste
+  und Betrag — bisher war der QR nur direkt nach dem Bestellen sichtbar. `OrderRow` mappt jetzt
+  `publicToken`; die Seite lädt `ingredients`+`sauces` und löst Zutatennamen via `buildLabels`
+  (`lib/order-labels.ts`, getestet) + `describeItem` auf. Modal schließt per X/Backdrop/Escape.
+  Reines Frontend, keine Migration.
 - **Zutaten bearbeiten + Kategorie „Sonstiges":** Admin kann bestehende Zutaten jetzt bearbeiten
   (Stift-Icon je Karte → gemeinsames Add-/Edit-Formular; `id` und Verfügbar-Status bleiben erhalten).
   Das Kategorie-Dropdown enthält ein festes Grundset inkl. **„Sonstiges"** (`BASE_CATEGORIES`) plus die
