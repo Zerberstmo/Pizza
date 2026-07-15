@@ -8,10 +8,10 @@ const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 interface DigestOrder {
   pickupTime: string; customerName: string; customerPhone: string;
-  items: { pizzaName: string }[]; total: number;
+  items: { pizzaName: string; quantity?: number }[]; total: number;
   serviceMode: "dinein" | "takeaway"; notes: string;
 }
-interface PrepItem { ingredientIds: string[]; sauceId?: string }
+interface PrepItem { ingredientIds: string[]; sauceId?: string; quantity?: number }
 interface PrepOrder { items: PrepItem[] }
 
 function euro(n: number): string {
@@ -24,13 +24,13 @@ function formatDigest(orders: DigestOrder[], dateLabel: string): string {
   const countLabel = `${orders.length} ${orders.length === 1 ? "Bestellung" : "Bestellungen"}`;
   const header = `🍕 Abholungen heute, ${dateLabel}\n${countLabel} · gesamt ${euro(sum)}`;
   const blocks = orders.map((o) => {
-    const pc = o.items.length;
+    const pc = o.items.reduce((s, it) => s + (it.quantity ?? 1), 0);
     const pizzaLabel = `${pc} ${pc === 1 ? "Pizza" : "Pizzen"}`;
     const service = o.serviceMode === "dinein" ? "Vor Ort" : "Abholen";
     const lines = [
       `${o.pickupTime} · ${o.customerName} · ${o.customerPhone}`,
       `  ${pizzaLabel} · ${euro(o.total)} · ${service}`,
-      ...o.items.map((it) => `  • ${it.pizzaName}`),
+      ...o.items.map((it) => `  • ${it.pizzaName}${(it.quantity ?? 1) > 1 ? ` × ${it.quantity}` : ""}`),
     ];
     if (o.notes.trim()) lines.push(`  Notiz: ${o.notes.trim()}`);
     return lines.join("\n");
@@ -51,9 +51,10 @@ function formatPrepList(
   const sau: Record<string, number> = {};
   for (const o of orders) {
     for (const it of o.items) {
-      doughCount++;
-      for (const id of it.ingredientIds) ing[id] = (ing[id] ?? 0) + 1;
-      if (it.sauceId) sau[it.sauceId] = (sau[it.sauceId] ?? 0) + 1;
+      const qty = it.quantity ?? 1;
+      doughCount += qty;
+      for (const id of it.ingredientIds) ing[id] = (ing[id] ?? 0) + qty;
+      if (it.sauceId) sau[it.sauceId] = (sau[it.sauceId] ?? 0) + qty;
     }
   }
   const section = (title: string, counts: Record<string, number>, names: Record<string, string>): string => {
