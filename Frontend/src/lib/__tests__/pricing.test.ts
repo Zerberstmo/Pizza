@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { formatPrice, computeSubtotal, computeDiscount, computeTotal, validateVoucher } from "@/lib/pricing";
+import { formatPrice, computeSubtotal, computeDiscount, computeTotal, validateVoucher, clampQty, cartQuantity } from "@/lib/pricing";
 import type { VoucherDef } from "@/types";
 
 const percent: VoucherDef = { id: "1", name: "P", code: "WELCOME10", type: "percent", value: 10, expiresAt: "2999-01-01", active: true, maxUses: 0, uses: 0 };
@@ -34,5 +34,25 @@ describe("pricing", () => {
   it("validateVoucher: maxUses 0 = unbegrenzt bleibt gültig trotz uses", () => {
     const unlimited = { ...percent, maxUses: 0, uses: 999 };
     expect(validateVoucher("WELCOME10", [unlimited], new Date("2025-01-01")).ok).toBe(true);
+  });
+});
+
+describe("clampQty", () => {
+  it("klemmt in den Bereich [1,20] und rundet ab", () => {
+    expect(clampQty(0)).toBe(1);
+    expect(clampQty(-5)).toBe(1);
+    expect(clampQty(3.9)).toBe(3);
+    expect(clampQty(25)).toBe(20);
+  });
+});
+
+describe("cartQuantity", () => {
+  it("summiert quantity, fehlend zählt als 1", () => {
+    expect(cartQuantity([{ quantity: 2 }, { quantity: 3 }])).toBe(5);
+    expect(cartQuantity([{}, { quantity: 4 }])).toBe(5);
+    expect(cartQuantity([])).toBe(0);
+  });
+  it("computeSubtotal mit Gesamtmenge", () => {
+    expect(computeSubtotal(cartQuantity([{ quantity: 2 }, { quantity: 1 }]))).toBe(30);
   });
 });
