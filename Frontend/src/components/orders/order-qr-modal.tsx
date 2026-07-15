@@ -1,7 +1,8 @@
 import type React from "react";
 import { useEffect } from "react";
 import { motion } from "motion/react";
-import { X } from "lucide-react";
+import { useNavigate } from "react-router";
+import { X, RotateCcw } from "lucide-react";
 import type { OrderRow } from "@/types";
 import { describeItem } from "@/lib/public-order";
 import { formatPrice } from "@/lib/pricing";
@@ -10,6 +11,8 @@ import { QrCode } from "@/components/common/qr-code";
 import { OrderStatusBadge } from "@/components/common/order-status-badge";
 import { PizzaSVG } from "@/components/pizza/pizza-svg";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { useCart } from "@/hooks/use-cart";
 
 // Overlay-Modal: zeigt QR + Status-Link + Details einer bereits getätigten Bestellung.
 // Rein darstellend — order + labels kommen als Props.
@@ -18,6 +21,17 @@ export function OrderQrModal({ order, labels, onClose }: {
   labels: Record<string, string>;
   onClose: () => void;
 }): React.ReactElement {
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
+
+  // Alle (Pizza-)Positionen zurück in den Warenkorb legen → Checkout.
+  // (Sonderartikel existieren noch nicht; sobald CartItem ein `kind` bekommt, hier ausschließen.)
+  const reorder = () => {
+    order.items.forEach((item) => addToCart(item.pizzaName, item.ingredientIds, item.sauceId));
+    onClose();
+    navigate("/warenkorb");
+  };
+
   // Escape schließt das Modal.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -81,6 +95,10 @@ export function OrderQrModal({ order, labels, onClose }: {
           <span>Gesamt (bar)</span>
           <span className="text-primary">{formatPrice(order.total)}</span>
         </div>
+
+        <Button className="w-full gap-2" onClick={reorder}>
+          <RotateCcw size={15} /> Erneut bestellen
+        </Button>
       </motion.div>
     </div>
   );
