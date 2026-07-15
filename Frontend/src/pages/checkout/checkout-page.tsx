@@ -2,13 +2,13 @@ import type React from "react";
 import { useState } from "react";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router";
-import { ArrowLeft, X, Plus, ChefHat, Phone, Calendar, Clock, FileText, Ticket, Check, AlertCircle } from "lucide-react";
+import { ArrowLeft, X, Plus, Minus, ChefHat, Phone, Calendar, Clock, FileText, Ticket, Check, AlertCircle } from "lucide-react";
 import { getConfig, getIngredients, getVouchers, getSauces, createOrder } from "@/lib/data/store";
 import { useAsync } from "@/hooks/use-async";
 import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/hooks/use-cart";
 import { cn } from "@/lib/utils";
-import { BASE_PRICE, formatPrice, computeSubtotal, computeDiscount, computeTotal, validateVoucher } from "@/lib/pricing";
+import { BASE_PRICE, formatPrice, computeSubtotal, computeDiscount, computeTotal, validateVoucher, cartQuantity } from "@/lib/pricing";
 import { getSelectableDates, getAvailableTimes, formatDateLabel, availableServiceModes } from "@/lib/slots";
 import { resolveSauce } from "@/lib/sauces";
 import type { Customer, ServiceMode, VoucherDef } from "@/types";
@@ -25,7 +25,7 @@ interface VoucherMessage { ok: boolean; text: string; }
 // Warenkorb/Checkout. Portiert aus App.tsx:777-1020; Slots aus Vorlaufzeit-Config,
 // Gutschein/Preise über lib/pricing, Bestellung über createOrder.
 export default function CheckoutPage(): React.ReactElement {
-  const { cart, removeFromCart, clearCart } = useCart();
+  const { cart, removeFromCart, clearCart, increment, decrement } = useCart();
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const cfg = useAsync(getConfig);
@@ -59,7 +59,7 @@ export default function CheckoutPage(): React.ReactElement {
   // Default-Modus setzen, sobald verfügbar (z. B. nach dem Laden der Config)
   if (modes.length > 0 && !serviceMode) setServiceMode(modes[0]);
 
-  const subtotal = computeSubtotal(cart.length);
+  const subtotal = computeSubtotal(cartQuantity(cart));
   const discount = computeDiscount(subtotal, appliedVoucher);
   const total = computeTotal(subtotal, discount);
 
@@ -127,7 +127,7 @@ export default function CheckoutPage(): React.ReactElement {
         </Button>
         <div>
           <h2 className="font-bold leading-tight">Warenkorb</h2>
-          <p className="text-xs text-muted-foreground">{cart.length} Pizza{cart.length !== 1 ? "en" : ""}</p>
+          <p className="text-xs text-muted-foreground">{cartQuantity(cart)} Pizza{cartQuantity(cart) !== 1 ? "en" : ""}</p>
         </div>
       </div>
 
@@ -149,10 +149,19 @@ export default function CheckoutPage(): React.ReactElement {
                       {[sauceName(item.sauceId), ...item.ingredientIds.map(ingName)].filter(Boolean).join(", ") || "Käse & Sauce"}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className="font-black text-sm text-primary">10 €</span>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Weniger"
+                      disabled={item.quantity <= 1} onClick={() => decrement(item.cartId)}>
+                      <Minus size={13} />
+                    </Button>
+                    <span className="w-5 text-center text-sm font-bold tabular-nums">{item.quantity}</span>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Mehr"
+                      disabled={item.quantity >= 20} onClick={() => increment(item.cartId)}>
+                      <Plus size={13} />
+                    </Button>
+                    <span className="font-black text-sm text-primary w-14 text-right">{formatPrice(BASE_PRICE * item.quantity)}</span>
                     <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                      onClick={() => removeFromCart(item.cartId)}>
+                      onClick={() => removeFromCart(item.cartId)} aria-label="Entfernen">
                       <X size={13} />
                     </Button>
                   </div>
@@ -297,8 +306,8 @@ export default function CheckoutPage(): React.ReactElement {
           <CardContent className="pt-5 space-y-2 text-sm">
             {cart.map((item) => (
               <div key={item.cartId} className="flex justify-between text-muted-foreground">
-                <span>{item.pizzaName}</span>
-                <span>{formatPrice(BASE_PRICE)}</span>
+                <span>{item.pizzaName}{item.quantity > 1 ? ` × ${item.quantity}` : ""}</span>
+                <span>{formatPrice(BASE_PRICE * item.quantity)}</span>
               </div>
             ))}
             {appliedVoucher?.type === "ingredient" && appliedVoucher.ingredientName && (
@@ -326,7 +335,7 @@ export default function CheckoutPage(): React.ReactElement {
         {orderError && <p className="text-destructive text-xs text-center mb-2">{orderError}</p>}
         <Button size="lg" className="w-full font-black text-base shadow-2xl shadow-primary/25"
           disabled={!canOrder || noDates || noService} onClick={placeOrder}>
-          {cart.length} Pizza{cart.length !== 1 ? "en" : ""} {serviceMode === "dinein" ? "vor Ort" : "abholen"} — {formatPrice(total)}
+          {cartQuantity(cart)} Pizza{cartQuantity(cart) !== 1 ? "en" : ""} {serviceMode === "dinein" ? "vor Ort" : "abholen"} — {formatPrice(total)}
         </Button>
       </div>
     </div>
