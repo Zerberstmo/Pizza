@@ -4,6 +4,13 @@
 
 <!-- Neue Einträge oben einfügen -->
 
+## 2026-07-15
+
+- **Erneut bestellen (1-Tap):** Im Bestell-Detail-Fenster („Meine Bestellungen" → Bestellung antippen)
+  legt der Button „Erneut bestellen" alle Positionen der Bestellung zurück in den Warenkorb und führt
+  zum Checkout (`OrderQrModal` → `addToCart` → `/warenkorb`). Anhängen an den bestehenden Warenkorb,
+  kein Bestätigungsdialog. Reines Frontend.
+
 ## 2026-07-14
 
 - **QR/Status aus „Meine Bestellungen" erneut öffnen:** Klick auf eine Bestellung öffnet ein
