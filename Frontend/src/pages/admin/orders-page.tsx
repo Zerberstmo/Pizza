@@ -4,7 +4,7 @@ import { getOrders, updateOrderStatus } from "@/lib/data/store";
 import { useAsync } from "@/hooks/use-async";
 import { useOrdersRealtime } from "@/hooks/use-orders-realtime";
 import { nextStatus, isActive, statusLabel } from "@/lib/order-status";
-import { formatPrice } from "@/lib/pricing";
+import { formatPrice, cartQuantity } from "@/lib/pricing";
 import type { OrderRow, OrderStatus } from "@/types";
 import { AsyncBoundary } from "@/components/common/async-boundary";
 import { OrderStatusBadge } from "@/components/common/order-status-badge";
@@ -53,7 +53,7 @@ export default function OrdersPage(): React.ReactElement {
                         <OrderStatusBadge status={o.status} />
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        {o.serviceMode === "dinein" ? "Vor Ort" : "Abholung"} · {o.pickupDate} · {o.pickupTime} Uhr · {o.items.length} Pizza{o.items.length !== 1 ? "en" : ""} · {formatPrice(o.total)}
+                        {o.serviceMode === "dinein" ? "Vor Ort" : "Abholung"} · {o.pickupDate} · {o.pickupTime} Uhr · {cartQuantity(o.items)} Pizza{cartQuantity(o.items) !== 1 ? "en" : ""} · {formatPrice(o.total)}
                       </p>
                       {o.notes && <p className="text-xs text-foreground/70">Bemerkung: {o.notes}</p>}
                       {isActive(o.status) && (

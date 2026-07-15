@@ -5,7 +5,7 @@ import { useNavigate } from "react-router";
 import { X, RotateCcw } from "lucide-react";
 import type { OrderRow } from "@/types";
 import { describeItem } from "@/lib/public-order";
-import { formatPrice } from "@/lib/pricing";
+import { formatPrice, BASE_PRICE } from "@/lib/pricing";
 import { formatDateLabel } from "@/lib/slots";
 import { QrCode } from "@/components/common/qr-code";
 import { OrderStatusBadge } from "@/components/common/order-status-badge";
@@ -27,7 +27,7 @@ export function OrderQrModal({ order, labels, onClose }: {
   // Alle (Pizza-)Positionen zurück in den Warenkorb legen → Checkout.
   // (Sonderartikel existieren noch nicht; sobald CartItem ein `kind` bekommt, hier ausschließen.)
   const reorder = () => {
-    order.items.forEach((item) => addToCart(item.pizzaName, item.ingredientIds, item.sauceId));
+    order.items.forEach((item) => addToCart(item.pizzaName, item.ingredientIds, item.sauceId, item.quantity ?? 1));
     onClose();
     navigate("/warenkorb");
   };
@@ -80,10 +80,10 @@ export function OrderQrModal({ order, labels, onClose }: {
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 shrink-0"><PizzaSVG selected={item.ingredientIds} /></div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold">{item.pizzaName}</p>
+                  <p className="font-semibold">{item.pizzaName}{(item.quantity ?? 1) > 1 ? ` × ${item.quantity}` : ""}</p>
                   <p className="text-xs text-muted-foreground truncate">{describeItem(item, labels)}</p>
                 </div>
-                <span className="text-primary font-bold shrink-0">10 €</span>
+                <span className="text-primary font-bold shrink-0">{formatPrice(BASE_PRICE * (item.quantity ?? 1))}</span>
               </div>
               {i < order.items.length - 1 && <Separator className="mt-3" />}
             </div>

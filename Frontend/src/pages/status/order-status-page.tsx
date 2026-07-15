@@ -4,7 +4,7 @@ import { useParams } from "react-router";
 import { getOrderStatus } from "@/lib/data/store";
 import { describeItem } from "@/lib/public-order";
 import { isActive } from "@/lib/order-status";
-import { formatPrice } from "@/lib/pricing";
+import { formatPrice, BASE_PRICE } from "@/lib/pricing";
 import { formatDateLabel } from "@/lib/slots";
 import { OrderStatusBadge } from "@/components/common/order-status-badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -68,10 +68,10 @@ export default function OrderStatusPage(): React.ReactElement {
               <div key={item.cartId ?? i}>
                 <div className="flex justify-between items-start gap-3">
                   <div className="min-w-0">
-                    <p className="font-semibold">{item.pizzaName}</p>
+                    <p className="font-semibold">{item.pizzaName}{(item.quantity ?? 1) > 1 ? ` × ${item.quantity}` : ""}</p>
                     <p className="text-xs text-muted-foreground truncate">{describeItem(item, status.labels)}</p>
                   </div>
-                  <span className="text-primary font-bold shrink-0">10 €</span>
+                  <span className="text-primary font-bold shrink-0">{formatPrice(BASE_PRICE * (item.quantity ?? 1))}</span>
                 </div>
                 {i < status.items.length - 1 && <Separator className="mt-3" />}
               </div>
