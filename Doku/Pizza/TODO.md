@@ -20,6 +20,7 @@
 | P3 | Telefon-Validierung im Checkout (ursprünglich für Teil-B angedacht, noch offen) | offen | Teil-B1 |
 | P2 | ~~Echter, scanbarer QR → öffentliche Bestell-Status-Seite~~ | erledigt (Migration 0010 `public_token`+RPC, `qrcode.react`, Route `/bestellung/:token`, Auto-Refresh 20s; ADR-0007). Betreiber: `bunx supabase db push` für 0010 | Frontend-Deployment |
 | P3 | ~~Pizza-Favicon~~ | erledigt (`Frontend/public/favicon.svg`, Markenorange, in `index.html` verlinkt + `theme-color`) | Frontend-Deployment |
+| P3 | ~~Erneut bestellen (1-Tap)~~ | erledigt (2026-07-15) — Button im `OrderQrModal` legt Positionen zurück in den Warenkorb → Checkout | Frontend-Deployment |
 | P3 | ~~QR/Status aus „Meine Bestellungen" erneut öffnen~~ | erledigt (2026-07-14) — `OrderQrModal` (Overlay, X/Backdrop/Escape), `publicToken` in `OrderRow`, `buildLabels` | Frontend-Deployment |
 | P3 | **Kunden-Erinnerung ~15 Uhr am Abholtag** — GEPARKT (2026-07-14): Auslöser trivial (15-Uhr-Cron + Bestellungen mit Abholung=heute). Blocker = Kanal (CallMeBot geht nicht für Kunden). Optionen analysiert: E-Mail (gratis, leichtester Start) / SMS-Twilio (~7–10 ct) / WhatsApp-Business-API (viel Setup). Bei Wiederaufnahme erst Kanal wählen. | geparkt | Teil-B3 |
 | P3 | ~~Zutaten bearbeiten~~ | erledigt (2026-07-14) — Stift-Icon/gemeinsames Formular, `id`+`available` bleiben | — |
