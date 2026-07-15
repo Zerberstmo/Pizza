@@ -2,7 +2,7 @@
 export interface DashboardOrder {
   total: number;
   status: string;
-  items: { pizzaName: string; ingredientIds: string[] }[];
+  items: { pizzaName: string; ingredientIds: string[]; quantity?: number }[];
 }
 
 export interface DashboardStats {
@@ -27,8 +27,9 @@ export function computeDashboard(
   const ingCounts: Record<string, number> = {};
   for (const o of active) {
     for (const it of o.items) {
-      pizzaCounts[it.pizzaName] = (pizzaCounts[it.pizzaName] ?? 0) + 1;
-      for (const id of it.ingredientIds) ingCounts[id] = (ingCounts[id] ?? 0) + 1;
+      const qty = it.quantity ?? 1;
+      pizzaCounts[it.pizzaName] = (pizzaCounts[it.pizzaName] ?? 0) + qty;
+      for (const id of it.ingredientIds) ingCounts[id] = (ingCounts[id] ?? 0) + qty;
     }
   }
 
