@@ -1,6 +1,6 @@
 import type { AppConfig, IngredientItem, NewOrder, NotifyConfig, OrderData, OrderRow, OrderStatus, PizzaTemplate, VoucherDef, Sauce, User, PublicOrderStatus } from "@/types";
 import { TEMPLATES } from "./seed";
-import { computeSubtotal, computeDiscount, computeTotal, validateVoucher } from "@/lib/pricing";
+import { computeSubtotal, computeDiscount, computeTotal, validateVoucher, cartQuantity } from "@/lib/pricing";
 import { computeDashboard, type DashboardStats } from "@/lib/dashboard";
 import { supabase } from "@/lib/supabase";
 import { rowToPublicStatus } from "@/lib/public-order";
@@ -71,7 +71,7 @@ export async function createOrder(input: NewOrder): Promise<OrderData> {
   const applied = input.voucherCode
     ? (() => { const r = validateVoucher(input.voucherCode!, vouchers, new Date()); return r.ok ? r.voucher : null; })()
     : null;
-  const subtotal = computeSubtotal(input.items.length);
+  const subtotal = computeSubtotal(cartQuantity(input.items));
   const discount = computeDiscount(subtotal, applied);
   const { data: sess } = await supabase.auth.getUser();
   const publicToken = crypto.randomUUID();
