@@ -3,12 +3,13 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router";
 import { ArrowLeft, X, Plus, Minus, ChefHat, Phone, Calendar, Clock, FileText, Ticket, Check, AlertCircle } from "lucide-react";
-import { getConfig, getIngredients, getVouchers, getSauces, createOrder } from "@/lib/data/store";
+import { getConfig, getIngredients, getVouchers, getSauces, createOrder, unlockSpecialItem } from "@/lib/data/store";
 import { useAsync } from "@/hooks/use-async";
 import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/hooks/use-cart";
 import { cn } from "@/lib/utils";
-import { BASE_PRICE, formatPrice, computeSubtotal, computeDiscount, computeTotal, validateVoucher, cartQuantity } from "@/lib/pricing";
+import { formatPrice, computeDiscount, computeTotal, validateVoucher } from "@/lib/pricing";
+import { isSpecialItem, itemLineTotal, cartSubtotal, pizzaQuantity } from "@/lib/cart-items";
 import { getSelectableDates, getAvailableTimes, formatDateLabel, availableServiceModes } from "@/lib/slots";
 import { resolveSauce } from "@/lib/sauces";
 import type { Customer, ServiceMode, VoucherDef } from "@/types";
@@ -25,7 +26,7 @@ interface VoucherMessage { ok: boolean; text: string; }
 // Warenkorb/Checkout. Portiert aus App.tsx:777-1020; Slots aus Vorlaufzeit-Config,
 // Gutschein/Preise über lib/pricing, Bestellung über createOrder.
 export default function CheckoutPage(): React.ReactElement {
-  const { cart, removeFromCart, clearCart, increment, decrement } = useCart();
+  const { cart, removeFromCart, clearCart, increment, decrement, addSpecial, setSpecialQty } = useCart();
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const cfg = useAsync(getConfig);
@@ -59,7 +60,7 @@ export default function CheckoutPage(): React.ReactElement {
   // Default-Modus setzen, sobald verfügbar (z. B. nach dem Laden der Config)
   if (modes.length > 0 && !serviceMode) setServiceMode(modes[0]);
 
-  const subtotal = computeSubtotal(cartQuantity(cart));
+  const subtotal = cartSubtotal(cart);
   const discount = computeDiscount(subtotal, appliedVoucher);
   const total = computeTotal(subtotal, discount);
 
@@ -68,6 +69,18 @@ export default function CheckoutPage(): React.ReactElement {
     pickupDate && pickupTime && cart.length > 0 && !!serviceMode;
 
   const applyVoucher = async () => {
+    // Zuerst prüfen, ob der Code ein freigeschalteter Sonderartikel ist.
+    try {
+      const special = await unlockSpecialItem(voucherCode.trim());
+      if (special) {
+        addSpecial(special);
+        setVoucherMessage({ ok: true, text: `${special.emoji} ${special.name} freigeschaltet!` });
+        setVoucherCode("");
+        return;
+      }
+    } catch {
+      // Netzwerk-/RPC-Fehler: still weiter zum normalen Gutschein-Flow.
+    }
     const vouchers = await getVouchers();
     const result = validateVoucher(voucherCode, vouchers, new Date());
     if (result.ok) {
@@ -127,7 +140,7 @@ export default function CheckoutPage(): React.ReactElement {
         </Button>
         <div>
           <h2 className="font-bold leading-tight">Warenkorb</h2>
-          <p className="text-xs text-muted-foreground">{cartQuantity(cart)} Pizza{cartQuantity(cart) !== 1 ? "en" : ""}</p>
+          <p className="text-xs text-muted-foreground">{pizzaQuantity(cart)} Pizza{pizzaQuantity(cart) !== 1 ? "en" : ""}</p>
         </div>
       </div>
 
@@ -140,26 +153,32 @@ export default function CheckoutPage(): React.ReactElement {
               <div key={item.cartId}>
                 {i > 0 && <Separator className="mb-3" />}
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 shrink-0">
-                    <PizzaSVG selected={item.ingredientIds} />
+                  <div className="w-12 h-12 shrink-0 flex items-center justify-center">
+                    {isSpecialItem(item)
+                      ? <span className="text-2xl">{item.emoji}</span>
+                      : <PizzaSVG selected={item.ingredientIds} />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm">{item.pizzaName}</p>
+                    <p className="font-semibold text-sm">{isSpecialItem(item) ? item.name : item.pizzaName}</p>
                     <p className="text-xs text-muted-foreground truncate">
-                      {[sauceName(item.sauceId), ...item.ingredientIds.map(ingName)].filter(Boolean).join(", ") || "Käse & Sauce"}
+                      {isSpecialItem(item)
+                        ? "Sonderartikel"
+                        : [sauceName(item.sauceId), ...item.ingredientIds.map(ingName)].filter(Boolean).join(", ") || "Käse & Sauce"}
                     </p>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
                     <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Weniger"
-                      disabled={item.quantity <= 1} onClick={() => decrement(item.cartId)}>
+                      disabled={item.quantity <= 1}
+                      onClick={() => isSpecialItem(item) ? setSpecialQty(item.cartId, item.quantity - 1) : decrement(item.cartId)}>
                       <Minus size={13} />
                     </Button>
                     <span className="w-5 text-center text-sm font-bold tabular-nums">{item.quantity}</span>
                     <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Mehr"
-                      disabled={item.quantity >= 20} onClick={() => increment(item.cartId)}>
+                      disabled={item.quantity >= (isSpecialItem(item) ? 99 : 20)}
+                      onClick={() => isSpecialItem(item) ? setSpecialQty(item.cartId, item.quantity + 1) : increment(item.cartId)}>
                       <Plus size={13} />
                     </Button>
-                    <span className="font-black text-sm text-primary w-14 text-right">{formatPrice(BASE_PRICE * item.quantity)}</span>
+                    <span className="font-black text-sm text-primary w-14 text-right">{formatPrice(itemLineTotal(item))}</span>
                     <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive"
                       onClick={() => removeFromCart(item.cartId)} aria-label="Entfernen">
                       <X size={13} />
@@ -306,8 +325,8 @@ export default function CheckoutPage(): React.ReactElement {
           <CardContent className="pt-5 space-y-2 text-sm">
             {cart.map((item) => (
               <div key={item.cartId} className="flex justify-between text-muted-foreground">
-                <span>{item.pizzaName}{item.quantity > 1 ? ` × ${item.quantity}` : ""}</span>
-                <span>{formatPrice(BASE_PRICE * item.quantity)}</span>
+                <span>{isSpecialItem(item) ? item.name : item.pizzaName}{item.quantity > 1 ? ` × ${item.quantity}` : ""}</span>
+                <span>{formatPrice(itemLineTotal(item))}</span>
               </div>
             ))}
             {appliedVoucher?.type === "ingredient" && appliedVoucher.ingredientName && (
@@ -335,7 +354,7 @@ export default function CheckoutPage(): React.ReactElement {
         {orderError && <p className="text-destructive text-xs text-center mb-2">{orderError}</p>}
         <Button size="lg" className="w-full font-black text-base shadow-2xl shadow-primary/25"
           disabled={!canOrder || noDates || noService} onClick={placeOrder}>
-          {cartQuantity(cart)} Pizza{cartQuantity(cart) !== 1 ? "en" : ""} {serviceMode === "dinein" ? "vor Ort" : "abholen"} — {formatPrice(total)}
+          {pizzaQuantity(cart)} Pizza{pizzaQuantity(cart) !== 1 ? "en" : ""} {serviceMode === "dinein" ? "vor Ort" : "abholen"} — {formatPrice(total)}
         </Button>
       </div>
     </div>
