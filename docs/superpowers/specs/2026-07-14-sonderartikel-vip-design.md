@@ -3,7 +3,21 @@
 **Datum:** 2026-07-14
 **Status:** freigegeben (Brainstorming) — Gesamt-Design, Umsetzung in Phasen
 **Kontext:** Pizza-Vorbestell-App (React/Vite/Supabase). Frontend live auf Vercel. Bestehende Preis-/
-Bestell-Härtung: Trigger `validate_order` rechnet serverseitig `total = 10 € × Anzahl Items`.
+Bestell-Härtung: Trigger `validate_order` rechnet serverseitig den Preis pro Position.
+
+> **Update 2026-07-16 (Reconciliation):** In einer neuen Brainstorming-Session wurde dieses Feature
+> versehentlich neu durchdacht; ein vereinfachter Entwurf (ein Item, ein fester Preis, kein
+> kontogebundener Zugang) wurde **verworfen** zugunsten dieses bestehenden Designs. Bestätigt:
+> **kontogebundener Zugang** (Admin schaltet einzelne Kunden frei), **pro Kunde individueller Preis**
+> und **Mengen-Rabatt/Staffeln**, Code-Eingabe im **Gutschein-Feld**. Zusätzlich festgelegt:
+> (a) **Diskretion nach Abholung = JA** (Abschnitt „Diskretion beim Kunden nach Abholung" gilt);
+> (b) **Umsetzung Phase 1 + Phase 2 gemeinsam** (Fundament/Bestellung **und** Admin-Verwaltung in einem
+> Plan), Phase-3-Ausschlusslogik (Dashboard/Digest) mit eingezogen.
+>
+> **Achtung — Basiswert veraltet:** Seit „Mengen im Warenkorb" (2026-07-15, Migration `0011`) rechnet
+> `validate_order` NICHT mehr `10 € × Anzahl Items`, sondern `10 € × Σ(Menge)` pro Pizza-Position
+> (Menge je Position geklemmt [1,20]). `CartItem` hat bereits ein Pflichtfeld `quantity: number`. Der
+> neue `validate_order` dieses Features (Sonderartikel-Preise) muss auf `0011` aufsetzen, nicht auf `0007`.
 
 ## Ziel
 
