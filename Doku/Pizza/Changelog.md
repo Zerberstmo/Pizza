@@ -4,6 +4,20 @@
 
 <!-- Neue Einträge oben einfügen -->
 
+## 2026-07-16
+
+- **Mengen im Warenkorb:** Warenkorb-Positionen haben jetzt eine Menge; identische Pizzen (gleicher
+  Name + gleiche Zutaten + gleiche Soße) verschmelzen zu einer Zeile mit Stepper (`−`/`+`, geklemmt
+  auf 1–20). Preis, Header-/Button-Zähler, Bestätigung, Status-Seite, „Meine Bestellungen"-Modal und
+  Admin-Bestellungen zeigen/rechnen die Menge; „Erneut bestellen" reicht die Menge durch.
+  Dashboard-Aggregation und der WhatsApp-Digest (Tages- + Vorbereitungsliste, inkl. Deno-Edge-Copy)
+  gewichten mit der Menge; Alt-Bestellungen ohne Menge zählen als 1. Serverseitige Härtung: Trigger
+  `validate_order` (Migration `0011`) rechnet den Preis aus der Summe der abgesicherten
+  Positions-Mengen (fehlend→1, geklemmt [1,20]) statt aus der Positionsanzahl — schützt vor
+  Preis-Manipulation via JSON. Reine Logik mit bun:test verifiziert (83 Tests grün, Build grün).
+  Betreiber führt aus: `bunx supabase db push` (Migration `0011`) + `bunx supabase functions deploy
+  daily-digest`.
+
 ## 2026-07-15
 
 - **Erneut bestellen (1-Tap):** Im Bestell-Detail-Fenster („Meine Bestellungen" → Bestellung antippen)
