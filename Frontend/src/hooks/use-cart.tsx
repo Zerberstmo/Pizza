@@ -1,11 +1,12 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import type { CartItem } from "@/types";
-import { clampQty, cartQuantity } from "@/lib/pricing";
+import type { CartItem, PizzaCartItem } from "@/types";
+import { clampQty } from "@/lib/pricing";
+import { addSpecialTo, setSpecialQtyIn, isSpecialItem, pizzaQuantity, type SpecialInput } from "@/lib/cart-items";
 
 const uid = () => Math.random().toString(36).slice(2, 9);
 const KEY = "pizza-cart";
 
-const cartKey = (i: Pick<CartItem, "pizzaName" | "ingredientIds" | "sauceId">) =>
+const cartKey = (i: Pick<PizzaCartItem, "pizzaName" | "ingredientIds" | "sauceId">) =>
   `${i.pizzaName}|${[...i.ingredientIds].sort().join(",")}|${i.sauceId ?? ""}`;
 
 interface CartContextValue {
@@ -15,6 +16,8 @@ interface CartContextValue {
   setQuantity(cartId: string, n: number): void;
   increment(cartId: string): void;
   decrement(cartId: string): void;
+  addSpecial(input: SpecialInput): void;
+  setSpecialQty(cartId: string, n: number): void;
   clearCart(): void;
   count: number;
 }
@@ -24,8 +27,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>(() => {
     const raw = localStorage.getItem(KEY);
     if (!raw) return [];
-    // Abwärtskompatibel: Alt-Einträge ohne quantity → 1.
-    return (JSON.parse(raw) as CartItem[]).map((i) => ({ ...i, quantity: clampQty(i.quantity ?? 1) }));
+    // Abwärtskompatibel: Alt-Einträge ohne quantity → 1. Specials bleiben unangetastet.
+    return (JSON.parse(raw) as CartItem[]).map((i) =>
+      i.kind === "special" ? i : { ...i, quantity: clampQty(i.quantity ?? 1) }
+    );
   });
   useEffect(() => {
     localStorage.setItem(KEY, JSON.stringify(cart));
@@ -34,7 +39,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const addToCart = (pizzaName: string, ingredientIds: string[], sauceId?: string, qty = 1) =>
     setCart((p) => {
       const key = cartKey({ pizzaName, ingredientIds, sauceId });
-      const idx = p.findIndex((x) => cartKey(x) === key);
+      const idx = p.findIndex((x) => !isSpecialItem(x) && cartKey(x) === key);
       if (idx >= 0) {
         const next = [...p];
         next[idx] = { ...next[idx], quantity: clampQty(next[idx].quantity + qty) };
@@ -50,11 +55,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setCart((p) => p.map((x) => (x.cartId === cartId ? { ...x, quantity: clampQty(x.quantity + 1) } : x)));
   const decrement = (cartId: string) =>
     setCart((p) => p.map((x) => (x.cartId === cartId ? { ...x, quantity: clampQty(x.quantity - 1) } : x)));
+  const addSpecial = (input: SpecialInput) => setCart((p) => addSpecialTo(p, input, uid()));
+  const setSpecialQty = (cartId: string, n: number) => setCart((p) => setSpecialQtyIn(p, cartId, n));
   const clearCart = () => setCart([]);
 
   return (
     <CartContext.Provider
-      value={{ cart, addToCart, removeFromCart, setQuantity, increment, decrement, clearCart, count: cartQuantity(cart) }}
+      value={{ cart, addToCart, removeFromCart, setQuantity, increment, decrement, addSpecial, setSpecialQty, clearCart, count: pizzaQuantity(cart) }}
     >
       {children}
     </CartContext.Provider>

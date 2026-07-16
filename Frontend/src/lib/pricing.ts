@@ -8,6 +8,12 @@ export function clampQty(n: number): number {
   return Math.max(1, Math.min(MAX_QTY, Math.floor(n)));
 }
 
+export const MAX_SPECIAL_QTY = 99;
+
+export function clampSpecialQty(n: number): number {
+  return Math.max(1, Math.min(MAX_SPECIAL_QTY, Math.floor(n)));
+}
+
 export function cartQuantity(items: { quantity?: number }[]): number {
   return items.reduce((s, i) => s + (i.quantity ?? 1), 0);
 }
