@@ -35,13 +35,33 @@ export interface Customer {
   phone: string;
 }
 
-export interface CartItem {
+export interface Tier {
+  min_qty: number;   // aufsteigend; enthält min_qty:1 als Basispreis
+  unit_price: number;
+}
+
+export interface PizzaCartItem {
   cartId: string;
+  kind?: "pizza"; // fehlend = Pizza (rückwärtskompatibel zu Alt-localStorage/Alt-Bestellungen)
   pizzaName: string;
   ingredientIds: string[];
   sauceId?: string;
   quantity: number; // immer >= 1, geklemmt auf [1, 20]
 }
+
+export interface SpecialCartItem {
+  cartId: string;
+  kind: "special";
+  specialItemId: string;
+  code: string;
+  name: string;
+  emoji: string;
+  tiers: Tier[];      // für Neuberechnung von lineTotal bei Mengenänderung
+  quantity: number;   // geklemmt auf [1, 99]
+  lineTotal: number;  // client-berechneter Anzeigepreis (NICHT autoritativ), persistiert
+}
+
+export type CartItem = PizzaCartItem | SpecialCartItem;
 
 export interface Hours {
   from: string;
@@ -142,4 +162,20 @@ export interface NotifyConfig {
   recipientPhone: string;
   callmebotApikey: string;
   enabled: boolean;
+}
+
+export interface SpecialItem {
+  id: string;
+  code: string;
+  name: string;
+  emoji: string;
+  active: boolean;
+}
+
+export interface SpecialGrant {
+  id: string;
+  itemId: string;
+  userId: string;
+  tiers: Tier[];
+  active: boolean;
 }
