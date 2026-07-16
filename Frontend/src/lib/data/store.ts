@@ -1,6 +1,8 @@
-import type { AppConfig, IngredientItem, NewOrder, NotifyConfig, OrderData, OrderRow, OrderStatus, PizzaTemplate, VoucherDef, Sauce, User, PublicOrderStatus } from "@/types";
+import type { AppConfig, IngredientItem, NewOrder, NotifyConfig, OrderData, OrderRow, OrderStatus, PizzaTemplate, VoucherDef, Sauce, User, PublicOrderStatus, SpecialItem, SpecialGrant } from "@/types";
+import type { SpecialInput } from "@/lib/cart-items";
 import { TEMPLATES } from "./seed";
-import { computeSubtotal, computeDiscount, computeTotal, validateVoucher, cartQuantity } from "@/lib/pricing";
+import { computeDiscount, computeTotal, validateVoucher } from "@/lib/pricing";
+import { cartSubtotal, redactPickedUpSpecials } from "@/lib/cart-items";
 import { computeDashboard, type DashboardStats } from "@/lib/dashboard";
 import { supabase } from "@/lib/supabase";
 import { rowToPublicStatus } from "@/lib/public-order";
@@ -71,7 +73,7 @@ export async function createOrder(input: NewOrder): Promise<OrderData> {
   const applied = input.voucherCode
     ? (() => { const r = validateVoucher(input.voucherCode!, vouchers, new Date()); return r.ok ? r.voucher : null; })()
     : null;
-  const subtotal = computeSubtotal(cartQuantity(input.items));
+  const subtotal = cartSubtotal(input.items);
   const discount = computeDiscount(subtotal, applied);
   const { data: sess } = await supabase.auth.getUser();
   const publicToken = crypto.randomUUID();
@@ -100,6 +102,47 @@ export async function getOrderStatus(token: string): Promise<PublicOrderStatus |
   if (error) throw error;
   const row = Array.isArray(data) ? data[0] : data;
   return row ? rowToPublicStatus(row) : null;
+}
+
+// ── Sonderartikel (VIP) ──
+export async function unlockSpecialItem(code: string): Promise<SpecialInput | null> {
+  const { data, error } = await supabase.rpc("unlock_special_item", { p_code: code });
+  if (error) throw error;
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!row) return null;
+  return { specialItemId: row.special_item_id, code, name: row.name, emoji: row.emoji, tiers: row.tiers ?? [] };
+}
+
+export async function getSpecialItems(): Promise<SpecialItem[]> {
+  const { data, error } = await supabase.from("special_items").select("*").order("created_at");
+  if (error) throw error;
+  return (data ?? []).map((r) => ({ id: r.id, code: r.code, name: r.name, emoji: r.emoji, active: r.active }));
+}
+export async function saveSpecialItem(item: SpecialItem): Promise<void> {
+  const { error } = await supabase.from("special_items").upsert({
+    id: item.id, code: item.code, name: item.name, emoji: item.emoji, active: item.active,
+  });
+  if (error) throw error;
+}
+export async function deleteSpecialItem(id: string): Promise<void> {
+  const { error } = await supabase.from("special_items").delete().eq("id", id);
+  if (error) throw error;
+}
+
+export async function getGrants(itemId: string): Promise<SpecialGrant[]> {
+  const { data, error } = await supabase.from("special_item_grants").select("*").eq("item_id", itemId);
+  if (error) throw error;
+  return (data ?? []).map((r) => ({ id: r.id, itemId: r.item_id, userId: r.user_id, tiers: r.tiers ?? [], active: r.active }));
+}
+export async function saveGrant(grant: SpecialGrant): Promise<void> {
+  const { error } = await supabase.from("special_item_grants").upsert({
+    id: grant.id, item_id: grant.itemId, user_id: grant.userId, tiers: grant.tiers, active: grant.active,
+  }, { onConflict: "item_id,user_id" });
+  if (error) throw error;
+}
+export async function deleteGrant(id: string): Promise<void> {
+  const { error } = await supabase.from("special_item_grants").delete().eq("id", id);
+  if (error) throw error;
 }
 
 // ── Nutzer/Profile → Supabase (`profiles`-Tabelle + Edge Function `admin-users`) ──
@@ -144,7 +187,7 @@ export async function getMyOrders(): Promise<OrderRow[]> {
   if (!uid) return [];
   const { data, error } = await supabase.from("orders").select("*").eq("user_id", uid).order("created_at", { ascending: false });
   if (error) throw error;
-  return (data ?? []).map(rowToOrder);
+  return redactPickedUpSpecials((data ?? []).map(rowToOrder));
 }
 
 export async function updateOrderStatus(id: string, status: OrderStatus): Promise<void> {

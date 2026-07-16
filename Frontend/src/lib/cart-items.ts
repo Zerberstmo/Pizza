@@ -1,4 +1,4 @@
-import type { CartItem, SpecialCartItem, Tier } from "@/types";
+import type { CartItem, SpecialCartItem, Tier, OrderRow } from "@/types";
 import { BASE_PRICE, clampSpecialQty } from "@/lib/pricing";
 import { priceForQty } from "@/lib/special-pricing";
 
@@ -53,4 +53,16 @@ export function setSpecialQtyIn(cart: CartItem[], cartId: string, n: number): Ca
     const quantity = clampSpecialQty(n);
     return { ...x, quantity, lineTotal: priceForQty(x.tiers, quantity) };
   });
+}
+
+// Kundenseitige Diskretion: nach Abholung Sonderartikel ausblenden; reine Special-Bestellung ganz entfernen.
+export function redactPickedUpSpecials(orders: OrderRow[]): OrderRow[] {
+  const out: OrderRow[] = [];
+  for (const o of orders) {
+    if (o.status !== "abgeholt") { out.push(o); continue; }
+    const items = o.items.filter((it) => !isSpecialItem(it));
+    if (items.length === 0) continue;
+    out.push({ ...o, items });
+  }
+  return out;
 }
