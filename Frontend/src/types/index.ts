@@ -40,6 +40,7 @@ export interface CartItem {
   pizzaName: string;
   ingredientIds: string[];
   sauceId?: string;
+  quantity: number; // immer >= 1, geklemmt auf [1, 20]
 }
 
 export interface Hours {

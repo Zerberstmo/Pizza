@@ -2,6 +2,16 @@ import type { VoucherDef } from "@/types";
 
 export const BASE_PRICE = 10.0;
 
+export const MAX_QTY = 20;
+
+export function clampQty(n: number): number {
+  return Math.max(1, Math.min(MAX_QTY, Math.floor(n)));
+}
+
+export function cartQuantity(items: { quantity?: number }[]): number {
+  return items.reduce((s, i) => s + (i.quantity ?? 1), 0);
+}
+
 export function formatPrice(n: number): string {
   return `${n.toFixed(2).replace(".", ",")} €`;
 }

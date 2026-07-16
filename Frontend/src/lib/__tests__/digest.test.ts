@@ -90,4 +90,25 @@ describe("formatPrepList", () => {
     const orders: PrepOrder[] = [{ items: [{ ingredientIds: ["i_sal"], sauceId: "s_tom" }] }];
     expect(formatPrepList(orders, ingNames, sauNames, "Fr 13.07.")).toContain("1 Pizza (= 1 Teig)");
   });
+  it("formatPrepList gewichtet Zutaten/Soßen/Teige mit quantity (fehlend = 1)", () => {
+    const msg = formatPrepList(
+      [{ items: [{ ingredientIds: ["salami"], sauceId: "tomate", quantity: 3 }, { ingredientIds: ["salami"] }] }],
+      { salami: "Salami" }, { tomate: "Tomate" }, "Mo 20.07.",
+    );
+    expect(msg).toContain("4 Pizzen (= 4 Teige)"); // 3 + 1
+    expect(msg).toContain("4× Salami");            // 3 + 1
+    expect(msg).toContain("3× Tomate");            // nur die 3er-Position hat Soße
+  });
+});
+
+describe("formatDigest × quantity", () => {
+  it("formatDigest zeigt × n und zählt Pizzen gewichtet", () => {
+    const msg = formatDigest(
+      [{ pickupDate: "2026-07-20", pickupTime: "18:00", customerName: "A", customerPhone: "1",
+         items: [{ pizzaName: "Margherita", quantity: 2 }], total: 20, serviceMode: "takeaway", notes: "" }],
+      "Mo 20.07.",
+    );
+    expect(msg).toContain("2 Pizzen");
+    expect(msg).toContain("• Margherita × 2");
+  });
 });

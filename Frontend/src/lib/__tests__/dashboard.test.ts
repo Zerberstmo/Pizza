@@ -46,4 +46,15 @@ describe("computeDashboard", () => {
     const s = computeDashboard([o({ items: [{ pizzaName: "P", ingredientIds: ["i_x"] }] })], ing);
     expect(s.topIngredients[0]).toEqual({ name: "i_x", v: 1 });
   });
+  it("gewichtet Pizza-/Zutaten-Zählung mit quantity (fehlend = 1)", () => {
+    const stats = computeDashboard(
+      [
+        { total: 30, status: "eingegangen", items: [{ pizzaName: "Margherita", ingredientIds: ["m"], quantity: 3 }] },
+        { total: 10, status: "eingegangen", items: [{ pizzaName: "Salami", ingredientIds: ["m"] }] }, // kein quantity → 1
+      ],
+      { m: "Mozzarella" },
+    );
+    expect(stats.topPizzas.find((p) => p.day === "Margherita")?.n).toBe(3);
+    expect(stats.topIngredient).toEqual({ name: "Mozzarella", v: 4 }); // 3 + 1
+  });
 });

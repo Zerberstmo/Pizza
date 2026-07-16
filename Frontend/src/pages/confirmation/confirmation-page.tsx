@@ -5,7 +5,7 @@ import { Check } from "lucide-react";
 import { getIngredients, getSauces } from "@/lib/data/store";
 import { resolveSauce } from "@/lib/sauces";
 import { useAsync } from "@/hooks/use-async";
-import { formatPrice } from "@/lib/pricing";
+import { formatPrice, BASE_PRICE, cartQuantity } from "@/lib/pricing";
 import { formatDateLabel } from "@/lib/slots";
 import type { OrderData } from "@/types";
 import { PizzaSVG } from "@/components/pizza/pizza-svg";
@@ -41,7 +41,7 @@ export default function ConfirmationPage(): React.ReactElement {
         <div className="text-center">
           <h1 className="text-3xl font-black">Bestellt!</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            {order.items.length} Pizza{order.items.length !== 1 ? "en" : ""} werden vorbereitet.
+            {cartQuantity(order.items)} Pizza{cartQuantity(order.items) !== 1 ? "en" : ""} werden vorbereitet.
           </p>
         </div>
 
@@ -80,12 +80,12 @@ export default function ConfirmationPage(): React.ReactElement {
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 shrink-0"><PizzaSVG selected={item.ingredientIds} /></div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm">{item.pizzaName}</p>
+                    <p className="font-semibold text-sm">{item.pizzaName}{(item.quantity ?? 1) > 1 ? ` × ${item.quantity}` : ""}</p>
                     <p className="text-xs text-muted-foreground truncate">
                       {[sauceName(item.sauceId), ...item.ingredientIds.map(ingName)].filter(Boolean).join(", ") || "Käse & Sauce"}
                     </p>
                   </div>
-                  <span className="text-primary font-bold shrink-0">10 €</span>
+                  <span className="text-primary font-bold shrink-0">{formatPrice(BASE_PRICE * (item.quantity ?? 1))}</span>
                 </div>
                 {i < order.items.length - 1 && <Separator className="mt-3" />}
               </div>
