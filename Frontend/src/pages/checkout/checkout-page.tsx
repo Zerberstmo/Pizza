@@ -134,6 +134,24 @@ export default function CheckoutPage(): React.ReactElement {
         <h2 className="font-black text-xl mb-2">Warenkorb ist leer</h2>
         <p className="text-muted-foreground text-sm mb-6">Wähle zuerst eine Pizza aus.</p>
         <Button onClick={() => navigate("/")}>Zur Speisekarte</Button>
+
+        {/* Code-Einlösung auch bei leerem Warenkorb: freigeschaltete Sonderartikel brauchen keine Pizza.
+            Ein gültiger Code fügt den Artikel hinzu → cart ist nicht mehr leer → normaler Checkout. */}
+        <div className="mt-10 w-full max-w-xs">
+          <p className="text-xs text-muted-foreground mb-2">Gutschein- oder Sonderartikel-Code</p>
+          <div className="flex gap-2">
+            <Input placeholder="CODE" className="uppercase tracking-widest text-sm font-mono"
+              value={voucherCode} onChange={(e) => setVoucherCode(e.target.value.toUpperCase())} />
+            <Button variant="secondary" onClick={applyVoucher} className="shrink-0">Einlösen</Button>
+          </div>
+          {voucherMessage && (
+            <p className={cn("text-xs mt-2 flex items-center gap-1.5 justify-center",
+              voucherMessage.ok ? "text-green-400" : "text-destructive")}>
+              {voucherMessage.ok ? <Check size={11} /> : <AlertCircle size={11} />}
+              {voucherMessage.text}
+            </p>
+          )}
+        </div>
       </div>
     );
   }
