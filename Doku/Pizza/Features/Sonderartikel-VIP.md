@@ -63,10 +63,13 @@ Gutschein-Weg — der Kunde merkt keinen Unterschied.
     - Neue Funktion + Trigger `notify_special_order` (AFTER INSERT auf `orders`, zusätzlich zum
       bestehenden Trigger aus `0005`): Feuert nur, wenn `new.items` mindestens ein Element mit
       `kind = 'special'` enthält, und ruft dann per `pg_net` die Edge Function auf (Payload
-      `{ order_id }`). URL und Service-Role-Key kommen aus `app.settings.notify_url` /
-      `app.settings.notify_key` (vom Betreiber per SQL gesetzt, **nicht** im Git) — fehlen sie, wird
-      still übersprungen. Der Trigger fängt eigene Fehler ab (`exception when others then return new;`); eine
-      fehlgeschlagene Benachrichtigung darf die Bestellung nie scheitern lassen.
+      `{ order_id }`). URL und Service-Role-Key kommen aus **Supabase Vault**
+      (`vault.decrypted_secrets`, Namen `notify_url` / `notify_key`; vom Betreiber per
+      `vault.create_secret` gesetzt, **nicht** im Git) — fehlen sie, wird still übersprungen. Der Trigger
+      fängt eigene Fehler ab (`exception when others then return new;`); eine fehlgeschlagene
+      Benachrichtigung darf die Bestellung nie scheitern lassen. (Migration `0014` stellte den Trigger von
+      `app.settings.*` auf Vault um, weil gehostetes Supabase `alter database … set app.settings.*`
+      verweigert.)
 - **Edge Function** `supabase/functions/notify-special-order/index.ts`:
   - Zwei Aufrufwege: (1) der DB-Trigger mit `{ order_id }` für genau eine Bestellung, (2) `pg_cron`
     ohne Payload als Sicherheitsnetz — sucht dann alle Sonderartikel-Bestellungen der letzten 2 Stunden
@@ -98,7 +101,7 @@ Gutschein-Weg — der Kunde merkt keinen Unterschied.
 | Netzwerk-/RPC-Fehler bei der Einlösung | Checkout fällt still auf den normalen Gutschein-Weg zurück. |
 | CallMeBot down / antwortet nicht mit 2xx | `special_notified_at` bleibt `null` → Cron holt innerhalb von 2 h nach. |
 | `pg_net`-Aufruf im Trigger schlägt fehl | Trigger schluckt den Fehler, die Bestellung bleibt gültig → Cron holt nach. |
-| `app.settings.notify_url`/`notify_key` nicht gesetzt | Trigger überspringt still → Cron holt nach, sobald gesetzt. |
+| Vault-Secrets `notify_url`/`notify_key` nicht gesetzt | Trigger überspringt still → Cron holt nach, sobald gesetzt. |
 | `notify_config.enabled = false` | Nichts senden, **nicht** markieren; die Bestellung altert irgendwann aus dem 2-h-Fenster des Crons heraus. |
 | Bestellung storniert | Nicht senden. |
 | Senden erfolgreich, aber `special_notified_at` lässt sich nicht setzen (DB-Fehler beim `update`) | Die Edge Function meldet das **nicht** als Erfolg: sie zählt Markier-Fehlschläge und antwortet mit HTTP 500 (`sent: X/Y, mark failed: N`), Vorbild ist `daily-digest`. Grund: Bliebe `special_notified_at` leer, hielte der 5-Minuten-Cron die Bestellung für unbenachrichtigt und würde dieselbe WhatsApp unbegrenzt alle 5 Minuten erneut verschicken, ohne dass es jemand bemerkt (Fund aus dem Code-Review, behoben in Commit `87fa55d`). |
@@ -111,16 +114,18 @@ ausführbar → Migration per Review + Smoke-Test des Betreibers abgesichert.
 
 ## Betreiber-Schritte
 
-1. `bunx supabase db push` — Migration `0012` ist **erledigt am 2026-07-17**; Migration `0013`
-   (Sofort-Bestellung + Notify-Trigger) steht noch aus.
+1. `bunx supabase db push` — Migration `0012` ist **erledigt am 2026-07-17**; `0013` (Sofort-Bestellung
+   + Notify-Trigger) und `0014` (Notify via Vault) stehen noch aus und laufen beim nächsten Push zusammen.
 2. `bunx supabase functions deploy daily-digest --use-api --project-ref gvszyvgbbsmlulhqiakp` — offen
    (die deployte Version spiegelt die neuesten Sonderartikel-Änderungen noch nicht).
 3. `bunx supabase functions deploy notify-special-order --use-api --project-ref gvszyvgbbsmlulhqiakp` —
    offen (die Function ist noch nie deployt).
-4. Einstellungen setzen (SQL-Editor, echte Werte einsetzen, **nicht** ins Git):
-   `app.settings.notify_url`, `app.settings.notify_key` — offen.
-5. Cron-Sicherheitsnetz anlegen (`cron.schedule('special-alert-retry', '*/5 * * * *', …)`) — offen.
-6. Frontend-Deploy (Vercel Auto-Deploy auf `main`) — offen, Branch noch nicht gemergt.
+4. Vault-Secrets setzen (SQL-Editor, echte Werte, **nicht** ins Git):
+   `select vault.create_secret('<FUNCTION_URL>', 'notify_url');` und
+   `select vault.create_secret('<SERVICE_ROLE_KEY>', 'notify_key');` — offen.
+5. Cron-Sicherheitsnetz anlegen (`cron.schedule('special-alert-retry', '*/5 * * * *', …)`, Service-Role-Key
+   inline im SQL wie beim `daily-digest`-Cron) — offen.
+6. Frontend-Deploy: **erledigt** — Branch am 2026-07-17 nach `main` gemergt, Vercel Auto-Deploy ausgelöst.
 7. Smoke-Test: Sonderartikel + Freischaltung anlegen → Kunde löst Code ein → bestellt → Preis stimmt →
    nach `abgeholt` verschwindet der Artikel kundenseitig. Zusätzlich: Ein freigeschalteter Kunde legt
    **nur** einen Sonderartikel in den Warenkorb → Checkout zeigt „Abholung sofort" ohne Datum/Zeit →
