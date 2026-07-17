@@ -4,6 +4,27 @@
 
 <!-- Neue Einträge oben einfügen -->
 
+## 2026-07-17
+
+- **Sonderartikel/VIP:** versteckte Menü-Items, die nur einzelnen registrierten Kunden per Code
+  zugänglich sind — mit **pro-Kunde-Preis** und **Mengen-Staffeln** (flach je Stufe: Stückpreis der
+  Stufe mit größtem `min_qty ≤ Menge`). Der Kunde tippt den Code ins **Gutscheinfeld** des Checkouts;
+  ist er freigeschaltet, landet der Artikel mit Stepper im Warenkorb, sonst läuft unverändert der
+  normale Gutschein-Weg. Admin verwaltet Items und Freischaltungen unter **/admin/sonderartikel**.
+  Migration `0012`: Tabellen `special_items`/`special_item_grants` (**RLS admin-only**), Einlöse-RPC
+  `unlock_special_item` (SECURITY DEFINER; unbekannter Code und fehlende Freischaltung liefern dasselbe
+  leere Ergebnis — **kein Leak**), neuer `validate_order` (rechnet `10 € × Σ(Pizza-Menge) +
+  Σ(Sonderartikel-Zeilenpreise)` und prüft je Special-Position einen aktiven Grant für `new.user_id` →
+  serverautoritativ, Client-Preise sind reine Anzeige), `get_order_status` blendet nach `abgeholt` die
+  Sonderartikel aus (reine Special-Bestellung → gar keine Zeile mehr). `CartItem` ist jetzt eine
+  diskriminierte Union (`kind`; fehlend = Pizza, rückwärtskompatibel); Zähler/Dashboard/Digest zählen
+  Sonderartikel **nicht** als Pizza — der Digest listet sie als eigene `★`-Zeile, die Vorbereitungsliste
+  plant für sie weder Teig noch Zutaten. Diskretion nach Abholung gilt **nur kundenseitig**; Admin sieht
+  immer alles. `special_line_price` (SQL) spiegelt `priceForQty` (TS) — synchron halten. Reine Logik mit
+  bun:test verifiziert (107 Tests grün, Typecheck + Build grün). Migration `0012` ist am 2026-07-17
+  eingespielt; offen: `bunx supabase functions deploy daily-digest` + Frontend-Deploy (Merge nach `main`).
+  Details: [Features/Sonderartikel-VIP.md](Features/Sonderartikel-VIP.md).
+
 ## 2026-07-16
 
 - **Mengen im Warenkorb:** Warenkorb-Positionen haben jetzt eine Menge; identische Pizzen (gleicher
