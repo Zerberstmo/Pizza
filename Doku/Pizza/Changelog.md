@@ -24,6 +24,21 @@
   bun:test verifiziert (107 Tests grün, Typecheck + Build grün). Migration `0012` ist am 2026-07-17
   eingespielt; offen: `bunx supabase functions deploy daily-digest` + Frontend-Deploy (Merge nach `main`).
   Details: [Features/Sonderartikel-VIP.md](Features/Sonderartikel-VIP.md).
+- **Sonderartikel: Sofort-Bestellung + Sofort-WhatsApp** — eine Bestellung aus ausschließlich
+  Sonderartikeln braucht kein Abholdatum und keine Uhrzeit mehr (Datum/Zeit = jetzt, Europe/Berlin) und
+  umgeht Vorlaufzeit/Bestelltage/Öffnungszeiten/Service-Verfügbarkeit; Preis- und Zugangsprüfung bleiben
+  unverändert serverautoritativ (Migration `0013`, Slot-Block nur noch bei `pizza_qty > 0`). Jede
+  Bestellung mit mindestens einem Sonderartikel löst binnen Sekunden eine WhatsApp an den Betreiber aus:
+  AFTER-INSERT-Trigger → `pg_net` → neue Edge Function `notify-special-order` → CallMeBot, plus
+  5-Minuten-Cron als Sicherheitsnetz (Fenster 2 h, Merker `orders.special_notified_at`). Der Trigger
+  schluckt eigene Fehler — eine fehlgeschlagene Benachrichtigung kippt nie die Bestellung. Reine Helfer
+  `berlinDateTime`/`formatSpecialAlert` mit bun:test getestet; die Edge Function spiegelt
+  `formatSpecialAlert` als Deno-Copy. Ein Code-Review deckte auf, dass ein fehlgeschlagenes „Markieren"
+  (`special_notified_at`) nach erfolgreichem Versand als Erfolg durchgereicht worden wäre — der
+  5-Minuten-Cron hätte dieselbe WhatsApp dann unbegrenzt alle 5 Minuten erneut verschickt; behoben, indem
+  die Function Markier-Fehlschläge zählt und mit HTTP 500 antwortet (`sent: X/Y, mark failed: N`,
+  Vorbild `daily-digest`). Betreiber: `db push` (0013), `functions deploy notify-special-order`,
+  `app.settings.*` setzen, Cron anlegen.
 
 ## 2026-07-16
 
