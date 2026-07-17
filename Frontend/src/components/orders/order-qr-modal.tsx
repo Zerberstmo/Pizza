@@ -5,7 +5,8 @@ import { useNavigate } from "react-router";
 import { X, RotateCcw } from "lucide-react";
 import type { OrderRow } from "@/types";
 import { describeItem } from "@/lib/public-order";
-import { formatPrice, BASE_PRICE } from "@/lib/pricing";
+import { formatPrice } from "@/lib/pricing";
+import { isSpecialItem, itemTitle, itemLineTotal } from "@/lib/cart-items";
 import { formatDateLabel } from "@/lib/slots";
 import { QrCode } from "@/components/common/qr-code";
 import { OrderStatusBadge } from "@/components/common/order-status-badge";
@@ -24,10 +25,13 @@ export function OrderQrModal({ order, labels, onClose }: {
   const navigate = useNavigate();
   const { addToCart } = useCart();
 
-  // Alle (Pizza-)Positionen zurück in den Warenkorb legen → Checkout.
-  // (Sonderartikel existieren noch nicht; sobald CartItem ein `kind` bekommt, hier ausschließen.)
+  // Alle Pizza-Positionen zurück in den Warenkorb legen → Checkout.
+  // Sonderartikel brauchen Code + Freischaltung und werden daher nicht mit-reordert.
   const reorder = () => {
-    order.items.forEach((item) => addToCart(item.pizzaName, item.ingredientIds, item.sauceId, item.quantity ?? 1));
+    order.items.forEach((item) => {
+      if (isSpecialItem(item)) return;
+      addToCart(item.pizzaName, item.ingredientIds, item.sauceId, item.quantity ?? 1);
+    });
     onClose();
     navigate("/warenkorb");
   };
@@ -78,12 +82,16 @@ export function OrderQrModal({ order, labels, onClose }: {
           {order.items.map((item, i) => (
             <div key={item.cartId ?? i}>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 shrink-0"><PizzaSVG selected={item.ingredientIds} /></div>
+                <div className="w-10 h-10 shrink-0 flex items-center justify-center">
+                  {isSpecialItem(item)
+                    ? <span className="text-xl">{item.emoji}</span>
+                    : <PizzaSVG selected={item.ingredientIds} />}
+                </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold">{item.pizzaName}{(item.quantity ?? 1) > 1 ? ` × ${item.quantity}` : ""}</p>
+                  <p className="font-semibold">{itemTitle(item)}{item.quantity > 1 ? ` × ${item.quantity}` : ""}</p>
                   <p className="text-xs text-muted-foreground truncate">{describeItem(item, labels)}</p>
                 </div>
-                <span className="text-primary font-bold shrink-0">{formatPrice(BASE_PRICE * (item.quantity ?? 1))}</span>
+                <span className="text-primary font-bold shrink-0">{formatPrice(itemLineTotal(item))}</span>
               </div>
               {i < order.items.length - 1 && <Separator className="mt-3" />}
             </div>
@@ -96,9 +104,11 @@ export function OrderQrModal({ order, labels, onClose }: {
           <span className="text-primary">{formatPrice(order.total)}</span>
         </div>
 
-        <Button className="w-full gap-2" onClick={reorder}>
-          <RotateCcw size={15} /> Erneut bestellen
-        </Button>
+        {order.items.some((it) => !isSpecialItem(it)) && (
+          <Button className="w-full gap-2" onClick={reorder}>
+            <RotateCcw size={15} /> Erneut bestellen
+          </Button>
+        )}
       </motion.div>
     </div>
   );

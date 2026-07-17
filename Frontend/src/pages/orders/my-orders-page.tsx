@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useOrdersRealtime } from "@/hooks/use-orders-realtime";
 import { buildLabels } from "@/lib/order-labels";
 import { formatPrice } from "@/lib/pricing";
+import { isSpecialItem } from "@/lib/cart-items";
 import type { OrderRow } from "@/types";
 import { AsyncBoundary } from "@/components/common/async-boundary";
 import { OrderStatusBadge } from "@/components/common/order-status-badge";
@@ -49,7 +50,11 @@ export default function MyOrdersPage(): React.ReactElement {
                   </p>
                   <div className="flex items-center gap-2 flex-wrap pt-1">
                     {o.items.map((item, i) => (
-                      <div key={item.cartId ?? i} className="w-8 h-8"><PizzaSVG selected={item.ingredientIds} /></div>
+                      <div key={item.cartId ?? i} className="w-8 h-8 flex items-center justify-center">
+                        {isSpecialItem(item)
+                          ? <span className="text-lg">{item.emoji}</span>
+                          : <PizzaSVG selected={item.ingredientIds} />}
+                      </div>
                     ))}
                     <span className="text-sm font-bold text-primary ml-auto">{formatPrice(o.total)}</span>
                   </div>
