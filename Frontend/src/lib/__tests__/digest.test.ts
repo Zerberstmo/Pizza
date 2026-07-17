@@ -8,6 +8,21 @@ const mk = (o: Partial<DigestOrder>): DigestOrder => ({
   serviceMode: "takeaway", notes: "", ...o,
 });
 
+describe("Sonderartikel im Digest", () => {
+  it("formatDigest: Sonderartikel zählt nicht als Pizza, erscheint als eigene Zeile", () => {
+    const msg = formatDigest([mk({
+      items: [{ pizzaName: "Margherita", quantity: 1 }, { pizzaName: "", quantity: 2, kind: "special", name: "VIP", emoji: "🌿" }],
+      total: 22,
+    })], "Do, 16.07.");
+    expect(msg).toContain("1 Pizza");                  // nur die echte Pizza gezählt
+    expect(msg).toContain("Sonderartikel: 2× VIP");
+  });
+  it("formatPrepList: Sonderartikel erzeugt keinen Teig/keine Zutaten", () => {
+    const msg = formatPrepList([{ items: [{ ingredientIds: [], quantity: 3, kind: "special" }] }], {}, {}, "Do, 16.07.");
+    expect(msg).toBe(""); // nur Sonderartikel → keine Vorbereitung nötig
+  });
+});
+
 describe("filterTodaysPickups", () => {
   it("behält nur heutige Abholungen und sortiert nach Uhrzeit", () => {
     const orders = [

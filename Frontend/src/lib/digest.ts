@@ -6,7 +6,7 @@ export interface DigestOrder {
   pickupTime: string;   // "HH:MM"
   customerName: string;
   customerPhone: string;
-  items: { pizzaName: string; quantity?: number }[];
+  items: { pizzaName: string; quantity?: number; kind?: string; name?: string; emoji?: string }[];
   total: number;
   serviceMode: "dinein" | "takeaway";
   notes: string;
@@ -30,13 +30,16 @@ export function formatDigest(orders: DigestOrder[], dateLabel: string): string {
   const header = `🍕 Abholungen heute, ${dateLabel}\n${countLabel} · gesamt ${euro(sum)}`;
 
   const blocks = orders.map((o) => {
-    const pizzaCount = o.items.reduce((s, it) => s + (it.quantity ?? 1), 0);
+    const pizzas = o.items.filter((it) => it.kind !== "special");
+    const specials = o.items.filter((it) => it.kind === "special");
+    const pizzaCount = pizzas.reduce((s, it) => s + (it.quantity ?? 1), 0);
     const pizzaLabel = `${pizzaCount} ${pizzaCount === 1 ? "Pizza" : "Pizzen"}`;
     const service = o.serviceMode === "dinein" ? "Vor Ort" : "Abholen";
     const lines = [
       `${o.pickupTime} · ${o.customerName} · ${o.customerPhone}`,
       `  ${pizzaLabel} · ${euro(o.total)} · ${service}`,
-      ...o.items.map((it) => `  • ${it.pizzaName}${(it.quantity ?? 1) > 1 ? ` × ${it.quantity}` : ""}`),
+      ...pizzas.map((it) => `  • ${it.pizzaName}${(it.quantity ?? 1) > 1 ? ` × ${it.quantity}` : ""}`),
+      ...specials.map((it) => `  ★ Sonderartikel: ${it.quantity ?? 1}× ${it.name ?? "?"}`),
     ];
     if (o.notes.trim()) lines.push(`  Notiz: ${o.notes.trim()}`);
     return lines.join("\n");
@@ -45,7 +48,7 @@ export function formatDigest(orders: DigestOrder[], dateLabel: string): string {
   return `${header}\n\n${blocks.join("\n\n")}`;
 }
 
-export interface PrepItem { ingredientIds: string[]; sauceId?: string; quantity?: number }
+export interface PrepItem { ingredientIds?: string[]; sauceId?: string; quantity?: number; kind?: string }
 export interface PrepOrder { items: PrepItem[] }
 
 // Aggregierte Einkaufs-/Vorbereitungsliste für einen Tag (Teil-B5). Rein & deterministisch;
@@ -63,12 +66,14 @@ export function formatPrepList(
   const sau: Record<string, number> = {};
   for (const o of orders) {
     for (const it of o.items) {
+      if (it.kind === "special") continue; // Sonderartikel brauchen weder Teig noch Zutaten
       const qty = it.quantity ?? 1;
       doughCount += qty;
-      for (const id of it.ingredientIds) ing[id] = (ing[id] ?? 0) + qty;
+      for (const id of it.ingredientIds ?? []) ing[id] = (ing[id] ?? 0) + qty;
       if (it.sauceId) sau[it.sauceId] = (sau[it.sauceId] ?? 0) + qty;
     }
   }
+  if (doughCount === 0) return ""; // nur Sonderartikel → keine Vorbereitung nötig
 
   const section = (title: string, counts: Record<string, number>, names: Record<string, string>): string => {
     const entries = Object.entries(counts);

@@ -8,10 +8,10 @@ const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 interface DigestOrder {
   pickupTime: string; customerName: string; customerPhone: string;
-  items: { pizzaName: string; quantity?: number }[]; total: number;
+  items: { pizzaName: string; quantity?: number; kind?: string; name?: string; emoji?: string }[]; total: number;
   serviceMode: "dinein" | "takeaway"; notes: string;
 }
-interface PrepItem { ingredientIds: string[]; sauceId?: string; quantity?: number }
+interface PrepItem { ingredientIds?: string[]; sauceId?: string; quantity?: number; kind?: string }
 interface PrepOrder { items: PrepItem[] }
 
 function euro(n: number): string {
@@ -24,13 +24,16 @@ function formatDigest(orders: DigestOrder[], dateLabel: string): string {
   const countLabel = `${orders.length} ${orders.length === 1 ? "Bestellung" : "Bestellungen"}`;
   const header = `🍕 Abholungen heute, ${dateLabel}\n${countLabel} · gesamt ${euro(sum)}`;
   const blocks = orders.map((o) => {
-    const pc = o.items.reduce((s, it) => s + (it.quantity ?? 1), 0);
+    const pizzas = o.items.filter((it) => it.kind !== "special");
+    const specials = o.items.filter((it) => it.kind === "special");
+    const pc = pizzas.reduce((s, it) => s + (it.quantity ?? 1), 0);
     const pizzaLabel = `${pc} ${pc === 1 ? "Pizza" : "Pizzen"}`;
     const service = o.serviceMode === "dinein" ? "Vor Ort" : "Abholen";
     const lines = [
       `${o.pickupTime} · ${o.customerName} · ${o.customerPhone}`,
       `  ${pizzaLabel} · ${euro(o.total)} · ${service}`,
-      ...o.items.map((it) => `  • ${it.pizzaName}${(it.quantity ?? 1) > 1 ? ` × ${it.quantity}` : ""}`),
+      ...pizzas.map((it) => `  • ${it.pizzaName}${(it.quantity ?? 1) > 1 ? ` × ${it.quantity}` : ""}`),
+      ...specials.map((it) => `  ★ Sonderartikel: ${it.quantity ?? 1}× ${it.name ?? "?"}`),
     ];
     if (o.notes.trim()) lines.push(`  Notiz: ${o.notes.trim()}`);
     return lines.join("\n");
@@ -51,12 +54,14 @@ function formatPrepList(
   const sau: Record<string, number> = {};
   for (const o of orders) {
     for (const it of o.items) {
+      if (it.kind === "special") continue; // Sonderartikel brauchen weder Teig noch Zutaten
       const qty = it.quantity ?? 1;
       doughCount += qty;
-      for (const id of it.ingredientIds) ing[id] = (ing[id] ?? 0) + qty;
+      for (const id of it.ingredientIds ?? []) ing[id] = (ing[id] ?? 0) + qty;
       if (it.sauceId) sau[it.sauceId] = (sau[it.sauceId] ?? 0) + qty;
     }
   }
+  if (doughCount === 0) return ""; // nur Sonderartikel → keine Vorbereitung nötig
   const section = (title: string, counts: Record<string, number>, names: Record<string, string>): string => {
     const entries = Object.entries(counts);
     if (entries.length === 0) return "";
@@ -145,7 +150,7 @@ Deno.serve(async () => {
     const { data: prepRows, error: prepErr } = await db.from("orders").select("items").eq("pickup_date", tomorrow.todayIso);
     if (prepErr) return new Response(`prep db error: ${prepErr.message}`, { status: 500 });
     const prepOrders: PrepOrder[] = (prepRows ?? []).map((r) => ({ items: r.items ?? [] }));
-    const doughCount = prepOrders.reduce((s, o) => s + o.items.length, 0);
+    const doughCount = prepOrders.reduce((s, o) => s + o.items.filter((it: PrepItem) => it.kind !== "special").length, 0);
     if (doughCount === 0) {
       status.push("prep: nothing for tomorrow"); // Merker NICHT setzen
     } else {
