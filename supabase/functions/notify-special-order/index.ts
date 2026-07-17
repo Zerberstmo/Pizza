@@ -86,6 +86,7 @@ Deno.serve(async (req) => {
   if (targets.length === 0) return new Response("skip: nothing to notify");
 
   let sent = 0;
+  let markFailures = 0;
   for (const r of targets) {
     const msg = formatSpecialAlert({
       id: r.id, createdTime: berlinTime(r.created_at), customerName: r.customer_name,
@@ -101,8 +102,20 @@ Deno.serve(async (req) => {
     if (!res.ok) continue; // dito
     // Senden, DANN markieren. Ein Claim vor dem Versand würde bei einem Sendefehler
     // die Bestellung als erledigt markieren und genau den Retry verhindern, den wir wollen.
-    await db.from("orders").update({ special_notified_at: new Date().toISOString() }).eq("id", r.id);
+    const { error: markErr } = await db.from("orders")
+      .update({ special_notified_at: new Date().toISOString() }).eq("id", r.id);
+    if (markErr) {
+      // Senden war erfolgreich, aber das Markieren ist fehlgeschlagen: das darf NICHT als
+      // Erfolg gemeldet werden. Bliebe special_notified_at leer, hielte das 5-Minuten-Cron-
+      // Sicherheitsnetz diese Bestellung für unbenachrichtigt und würde dieselbe WhatsApp
+      // alle 5 Minuten unbegrenzt erneut verschicken — ohne dass ein Betreiber es sieht.
+      markFailures++;
+      continue; // andere Bestellungen im Sweep sind unabhängig -> weitermachen, nicht abbrechen
+    }
     sent++;
+  }
+  if (markFailures > 0) {
+    return new Response(`sent: ${sent}/${targets.length}, mark failed: ${markFailures}`, { status: 500 });
   }
   return new Response(`sent: ${sent}/${targets.length}`);
 });
