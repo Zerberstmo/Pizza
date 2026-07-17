@@ -46,6 +46,17 @@ describe("computeDashboard", () => {
     const s = computeDashboard([o({ items: [{ pizzaName: "P", ingredientIds: ["i_x"] }] })], ing);
     expect(s.topIngredients[0]).toEqual({ name: "i_x", v: 1 });
   });
+  it("Sonderartikel: nicht in Pizza-/Zutaten-Zählung, aber Umsatz zählt", () => {
+    const stats = computeDashboard([
+      { total: 30, status: "eingegangen", items: [
+        { pizzaName: "Margherita", ingredientIds: ["cheese"], quantity: 2 },
+        { kind: "special", pizzaName: "", ingredientIds: [], quantity: 3 },
+      ] },
+    ], { cheese: "Käse" });
+    expect(stats.totalRevenue).toBe(30);                            // Umsatz via order.total unverändert
+    expect(stats.topPizzas).toEqual([{ day: "Margherita", n: 2 }]); // Special nicht als Pizza
+    expect(stats.topIngredients).toEqual([{ name: "Käse", v: 2 }]); // Special-Menge nicht auf Zutaten
+  });
   it("gewichtet Pizza-/Zutaten-Zählung mit quantity (fehlend = 1)", () => {
     const stats = computeDashboard(
       [
