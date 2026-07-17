@@ -22,6 +22,7 @@ import VouchersPage from "@/pages/admin/vouchers-page";
 import ServicePage from "@/pages/admin/service-page";
 import UsersPage from "@/pages/admin/users-page";
 import NotificationsPage from "@/pages/admin/notifications-page";
+import SpecialItemsPage from "@/pages/admin/special-items-page";
 
 export const router = createBrowserRouter([
   { path: "/login", element: <LoginPage /> },
@@ -52,6 +53,7 @@ export const router = createBrowserRouter([
       { path: "zutaten", element: <IngredientsPage /> },
       { path: "sossen", element: <SaucesPage /> },
       { path: "gutscheine", element: <VouchersPage /> },
+      { path: "sonderartikel", element: <SpecialItemsPage /> },
       { path: "nutzer", element: <UsersPage /> },
       { path: "benachrichtigungen", element: <NotificationsPage /> },
     ],
