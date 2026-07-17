@@ -22,4 +22,10 @@ describe("priceForQty", () => {
     expect(priceForQty([{ min_qty: 2, unit_price: 5 }], 1)).toBe(5);
   });
   it("leere Tiers => 0", () => expect(priceForQty([], 3)).toBe(0));
+  // Doppeltes min_qty ist Fehleingabe des Admins, muss aber DIESELBE Stufe wählen wie
+  // special_line_price (0012): rohe Array-Reihenfolge, strikt größer => der ERSTE Eintrag gewinnt.
+  // Sonst zeigt der Warenkorb einen anderen Preis als der Server verbucht (still, ohne Fehler).
+  it("doppeltes min_qty: erster Eintrag gewinnt (spiegelt special_line_price)", () => {
+    expect(priceForQty([{ min_qty: 2, unit_price: 5 }, { min_qty: 2, unit_price: 8 }], 2)).toBe(10);
+  });
 });
