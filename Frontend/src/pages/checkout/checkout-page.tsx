@@ -9,7 +9,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/hooks/use-cart";
 import { cn } from "@/lib/utils";
 import { formatPrice, computeDiscount, computeTotal, validateVoucher } from "@/lib/pricing";
-import { isSpecialItem, itemLineTotal, cartSubtotal, pizzaQuantity } from "@/lib/cart-items";
+import { isSpecialItem, itemLineTotal, cartSubtotal, pizzaQuantity, isSpecialsOnly } from "@/lib/cart-items";
+import { berlinDateTime } from "@/lib/berlin-time";
 import { getSelectableDates, getAvailableTimes, formatDateLabel, availableServiceModes } from "@/lib/slots";
 import { resolveSauce } from "@/lib/sauces";
 import type { Customer, ServiceMode, VoucherDef } from "@/types";
@@ -58,7 +59,12 @@ export default function CheckoutPage(): React.ReactElement {
   const modes = config ? availableServiceModes(config) : [];
   const noService = !cfg.loading && modes.length === 0;
   // Default-Modus setzen, sobald verfügbar (z. B. nach dem Laden der Config)
+  const specialsOnly = isSpecialsOnly(cart);
+
   if (modes.length > 0 && !serviceMode) setServiceMode(modes[0]);
+  // Sonderartikel umgehen die Service-Verfügbarkeit (0013). Ohne Fallback bliebe serviceMode ""
+  // und canOrder false, obwohl der Server die Bestellung annähme.
+  else if (specialsOnly && !serviceMode) setServiceMode("takeaway");
 
   const subtotal = cartSubtotal(cart);
   const discount = computeDiscount(subtotal, appliedVoucher);
@@ -66,7 +72,7 @@ export default function CheckoutPage(): React.ReactElement {
 
   const canOrder =
     customer.firstName.trim() && customer.lastName.trim() && customer.phone.trim() &&
-    pickupDate && pickupTime && cart.length > 0 && !!serviceMode;
+    (specialsOnly || (pickupDate && pickupTime)) && cart.length > 0 && !!serviceMode;
 
   const applyVoucher = async () => {
     // Zuerst prüfen, ob der Code ein freigeschalteter Sonderartikel ist.
@@ -98,15 +104,18 @@ export default function CheckoutPage(): React.ReactElement {
   };
 
   const placeOrder = async () => {
-    if (!canOrder || noDates || noService || !serviceMode) return;
+    if (!canOrder || !serviceMode) return;
+    if (!specialsOnly && (noDates || noService)) return;
     setOrderError("");
+    // Sonderartikel: Abholung sofort — Datum/Zeit in Berlin, nicht in der Zone des Browsers.
+    const now = specialsOnly ? berlinDateTime(new Date()) : null;
     try {
       const order = await createOrder({
         items: cart,
         customer,
         notes,
-        pickupDate,
-        pickupTime,
+        pickupDate: now ? now.date : pickupDate,
+        pickupTime: now ? now.time : pickupTime,
         voucherCode: appliedVoucher?.code,
         serviceMode,
       });
@@ -140,7 +149,9 @@ export default function CheckoutPage(): React.ReactElement {
         </Button>
         <div>
           <h2 className="font-bold leading-tight">Warenkorb</h2>
-          <p className="text-xs text-muted-foreground">{pizzaQuantity(cart)} Pizza{pizzaQuantity(cart) !== 1 ? "en" : ""}</p>
+          <p className="text-xs text-muted-foreground">
+            {specialsOnly ? "Sonderartikel" : `${pizzaQuantity(cart)} Pizza${pizzaQuantity(cart) !== 1 ? "en" : ""}`}
+          </p>
         </div>
       </div>
 
@@ -243,7 +254,12 @@ export default function CheckoutPage(): React.ReactElement {
                 ))}
               </div>
             )}
-            {cfg.loading ? (
+            {specialsOnly ? (
+              <div className="bg-primary/8 border border-primary/20 rounded-xl px-4 py-3">
+                <p className="text-sm text-primary font-semibold">Abholung sofort</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Kein Datum, keine Uhrzeit nötig.</p>
+              </div>
+            ) : cfg.loading ? (
               <p className="text-xs text-muted-foreground">Lädt…</p>
             ) : noService ? (
               <div className="bg-destructive/8 border border-destructive/20 rounded-xl px-4 py-3">
@@ -353,8 +369,10 @@ export default function CheckoutPage(): React.ReactElement {
       <div className="fixed bottom-[68px] left-0 right-0 z-40 px-4 pb-2 max-w-lg mx-auto">
         {orderError && <p className="text-destructive text-xs text-center mb-2">{orderError}</p>}
         <Button size="lg" className="w-full font-black text-base shadow-2xl shadow-primary/25"
-          disabled={!canOrder || noDates || noService} onClick={placeOrder}>
-          {pizzaQuantity(cart)} Pizza{pizzaQuantity(cart) !== 1 ? "en" : ""} {serviceMode === "dinein" ? "vor Ort" : "abholen"} — {formatPrice(total)}
+          disabled={!canOrder || (!specialsOnly && (noDates || noService))} onClick={placeOrder}>
+          {specialsOnly
+            ? `Sofort bestellen — ${formatPrice(total)}`
+            : `${pizzaQuantity(cart)} Pizza${pizzaQuantity(cart) !== 1 ? "en" : ""} ${serviceMode === "dinein" ? "vor Ort" : "abholen"} — ${formatPrice(total)}`}
         </Button>
       </div>
     </div>

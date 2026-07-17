@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { isSpecialItem, itemTitle, itemLineTotal, pizzaQuantity, specialsTotal, cartSubtotal } from "@/lib/cart-items";
+import { isSpecialItem, itemTitle, itemLineTotal, pizzaQuantity, specialsTotal, cartSubtotal, isSpecialsOnly } from "@/lib/cart-items";
 import type { CartItem, PizzaCartItem, SpecialCartItem } from "@/types";
 
 const pizza: PizzaCartItem = { cartId: "p1", pizzaName: "Margherita", ingredientIds: ["cheese"], quantity: 2 };
@@ -25,4 +25,11 @@ describe("cart-items", () => {
   it("pizzaQuantity zählt nur Pizzas", () => expect(pizzaQuantity(cart)).toBe(2));
   it("specialsTotal summiert lineTotal der Specials", () => expect(specialsTotal(cart)).toBe(18));
   it("cartSubtotal = 10*Pizzamenge + Specials", () => expect(cartSubtotal(cart)).toBe(38));
+});
+
+describe("isSpecialsOnly", () => {
+  it("nur Sonderartikel => true", () => expect(isSpecialsOnly([special])).toBe(true));
+  it("gemischt => false", () => expect(isSpecialsOnly(cart)).toBe(false));
+  it("nur Pizza => false", () => expect(isSpecialsOnly([pizza])).toBe(false));
+  it("leerer Warenkorb => false (nicht bestellbar, nicht 'sofort')", () => expect(isSpecialsOnly([])).toBe(false));
 });

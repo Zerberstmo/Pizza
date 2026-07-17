@@ -66,3 +66,11 @@ export function redactPickedUpSpecials(orders: OrderRow[]): OrderRow[] {
   }
   return out;
 }
+
+// Reine Sonderartikel-Bestellung: keine einzige Pizza im (nicht leeren) Warenkorb.
+// TS-Gegenstück zu `pizza_qty = 0` in validate_order (0013) — beide Seiten leiten das
+// unabhängig voneinander aus den Positionen ab, der Client behauptet es nicht.
+// Leerer Warenkorb => false: der ist gar nicht bestellbar.
+export function isSpecialsOnly(items: CartItem[]): boolean {
+  return items.length > 0 && pizzaQuantity(items) === 0;
+}
