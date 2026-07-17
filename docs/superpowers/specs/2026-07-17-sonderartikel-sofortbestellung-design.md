@@ -86,7 +86,7 @@ Cron (alle paar Minuten) ──▶ dieselbe Function, ohne Payload
 ### Trigger
 
 - Feuert **nur**, wenn `new.items` mindestens ein Element mit `kind = 'special'` enthält.
-- **Fängt eigene Fehler ab** (`exception when others then null`): Eine fehlgeschlagene Benachrichtigung
+- **Fängt eigene Fehler ab** (`exception when others then return new;`): Eine fehlgeschlagene Benachrichtigung
   darf die Bestellung **niemals** scheitern lassen. Das Sicherheitsnetz holt sie nach.
 - **Formatiert den Text nicht selbst** — das täte eine dritte Kopie der Formatierungslogik neben
   `digest.ts` und ihrem Deno-Zwilling aufmachen.

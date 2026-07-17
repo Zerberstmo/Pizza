@@ -65,7 +65,7 @@ Gutschein-Weg — der Kunde merkt keinen Unterschied.
       `kind = 'special'` enthält, und ruft dann per `pg_net` die Edge Function auf (Payload
       `{ order_id }`). URL und Service-Role-Key kommen aus `app.settings.notify_url` /
       `app.settings.notify_key` (vom Betreiber per SQL gesetzt, **nicht** im Git) — fehlen sie, wird
-      still übersprungen. Der Trigger fängt eigene Fehler ab (`exception when others then null`); eine
+      still übersprungen. Der Trigger fängt eigene Fehler ab (`exception when others then return new;`); eine
       fehlgeschlagene Benachrichtigung darf die Bestellung nie scheitern lassen.
 - **Edge Function** `supabase/functions/notify-special-order/index.ts`:
   - Zwei Aufrufwege: (1) der DB-Trigger mit `{ order_id }` für genau eine Bestellung, (2) `pg_cron`

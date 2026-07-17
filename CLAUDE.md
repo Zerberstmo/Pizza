@@ -1,5 +1,27 @@
 # Pizza-Projekt — Arbeitsanweisungen für Claude
 
+## Coding-Workflow (ECC — hat Priorität)
+
+Bei jeder Coding-Aufgabe nutze ich standardmäßig das ECC-Plugin (`ecc@ecc`) und
+seine Agents/Skills. Dieser Ablauf ersetzt/steuert die Doku-Schritte weiter unten —
+er ist die verbindliche Reihenfolge, sofern nicht anders angegeben:
+
+1. **`/ecc:plan "<Aufgabe>"`** — Planner-Agent erstellt einen Blueprint (Schritte,
+   Risiken, Dependencies). Dabei prüft er bestehende Doku (`Doku/Pizza/`) und
+   `SETUP.md`, bevor er plant.
+2. **Umsetzen** gemäß Blueprint. Wo sinnvoll: `tdd-workflow`-Skill (Tests zuerst).
+   Bei größeren/unabhängigen Teilaufgaben: Git-Worktree-Parallelisierung nutzen.
+3. **`/code-review`** — Qualitäts- und Security-Pass durch den Code-Reviewer-Agent.
+4. **`/security-scan`** (AgentShield) — Pflicht vor jedem Commit.
+5. **Doku aktualisieren** (siehe unten, via Templates).
+6. **Changelog-Eintrag** ergänzen (`Doku/Pizza/Changelog.md`).
+7. **TODO** pflegen (`Doku/Pizza/TODO.md`).
+8. Größere Entscheidung? → **ADR** anlegen (`Doku/Pizza/Entscheidungen/`).
+
+Der Security-Reviewer/AgentShield-Agent wird zusätzlich automatisch bei
+sicherheitsrelevanten Änderungen (Auth, Payments, Datenzugriff) hinzugezogen,
+auch außerhalb von Schritt 4.
+
 ## Doku-System
 
 Die gesamte Projektdokumentation liegt in `Doku/Pizza/` (Obsidian-Vault auf `Doku/` öffnen).
@@ -16,15 +38,6 @@ Neue Setup-Entscheidungen trage ich dort ein.
 
 **Es darf keine implementierte Funktion existieren, die nicht dokumentiert wurde.**
 Nach jeder Umsetzung aktualisiere ich die betroffene Doku.
-
-## Ablauf pro Aufgabe
-
-1. Anforderung verstehen → bestehende Doku & Architektur prüfen
-2. Umsetzen
-3. **Doku aktualisieren** (Feature-/Seiten-/Komponenten-Seite via Templates)
-4. **Changelog-Eintrag** ergänzen (`Doku/Pizza/Changelog.md`)
-5. **TODO** pflegen (`Doku/Pizza/TODO.md`)
-6. Größere Entscheidung? → **ADR** anlegen (`Doku/Pizza/Entscheidungen/`)
 
 ## Templates immer nutzen
 
