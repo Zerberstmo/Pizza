@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from "bun:test";
 import { renderHook, act } from "@testing-library/react";
 import { CartProvider, useCart } from "@/hooks/use-cart";
+import type { PizzaCartItem } from "@/types";
 
 const wrapper = ({ children }: { children: React.ReactNode }) => <CartProvider>{children}</CartProvider>;
 beforeEach(() => localStorage.clear());
@@ -26,7 +27,8 @@ describe("useCart", () => {
   it("übernimmt die sauceId", () => {
     const { result } = renderHook(() => useCart(), { wrapper });
     act(() => result.current.addToCart("Eigene Pizza", ["salami"], "pesto"));
-    expect(result.current.cart[0].sauceId).toBe("pesto");
+    // addToCart legt immer Pizza-Positionen an; für den Feldzugriff auf die Pizza-Variante eingrenzen.
+    expect((result.current.cart[0] as PizzaCartItem).sauceId).toBe("pesto");
   });
   it("verschmilzt identische Positionen und summiert quantity in count", () => {
     const { result } = renderHook(() => useCart(), { wrapper });

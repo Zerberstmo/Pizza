@@ -1,13 +1,13 @@
 import { describe, it, expect } from "bun:test";
 import { redactPickedUpSpecials } from "@/lib/cart-items";
-import type { OrderRow } from "@/types";
+import type { OrderRow, PizzaCartItem, SpecialCartItem } from "@/types";
 
 const mk = (status: OrderRow["status"], items: OrderRow["items"]): OrderRow => ({
   id: "#1", publicToken: "t", items, total: 30, serviceMode: "takeaway",
   pickupDate: "2026-07-16", pickupTime: "18:00", notes: "", status, createdAt: "", userId: "u1",
 });
-const pizza = { cartId: "p", pizzaName: "Marg", ingredientIds: ["cheese"], quantity: 1 } as const;
-const special = { cartId: "s", kind: "special", specialItemId: "it", code: "C", name: "S", emoji: "🌿", tiers: [], quantity: 1, lineTotal: 6 } as const;
+const pizza: PizzaCartItem = { cartId: "p", pizzaName: "Marg", ingredientIds: ["cheese"], quantity: 1 };
+const special: SpecialCartItem = { cartId: "s", kind: "special", specialItemId: "it", code: "C", name: "S", emoji: "🌿", tiers: [], quantity: 1, lineTotal: 6 };
 
 describe("redactPickedUpSpecials", () => {
   it("aktiv: nichts filtern", () => {
