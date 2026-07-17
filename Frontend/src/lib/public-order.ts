@@ -1,8 +1,10 @@
 import type { CartItem, PublicOrderStatus } from "@/types";
+import { isSpecialItem } from "@/lib/cart-items";
 
 // Zutaten-/Soßennamen einer Bestellposition auflösen (Reihenfolge: Soße, dann Zutaten).
 // labels = Map id->Name (aus der get_order_status-RPC). Fehlende Labels werden übersprungen.
 export function describeItem(item: CartItem, labels: Record<string, string>): string {
+  if (isSpecialItem(item)) return "Sonderartikel";
   const parts = [
     item.sauceId ? labels[item.sauceId] : undefined,
     ...item.ingredientIds.map((id) => labels[id]),

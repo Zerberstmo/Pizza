@@ -1,6 +1,6 @@
 import { describe, it, expect } from "bun:test";
 import { describeItem, rowToPublicStatus } from "@/lib/public-order";
-import type { CartItem } from "@/types";
+import type { CartItem, SpecialCartItem } from "@/types";
 
 const labels = { tomate: "Tomatensauce", salami: "Salami", champ: "Champignons" };
 
@@ -16,6 +16,10 @@ describe("describeItem", () => {
   it("leere Zutaten/keine Soße → Fallback", () => {
     const item: CartItem = { cartId: "c3", pizzaName: "Margherita", ingredientIds: [], sauceId: undefined, quantity: 1 };
     expect(describeItem(item, labels)).toBe("Käse & Sauce");
+  });
+  it("Sonderartikel liefert 'Sonderartikel'", () => {
+    const special = { cartId: "s", kind: "special", specialItemId: "it", code: "C", name: "S", emoji: "🌿", tiers: [], quantity: 1, lineTotal: 6 } as SpecialCartItem;
+    expect(describeItem(special, {})).toBe("Sonderartikel");
   });
 });
 
