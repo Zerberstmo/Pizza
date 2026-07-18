@@ -3,7 +3,7 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router";
 import { ArrowLeft, X, Plus, Minus, ChefHat, Phone, Calendar, Clock, FileText, Ticket, Check, AlertCircle } from "lucide-react";
-import { getConfig, getIngredients, getVouchers, getSauces, createOrder, unlockSpecialItem } from "@/lib/data/store";
+import { getConfig, getIngredients, getVouchers, getSauces, createOrder, unlockSpecialItem, getOpenDays } from "@/lib/data/store";
 import { useAsync } from "@/hooks/use-async";
 import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/hooks/use-cart";
@@ -33,6 +33,7 @@ export default function CheckoutPage(): React.ReactElement {
   const cfg = useAsync(getConfig);
   const { data: ingredients } = useAsync(getIngredients);
   const { data: sauces } = useAsync(getSauces);
+  const { data: openDays } = useAsync(getOpenDays);
 
   const [customer, setCustomer] = useState<Customer>(() => ({
     firstName: currentUser?.firstName ?? "",
@@ -49,7 +50,7 @@ export default function CheckoutPage(): React.ReactElement {
   const [orderError, setOrderError] = useState("");
 
   const config = cfg.data;
-  const availableDates = config ? getSelectableDates(config, new Date()) : [];
+  const availableDates = config ? getSelectableDates(openDays ?? [], config.leadTimeDays, new Date()) : [];
   const availableTimes = config ? getAvailableTimes(config.hours) : [];
   const dateOptions = availableDates.map((d) => ({ value: d, label: formatDateLabel(d) }));
   const timeOptions = availableTimes.map((t) => ({ value: t, label: `${t} Uhr` }));

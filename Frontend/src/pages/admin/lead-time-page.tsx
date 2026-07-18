@@ -1,6 +1,8 @@
 import type React from "react";
 import { Check, Timer } from "lucide-react";
 import { useConfigEditor } from "@/hooks/use-config-editor";
+import { useAsync } from "@/hooks/use-async";
+import { getOpenDays } from "@/lib/data/store";
 import { getSelectableDates, formatDateLabel } from "@/lib/slots";
 import type { AppConfig } from "@/types";
 import { AsyncBoundary } from "@/components/common/async-boundary";
@@ -14,6 +16,7 @@ const OPTIONS = Array.from({ length: 15 }, (_, i) => ({ value: String(i), label:
 
 export default function LeadTimePage(): React.ReactElement {
   const { config, setConfig, loading, error, saved, save } = useConfigEditor();
+  const { data: openDays } = useAsync(getOpenDays);
 
   const setLeadTime = (v: string) =>
     setConfig((c) => (c ? { ...c, leadTimeDays: Number(v) } : c));
@@ -26,7 +29,7 @@ export default function LeadTimePage(): React.ReactElement {
       </div>
       <AsyncBoundary loading={loading} error={error} data={config}>
         {(cfg: AppConfig) => {
-          const earliest = getSelectableDates(cfg, new Date())[0];
+          const earliest = getSelectableDates(openDays ?? [], cfg.leadTimeDays, new Date())[0];
           return (
             <>
               <Card>
