@@ -3,7 +3,7 @@ import { getSelectableDates, calendarGrid, getAvailableTimes, isSlotAllowed, for
 import type { AppConfig } from "@/types";
 
 const allDays = { Montag: true, Dienstag: true, Mittwoch: true, Donnerstag: true, Freitag: true, Samstag: true, Sonntag: true };
-const cfg = (leadTimeDays: number): AppConfig => ({ days: allDays, hours: { from: "11:00", to: "12:00" }, leadTimeDays, service: { dineIn: false, takeaway: true } });
+const cfg = (leadTimeDays: number): AppConfig => ({ days: allDays, hours: { from: "11:00", to: "12:00" }, leadTimeDays, service: { dineIn: false, takeaway: true }, dashboardResetAt: null });
 
 describe("getSelectableDates (open_days)", () => {
   const today = new Date("2026-07-18T09:00:00"); // Sa

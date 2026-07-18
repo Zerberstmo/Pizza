@@ -98,4 +98,5 @@ export const DEFAULT_CONFIG: AppConfig = {
   hours: { from: "11:00", to: "21:00" },
   leadTimeDays: 3,
   service: { dineIn: false, takeaway: true },
+  dashboardResetAt: null,
 };

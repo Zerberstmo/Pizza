@@ -73,6 +73,7 @@ export interface AppConfig {
   hours: Hours;
   leadTimeDays: number;
   service: { dineIn: boolean; takeaway: boolean };
+  dashboardResetAt: string | null;
 }
 
 export type ServiceMode = "dinein" | "takeaway";

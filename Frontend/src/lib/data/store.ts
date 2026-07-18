@@ -53,16 +53,29 @@ export async function saveVouchers(list: VoucherDef[]): Promise<void> {
 export async function getConfig(): Promise<AppConfig> {
   const { data, error } = await supabase.from("app_config").select("*").eq("id", 1).single();
   if (error) throw error;
-  return { days: data.days, hours: data.hours, leadTimeDays: data.lead_time_days, service: data.service };
+  return { days: data.days, hours: data.hours, leadTimeDays: data.lead_time_days, service: data.service, dashboardResetAt: data.dashboard_reset_at ?? null };
 }
 export async function saveConfig(config: AppConfig): Promise<void> {
-  const { error } = await supabase.from("app_config").upsert({ id: 1, days: config.days, hours: config.hours, lead_time_days: config.leadTimeDays, service: config.service });
+  const { error } = await supabase.from("app_config").upsert({ id: 1, days: config.days, hours: config.hours, lead_time_days: config.leadTimeDays, service: config.service, dashboard_reset_at: config.dashboardResetAt });
+  if (error) throw error;
+}
+
+// Nur den Dashboard-Reset-Punkt setzen (partielles Update, rührt andere Config-Felder nicht an).
+// at = ISO-String -> Reset auf diesen Zeitpunkt; at = null -> all-time.
+export async function setDashboardResetAt(at: string | null): Promise<void> {
+  const { error } = await supabase.from("app_config").update({ dashboard_reset_at: at }).eq("id", 1);
   if (error) throw error;
 }
 
 // Dashboard-Kennzahlen aus echten Bestellungen (Admin-RLS) aggregieren.
+// Ab gesetztem dashboard_reset_at nur Bestellungen ab diesem Zeitpunkt (weicher Reset), sonst all-time.
 export async function getDashboardStats(): Promise<DashboardStats> {
-  const [orders, ingredients] = await Promise.all([getOrders(), getIngredients()]);
+  const [config, ingredients] = await Promise.all([getConfig(), getIngredients()]);
+  let query = supabase.from("orders").select("*").order("created_at", { ascending: false });
+  if (config.dashboardResetAt) query = query.gte("created_at", config.dashboardResetAt);
+  const { data, error } = await query;
+  if (error) throw error;
+  const orders = (data ?? []).map(rowToOrder);
   const names = Object.fromEntries(ingredients.map((i) => [i.id, i.name]));
   return computeDashboard(orders, names);
 }
