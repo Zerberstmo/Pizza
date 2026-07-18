@@ -55,11 +55,12 @@ export function setSpecialQtyIn(cart: CartItem[], cartId: string, n: number): Ca
   });
 }
 
-// Kundenseitige Diskretion: nach Abholung Sonderartikel ausblenden; reine Special-Bestellung ganz entfernen.
+// Kundenseitige Diskretion: in Endzuständen (abgeholt ODER storniert) Sonderartikel ausblenden;
+// reine Special-Bestellung ganz entfernen. Admin sieht weiterhin alles (redigiert hier nur die Kundenliste).
 export function redactPickedUpSpecials(orders: OrderRow[]): OrderRow[] {
   const out: OrderRow[] = [];
   for (const o of orders) {
-    if (o.status !== "abgeholt") { out.push(o); continue; }
+    if (o.status !== "abgeholt" && o.status !== "storniert") { out.push(o); continue; }
     const items = o.items.filter((it) => !isSpecialItem(it));
     if (items.length === 0) continue;
     out.push({ ...o, items });

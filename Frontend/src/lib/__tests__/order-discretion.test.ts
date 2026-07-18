@@ -23,4 +23,13 @@ describe("redactPickedUpSpecials", () => {
     const out = redactPickedUpSpecials([mk("abgeholt", [special])]);
     expect(out).toHaveLength(0);
   });
+  it("storniert + gemischt: Special entfernen, Pizza bleibt", () => {
+    const out = redactPickedUpSpecials([mk("storniert", [pizza, special])]);
+    expect(out[0].items).toHaveLength(1);
+    expect(out[0].items[0].cartId).toBe("p");
+  });
+  it("storniert + nur Special: Bestellung ganz raus", () => {
+    const out = redactPickedUpSpecials([mk("storniert", [special])]);
+    expect(out).toHaveLength(0);
+  });
 });
