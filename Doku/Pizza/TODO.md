@@ -5,6 +5,7 @@
 
 | Prio | Beschreibung | Status | Abhängigkeiten |
 |------|--------------|--------|----------------|
+| P1 | ~~Öffnungstage per Kalender statt Wochentags-Muster~~ | erledigt (2026-07-18) — Tabelle `open_days` + `validate_order` prüft `date ∈ open_days` (Migration `0017`), Admin `/admin/tage` als Kalender-Raster (4 Wochen), Checkout + Vorlaufzeit-Seite umgestellt. Betreiber: `bunx supabase db push` (0017), dann Tage im Admin planen (startet leer). | Teil-B4 |
 | P1 | Teil-A Frontend-Fundament umsetzen (Plan `docs/superpowers/plans/2026-07-09-teil-a-frontend-fundament.md`) | erledigt | — |
 | P1 | Teil-A-Erweiterung (Soßen/Favoriten/Service) | erledigt | Teil-A |
 | P1 | Nutzer-Accounts (Teil-A-Mock) | erledigt | Teil-A |

@@ -6,6 +6,13 @@
 
 ## 2026-07-18
 
+- **Öffnungstage per Kalender:** Der Admin plant unter `/admin/tage` konkrete Kalendertage
+  (Kalender-Raster, 4 Wochen rollend) statt fester Wochentage — für unregelmäßigen Betrieb. Neue
+  Tabelle `open_days` (Admin schreibt, Kunden lesen, RLS); `validate_order` (Migration `0017`) prüft
+  `date ∈ open_days` statt Wochentag. Globale Uhrzeit + Vorlaufzeit unverändert; Sonderartikel-Sofort­
+  bestellung (`pizza_qty = 0`-Bypass) unberührt. Reine Helfer `getSelectableDates`/`calendarGrid` mit
+  `bun:test`. Umbau zog zwei weitere `getSelectableDates`-Aufrufer nach (Checkout + Vorlaufzeit-Seite).
+  Betreiber: `bunx supabase db push` (0017), danach Tage im Admin planen (`open_days` startet leer).
 - **Sonderartikel-Feature ausgerollt & live verifiziert:** Branch `feat/sonderartikel-vip` nach `main`
   gemergt (Vercel-Deploy), Migrationen `0013`/`0014` eingespielt, `notify-special-order` + `daily-digest`
   deployt. Sofort-Bestellung + Sofort-WhatsApp end-to-end getestet: reiner Sonderartikel-Warenkorb →
