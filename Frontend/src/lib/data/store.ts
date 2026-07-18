@@ -207,3 +207,18 @@ export async function saveNotifyConfig(cfg: NotifyConfig): Promise<void> {
   });
   if (error) throw error;
 }
+
+// ── Öffnungstage (open_days) ──
+export async function getOpenDays(): Promise<string[]> {
+  const { data, error } = await supabase.from("open_days").select("date").order("date");
+  if (error) throw error;
+  return (data ?? []).map((r) => r.date as string);
+}
+export async function addOpenDay(date: string): Promise<void> {
+  const { error } = await supabase.from("open_days").upsert({ date });
+  if (error) throw error;
+}
+export async function removeOpenDay(date: string): Promise<void> {
+  const { error } = await supabase.from("open_days").delete().eq("date", date);
+  if (error) throw error;
+}
