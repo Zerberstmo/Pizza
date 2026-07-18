@@ -1,7 +1,7 @@
 import type React from "react";
 import { NavLink, Outlet, useNavigate } from "react-router";
 import { motion } from "motion/react";
-import { BarChart2, Calendar, Clock, Timer, Package, Droplet, Tag, Users, ChefHat, LogOut, Store, User, ClipboardList, MessageSquare, Star } from "lucide-react";
+import { BarChart2, Calendar, Clock, Timer, Package, Droplet, Tag, Users, ChefHat, LogOut, Store, User, ClipboardList, MessageSquare, Settings, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,7 @@ const NAV: Array<{ to: string; icon: React.ElementType; label: string }> = [
   { to: "/admin/sonderartikel",   icon: Star,      label: "Sonderartikel"  },
   { to: "/admin/nutzer",          icon: Users,     label: "Nutzer"         },
   { to: "/admin/benachrichtigungen", icon: MessageSquare, label: "Benachrichtigungen" },
+  { to: "/admin/einstellungen",   icon: Settings,  label: "Einstellungen"  },
 ];
 
 export default function AdminLayout(): React.ReactElement {

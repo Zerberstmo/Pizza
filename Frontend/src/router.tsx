@@ -23,6 +23,7 @@ import ServicePage from "@/pages/admin/service-page";
 import UsersPage from "@/pages/admin/users-page";
 import NotificationsPage from "@/pages/admin/notifications-page";
 import SpecialItemsPage from "@/pages/admin/special-items-page";
+import SettingsPage from "@/pages/admin/settings-page";
 
 export const router = createBrowserRouter([
   { path: "/login", element: <LoginPage /> },
@@ -56,6 +57,7 @@ export const router = createBrowserRouter([
       { path: "sonderartikel", element: <SpecialItemsPage /> },
       { path: "nutzer", element: <UsersPage /> },
       { path: "benachrichtigungen", element: <NotificationsPage /> },
+      { path: "einstellungen", element: <SettingsPage /> },
     ],
   },
 ]);
