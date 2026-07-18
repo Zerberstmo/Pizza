@@ -4,6 +4,27 @@
 
 <!-- Neue Einträge oben einfügen -->
 
+## 2026-07-18
+
+- **Sonderartikel-Feature ausgerollt & live verifiziert:** Branch `feat/sonderartikel-vip` nach `main`
+  gemergt (Vercel-Deploy), Migrationen `0013`/`0014` eingespielt, `notify-special-order` + `daily-digest`
+  deployt. Sofort-Bestellung + Sofort-WhatsApp end-to-end getestet: reiner Sonderartikel-Warenkorb →
+  „Abholung sofort" → Bestellung → WhatsApp binnen Sekunden.
+- **Notify-Trigger liest Secrets aus Supabase Vault (`0014`):** gehostetes Supabase verweigert
+  `alter database … set app.settings.*`, daher liest `notify_special_order` URL + Service-Role-Key aus
+  `vault.decrypted_secrets` (`notify_url`/`notify_key`) statt aus `app.settings`.
+- **Code-Einlösung auch bei leerem Warenkorb** (`checkout-page.tsx`): Das Gutschein-/Code-Feld lag bisher
+  nur im Checkout mit nicht-leerem Warenkorb — ein VIP ohne Pizza kam nie an die Einlösung, die reine
+  Sonderartikel-Bestellung war praktisch unerreichbar. Der Leerer-Warenkorb-Zustand zeigt jetzt das
+  Code-Feld; ein gültiger Code fügt den Artikel hinzu → normaler Checkout mit „Abholung sofort".
+- **Sonderartikel-Code case-insensitiv (`0015`):** Der Checkout wandelt die Eingabe in Großbuchstaben,
+  `unlock_special_item` verglich aber exakt — ein mit Kleinbuchstaben angelegter Code war nie einlösbar.
+  Der Vergleich ist jetzt `lower(code) = lower(eingabe)`.
+- **Betreiber-Hinweis (Lehre aus dem Deploy):** Nach einer JWT-Secret-Rotation muss der **neue**
+  `service_role`-Key (`eyJ…`) an allen drei Stellen stehen — Vault `notify_key`, `daily-digest`-Cron,
+  `special-alert-retry`-Cron. Beim Einfügen **keine** spitzen Klammern (`<…>`) mitkopieren, sonst wirft
+  das Function-Gateway `401 UNAUTHORIZED_INVALID_JWT_FORMAT`. Diagnose über `net._http_response`.
+
 ## 2026-07-17
 
 - **Sonderartikel/VIP:** versteckte Menü-Items, die nur einzelnen registrierten Kunden per Code
