@@ -1,5 +1,5 @@
 import type React from "react";
-import { getDashboardStats } from "@/lib/data/store";
+import { getDashboardStats, getConfig } from "@/lib/data/store";
 import type { DashboardStats } from "@/lib/dashboard";
 import { useAsync } from "@/hooks/use-async";
 import { cn } from "@/lib/utils";
@@ -15,10 +15,18 @@ const CHART_COLORS = ["#F97316", "#EAB308", "#22C55E", "#3B82F6", "#A855F7"];
 // Admin-Dashboard mit echten Kennzahlen aus orders (all-time, storniert ausgeschlossen).
 export default function DashboardPage(): React.ReactElement {
   const { data, loading, error } = useAsync(getDashboardStats);
+  const { data: cfg } = useAsync(getConfig);
 
   return (
     <div className="p-4 space-y-5">
-      <h2 className="font-bold text-lg">Dashboard</h2>
+      <div>
+        <h2 className="font-bold text-lg">Dashboard</h2>
+        {cfg?.dashboardResetAt && (
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Statistik seit {new Date(cfg.dashboardResetAt).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" })}
+          </p>
+        )}
+      </div>
       <AsyncBoundary loading={loading} error={error} data={data}>
         {(stats: DashboardStats) => {
           const tiles = [
