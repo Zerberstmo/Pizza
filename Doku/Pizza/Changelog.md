@@ -4,6 +4,17 @@
 
 <!-- Neue Einträge oben einfügen -->
 
+## 2026-07-19
+
+- **Mobile-Responsivität (horizontaler Überlauf):** Am Handy musste man die Seite erst herauszoomen, um
+  den rechten Rand zu sehen — Symptom eines horizontalen Überlaufs. Fix in zwei Ebenen: (1) globales
+  Sicherheitsnetz in `theme.css` (`html, body { overflow-x: hidden; max-width: 100% }`), das horizontalen
+  Überlauf grundsätzlich unterbindet; (2) 360-px-Audit aller Routen — der einzige echte Nowrap-Überläufer
+  war die (lange) E-Mail im Admin-Header (Button mit `whitespace-nowrap`), jetzt `truncate` + `max-w-[45vw]`.
+  Kein Desktop-Umbau (bewusst separater Schritt). Hinweis: Der Audit lief statisch + auf öffentlichen
+  Routen; ein voller Live-360-px-Durchlauf der Auth-Routen braucht einen Test-Login. Kein Betreiber-Deploy
+  nötig (nur Frontend, Vercel deployt bei Push automatisch).
+
 ## 2026-07-18
 
 - **Dashboard-Reset (weicher Reset-Punkt):** Neue Admin-Seite `/admin/einstellungen` — der Admin setzt
