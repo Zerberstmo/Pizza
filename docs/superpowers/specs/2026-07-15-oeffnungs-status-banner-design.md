@@ -1,10 +1,16 @@
 # Design: Öffnungs-Status-Banner (Startseite)
 
-**Datum:** 2026-07-15
+**Datum:** 2026-07-15 (korrigiert 2026-07-19 an das Kalender-Öffnungstage-Modell)
 **Status:** freigegeben (Brainstorming)
 **Kontext:** Pizza-Vorbestell-App (React/Vite/Supabase). Vorbestellung mit Vorlaufzeit
-(`app_config.leadTimeDays`), offene Wochentage (`days`), Uhrzeiten (`hours.from/to`), Service-Modi
-(`service`). Slot-Logik in `lib/slots.ts`. Startseite = Speisekarte (`menu-page.tsx`, Route `/`).
+(`app_config.leadTimeDays`), Uhrzeiten (`hours.from/to`), Service-Modi (`service`). Slot-Logik in
+`lib/slots.ts`. Startseite = Speisekarte (`menu-page.tsx`, Route `/`).
+
+> **Korrektur 2026-07-19:** Seit Migration `0017` sind die Öffnungstage **konkrete Kalendertage**
+> in der `open_days`-Tabelle (via `getOpenDays(): Promise<string[]>`), **nicht** mehr der
+> Wochentags-Map `config.days`. Und `getSelectableDates` hat jetzt die Signatur
+> `(openDates: string[], leadTimeDays: number, today: Date)`. Die Helfer/Props unten sind daran
+> angepasst: `openingStatus(config, openDays, now)`, Komponenten-Prop `openDays`.
 
 ## Ziel
 
@@ -24,24 +30,24 @@ Pizza bekommt. Rein aus der vorhandenen Config, **kein Backend**.
 
 ```ts
 import type { AppConfig } from "@/types";
-import { JS_DAY_MAP, getSelectableDates, availableServiceModes } from "@/lib/slots";
+import { toISO, getSelectableDates, availableServiceModes } from "@/lib/slots";
 
 export interface OpeningStatus {
   openNow: boolean;
   nextPickup: { date: string; time: string } | null; // date = ISO YYYY-MM-DD, time = hours.from
 }
 
-// "Jetzt geöffnet" = heutiger Wochentag offen UND aktuelle Uhrzeit in [from..to] UND ein Service aktiv.
+// "Jetzt geöffnet" = heutiges Datum ist ein geplanter Öffnungstag (open_days)
+// UND aktuelle Uhrzeit in [from..to] UND mind. ein Service aktiv.
 // nextPickup = erster wählbarer Abholtag (getSelectableDates) + hours.from; null wenn keine Termine.
-export function openingStatus(config: AppConfig, now: Date): OpeningStatus {
-  const dayName = JS_DAY_MAP[now.getDay()];
-  const openDay = !!config.days[dayName];
+export function openingStatus(config: AppConfig, openDays: string[], now: Date): OpeningStatus {
+  const openToday = openDays.includes(toISO(now));
   const cur = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
   const withinHours = cur >= config.hours.from && cur <= config.hours.to;
   const hasService = availableServiceModes(config).length > 0;
-  const openNow = openDay && withinHours && hasService;
+  const openNow = openToday && withinHours && hasService;
 
-  const dates = getSelectableDates(config, now);
+  const dates = getSelectableDates(openDays, config.leadTimeDays, now);
   const nextPickup = dates.length > 0 ? { date: dates[0], time: config.hours.from } : null;
   return { openNow, nextPickup };
 }
@@ -60,13 +66,13 @@ export function relativeDateLabel(dateStr: string, now: Date): string {
 }
 ```
 
-> Hinweis: `JS_DAY_MAP`, `getSelectableDates`, `availableServiceModes` existieren bereits in
+> Hinweis: `toISO`, `getSelectableDates`, `availableServiceModes` existieren bereits in
 > `lib/slots.ts`. String-Vergleich von `HH:MM` (nullpadded) ist korrekt für den Uhrzeit-Check.
 
 ## Komponente (`components/common/opening-status-banner.tsx`)
 
-- Props: `{ config: AppConfig }` (den `now`-Zeitpunkt bildet die Komponente via `new Date()`; Banner ist
-  ein Momentanzustand — kein Live-Ticking nötig).
+- Props: `{ config: AppConfig; openDays: string[] }` (den `now`-Zeitpunkt bildet die Komponente via
+  `new Date()`; Banner ist ein Momentanzustand — kein Live-Ticking nötig).
 - Rendert:
   - **Ampel:** kleiner Punkt (🟢 `bg-green-500` / ⚪ `bg-muted-foreground`) + Text „Jetzt geöffnet" /
     „Jetzt geschlossen" (aus `openNow`).
@@ -76,9 +82,11 @@ export function relativeDateLabel(dateStr: string, now: Date): string {
 
 ## Einbindung (`menu-page.tsx`)
 
-- `config` via `useAsync(getConfig)` laden (falls die Menu-Seite es noch nicht tut).
-- Oben, vor der Speisekarte, `{config && <OpeningStatusBanner config={config} />}` einsetzen. Während
-  des Ladens nichts/Platzhalter (kein Layout-Sprung provozieren).
+- `config` via `useAsync(getConfig)` wird bereits geladen; zusätzlich `openDays` via
+  `useAsync(getOpenDays)` laden.
+- Oben, vor der Speisekarte (unter dem Header), einsetzen:
+  `{config.data && openDays.data && <OpeningStatusBanner config={config.data} openDays={openDays.data} />}`.
+  Während des Ladens nichts rendern (kein Layout-Sprung provozieren).
 - Bestehende Menu-Inhalte unverändert.
 
 ## Fehler-/Randfälle
@@ -91,9 +99,9 @@ export function relativeDateLabel(dateStr: string, now: Date): string {
 
 ## Tests (bun:test)
 
-- `openingStatus`: offen (offener Tag + Uhrzeit drin + Service) → `openNow=true`; außerhalb der
-  Uhrzeiten → false; geschlossener Wochentag → false; kein Service → false; `nextPickup` = erster
-  wählbarer Tag bzw. `null` bei leeren `days`.
+- `openingStatus`: offen (heute in `open_days` + Uhrzeit drin + Service) → `openNow=true`; außerhalb
+  der Uhrzeiten → false; heute **nicht** in `open_days` → false; kein Service → false; `nextPickup` =
+  erster wählbarer Tag bzw. `null` bei leerem `openDays`.
 - `relativeDateLabel`: heute/morgen/übermorgen (Wochentag+Datum).
 
 ## Doku

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router";
 import { X, Pencil } from "lucide-react";
-import { getMenu, getIngredients, getConfig, getSauces } from "@/lib/data/store";
+import { getMenu, getIngredients, getConfig, getSauces, getOpenDays } from "@/lib/data/store";
 import { useAsync } from "@/hooks/use-async";
 import { useCart } from "@/hooks/use-cart";
 import { useFavorites } from "@/hooks/use-favorites";
@@ -14,6 +14,7 @@ import type { PizzaTemplate } from "@/types";
 import { PizzaCard } from "@/components/pizza/pizza-card";
 import { PizzaSVG } from "@/components/pizza/pizza-svg";
 import { AsyncBoundary } from "@/components/common/async-boundary";
+import { OpeningStatusBanner } from "@/components/common/opening-status-banner";
 import { Separator } from "@/components/ui/separator";
 
 // Speisekarte. Portiert aus App.tsx:541-637 (HomePage), Menü nun async.
@@ -22,6 +23,7 @@ export default function MenuPage(): React.ReactElement {
   const ingredients = useAsync(getIngredients);
   const config = useAsync(getConfig);
   const sauces = useAsync(getSauces);
+  const openDays = useAsync(getOpenDays);
   const { addToCart, count } = useCart();
   const { favorites, remove, rename } = useFavorites();
   const navigate = useNavigate();
@@ -53,6 +55,12 @@ export default function MenuPage(): React.ReactElement {
           </p>
         </motion.div>
       </div>
+
+      {config.data && openDays.data && (
+        <div className="px-4 pb-4">
+          <OpeningStatusBanner config={config.data} openDays={openDays.data} />
+        </div>
+      )}
 
       <Separator />
 

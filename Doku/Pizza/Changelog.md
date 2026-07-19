@@ -6,6 +6,16 @@
 
 ## 2026-07-19
 
+- **Öffnungs-Status-Banner (Startseite):** Oben auf der Speisekarte zeigt ein dezentes Banner jetzt eine
+  Ampel „Jetzt geöffnet/geschlossen" und „Nächste Abholung: <Tag> ab <Zeit> Uhr". „Geöffnet" = heutiges
+  Datum liegt in den geplanten Öffnungstagen (`open_days`) **und** die aktuelle Uhrzeit in `[from..to]`
+  **und** mind. ein Service aktiv; der nächste Termin kommt aus `getSelectableDates`. Reine, mit `bun:test`
+  getestete Helfer `openingStatus`/`relativeDateLabel` (`lib/opening-status.ts`, 9 Tests), Komponente
+  `OpeningStatusBanner`, in `menu-page.tsx` eingebunden (rendert erst, wenn Config + Öffnungstage geladen
+  sind — kein Layout-Sprung). Momentanzustand (kein Live-Ticking); die Slot-Validierung bleibt
+  serverautoritativ. Hinweis: die ursprüngliche Spec (15.07.) war am veralteten Wochentags-Modell
+  (`config.days`) orientiert und wurde vor der Umsetzung auf das Kalendermodell (`open_days`, seit
+  Migration 0017) korrigiert. Kein Betreiber-Deploy (nur Frontend).
 - **Fix: Tailwind-Breakpoints fehlten (Responsive-Varianten global wirkungslos):** Im `@theme` von
   `theme.css` waren keine `--breakpoint-*` definiert → Tailwind v4 erzeugte **keine** `sm:`/`md:`/`lg:`/…
   -Varianten, das gebaute CSS hatte null `min-width`-Media-Queries. Dadurch blieb die Admin-Seitenleiste
