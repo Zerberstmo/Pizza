@@ -134,7 +134,7 @@ Deno.serve(async () => {
       const msg = formatDigest(orders, dateLabel);
       let res: Response;
       try { res = await fetch(callmebotUrl(cfg.recipient_phone, cfg.callmebot_apikey, msg)); }
-      catch (e) { return new Response(`callmebot fetch failed: ${e}`, { status: 502 }); }
+      catch (e) { console.error("callmebot fetch failed", e); return new Response("callmebot fetch failed", { status: 502 }); }
       if (!res.ok) return new Response(`callmebot error: ${res.status}`, { status: 502 });
       const { error: markErr } = await db.from("notify_config").update({ last_digest_date: todayIso }).eq("id", 1);
       if (markErr) return new Response(`digest sent but mark failed: ${markErr.message}`, { status: 500 });
@@ -166,7 +166,7 @@ Deno.serve(async () => {
       const prepMsg = formatPrepList(prepOrders, ingredientNames, sauceNames, tomorrow.dateLabel);
       let prepRes: Response;
       try { prepRes = await fetch(callmebotUrl(cfg.recipient_phone, cfg.callmebot_apikey, prepMsg)); }
-      catch (e) { return new Response(`prep fetch failed: ${e}`, { status: 502 }); }
+      catch (e) { console.error("prep fetch failed", e); return new Response("prep fetch failed", { status: 502 }); }
       if (!prepRes.ok) return new Response(`prep callmebot error: ${prepRes.status}`, { status: 502 });
       const { error: pMarkErr } = await db.from("notify_config").update({ last_prep_date: tomorrow.todayIso }).eq("id", 1);
       if (pMarkErr) return new Response(`prep sent but mark failed: ${pMarkErr.message}`, { status: 500 });

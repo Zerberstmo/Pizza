@@ -6,6 +6,12 @@
 
 ## 2026-07-19
 
+- **`daily-digest`-Fehlermeldungen gehärtet (Security, defensiv):** Die beiden `fetch`-`catch`-Blöcke
+  interpolierten `${e}` in den Response-Body — bei einem Fetch-Fehler hätte theoretisch die
+  apikey-behaftete CallMeBot-URL im Body landen können (nur an den privilegierten Cron-Aufrufer, daher
+  P3). Jetzt: generische Meldung an den Aufrufer (`callmebot fetch failed` / `prep fetch failed`), Detail
+  via `console.error` serverseitig geloggt. `notify-special-order` hat das Muster nicht. Betreiber:
+  `bunx supabase functions deploy daily-digest`.
 - **Mobile-Responsivität (horizontaler Überlauf):** Am Handy musste man die Seite erst herauszoomen, um
   den rechten Rand zu sehen — Symptom eines horizontalen Überlaufs. Fix in zwei Ebenen: (1) globales
   Sicherheitsnetz in `theme.css` (`html, body { overflow-x: hidden; max-width: 100% }`), das horizontalen
