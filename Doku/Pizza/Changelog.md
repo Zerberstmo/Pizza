@@ -6,6 +6,12 @@
 
 ## 2026-07-18
 
+- **Dashboard-Reset (weicher Reset-Punkt):** Neue Admin-Seite `/admin/einstellungen` — der Admin setzt
+  per zweistufigem Confirm einen Reset-Zeitpunkt (`app_config.dashboard_reset_at`, Migration `0018`), ab
+  dem das Dashboard zählt; „Auf all-time zurückstellen" setzt ihn wieder auf `null`. Nicht destruktiv:
+  Bestellungen, Historie und WhatsApp-Digest bleiben unberührt (`getDashboardStats` filtert
+  `created_at >= reset`, `computeDashboard` unverändert). Dashboard zeigt den Stichtag „Statistik seit …".
+  Betreiber: `bunx supabase db push` (0018).
 - **Öffnungstage per Kalender:** Der Admin plant unter `/admin/tage` konkrete Kalendertage
   (Kalender-Raster, 4 Wochen rollend) statt fester Wochentage — für unregelmäßigen Betrieb. Neue
   Tabelle `open_days` (Admin schreibt, Kunden lesen, RLS); `validate_order` (Migration `0017`) prüft
