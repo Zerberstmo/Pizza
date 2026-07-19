@@ -69,7 +69,7 @@ export default function SaucesPage(): React.ReactElement {
       <AsyncBoundary loading={loading} error={error} data={list}
         empty={<p className="text-sm text-muted-foreground text-center py-8">Noch keine Soßen.</p>}>
         {(sauces: Sauce[]) => (
-          <div className="space-y-2">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 items-start">
             {sauces.map((s) => (
               <Card key={s.id} className={cn(!s.available && "opacity-40")}>
                 <CardContent className="py-3 px-4 flex items-center gap-3">

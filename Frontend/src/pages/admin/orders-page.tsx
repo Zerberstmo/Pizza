@@ -43,7 +43,7 @@ export default function OrdersPage(): React.ReactElement {
             return <p className="text-sm text-muted-foreground text-center py-8">Keine {showDone ? "" : "aktiven "}Bestellungen.</p>;
           }
           return (
-            <div className="space-y-3">
+            <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3 items-start">
               {shown.map((o) => {
                 const nx = nextStatus(o.status);
                 return (

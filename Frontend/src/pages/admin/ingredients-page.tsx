@@ -135,7 +135,7 @@ export default function IngredientsPage(): React.ReactElement {
                   {catList.map((c) => <TabsTrigger key={c} value={c} className="flex-1 text-xs">{c}</TabsTrigger>)}
                 </TabsList>
                 {catList.map((cat) => (
-                  <TabsContent key={cat} value={cat} className="space-y-2 mt-3">
+                  <TabsContent key={cat} value={cat} className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 items-start mt-3">
                     {items.filter((i) => i.category === cat).length === 0 && (
                       <p className="text-sm text-muted-foreground text-center py-6">Keine Zutaten in dieser Kategorie.</p>
                     )}

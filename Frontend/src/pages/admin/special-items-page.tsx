@@ -91,7 +91,7 @@ export default function SpecialItemsPage(): React.ReactElement {
       <AsyncBoundary loading={loading} error={error} data={items}
         empty={<p className="text-sm text-muted-foreground text-center py-8">Noch keine Sonderartikel.</p>}>
         {(list: SpecialItem[]) => (
-          <div className="space-y-3">
+          <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3 items-start">
             {list.map((it) => (
               <Card key={it.id} className={it.active ? "" : "opacity-45"}>
                 <CardContent className="pt-4 pb-4 space-y-3">

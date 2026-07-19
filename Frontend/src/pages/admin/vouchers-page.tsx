@@ -138,7 +138,7 @@ export default function VouchersPage(): React.ReactElement {
       <AsyncBoundary loading={loading} error={error} data={list}
         empty={<p className="text-sm text-muted-foreground text-center py-8">Noch keine Gutscheine erstellt.</p>}>
         {(vouchers: VoucherDef[]) => (
-          <div className="space-y-3">
+          <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3 items-start">
             {vouchers.map((v) => {
               const pct = Math.min(100, Math.round((v.uses / v.maxUses) * 100));
               return (

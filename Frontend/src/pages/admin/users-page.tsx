@@ -138,7 +138,7 @@ export default function UsersPage(): React.ReactElement {
       <AsyncBoundary loading={loading} error={error} data={list}
         empty={<p className="text-sm text-muted-foreground text-center py-8">Noch keine Nutzer.</p>}>
         {(users: User[]) => (
-          <div className="space-y-2">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 items-start">
             {users.map((u) => {
               const isSelf = u.id === currentUser?.id;
               return (

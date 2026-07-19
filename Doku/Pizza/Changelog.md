@@ -6,6 +6,11 @@
 
 ## 2026-07-19
 
+- **Admin-Desktop-Layout, Phase 2 (Listen mehrspaltig):** Die sechs Admin-Listenseiten (Bestellungen,
+  Nutzer, Zutaten, Soßen, Gutscheine, Sonderartikel) zeigen ihre Karten auf großen Schirmen jetzt in
+  responsiven Rastern statt als einspaltiger Stapel — kompakte Listen `sm:grid-cols-2 xl:grid-cols-3`,
+  reichere `md:grid-cols-2 2xl:grid-cols-3`, jeweils `items-start`. Handy bleibt einspaltig. Nur der
+  jeweilige Listen-Container-`className` geändert, keine Logik/Formulare angefasst. Kein Betreiber-Deploy.
 - **Admin-Desktop-Layout, Phase 1 (Shell):** Auf großen Bildschirmen (`lg`+) zeigt der Admin-Bereich jetzt
   eine feste linke **Seitenleiste** mit vertikaler Navigation (Logo oben, 13 Punkte, E-Mail/Abmelden im Fuß)
   statt der scrollenden Tab-Leiste; der Inhalt nutzt die volle Breite neben der Seitenleiste. Auf dem Handy bleibt alles
