@@ -8,7 +8,7 @@
 
 - **Admin-Desktop-Layout, Phase 1 (Shell):** Auf großen Bildschirmen (`lg`+) zeigt der Admin-Bereich jetzt
   eine feste linke **Seitenleiste** mit vertikaler Navigation (Logo oben, 13 Punkte, E-Mail/Abmelden im Fuß)
-  statt der scrollenden Tab-Leiste; der Inhalt ist auf `max-w-5xl` zentriert. Auf dem Handy bleibt alles
+  statt der scrollenden Tab-Leiste; der Inhalt nutzt die volle Breite neben der Seitenleiste. Auf dem Handy bleibt alles
   unverändert (Kopfzeile + scrollende Tab-Leiste, jetzt `lg:hidden`). Reiner Layout-Umbau in
   `admin-shell.tsx`, `NAV`/Auth unverändert. Phase 2 (Listenseiten mehrspaltig) und Phase 3 (Konfig/Dashboard)
   folgen separat. Kein Betreiber-Deploy (nur Frontend).

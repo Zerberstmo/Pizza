@@ -98,7 +98,7 @@ export default function AdminLayout(): React.ReactElement {
         {/* Inhalt */}
         <main className="flex-1 overflow-auto">
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }}>
-            <div className="mx-auto w-full max-w-5xl">
+            <div className="w-full">
               <Outlet />
             </div>
           </motion.div>
