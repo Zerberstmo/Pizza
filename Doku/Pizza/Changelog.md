@@ -6,6 +6,12 @@
 
 ## 2026-07-19
 
+- **Admin-Desktop-Layout, Phase 1 (Shell):** Auf großen Bildschirmen (`lg`+) zeigt der Admin-Bereich jetzt
+  eine feste linke **Seitenleiste** mit vertikaler Navigation (Logo oben, 13 Punkte, E-Mail/Abmelden im Fuß)
+  statt der scrollenden Tab-Leiste; der Inhalt ist auf `max-w-5xl` zentriert. Auf dem Handy bleibt alles
+  unverändert (Kopfzeile + scrollende Tab-Leiste, jetzt `lg:hidden`). Reiner Layout-Umbau in
+  `admin-shell.tsx`, `NAV`/Auth unverändert. Phase 2 (Listenseiten mehrspaltig) und Phase 3 (Konfig/Dashboard)
+  folgen separat. Kein Betreiber-Deploy (nur Frontend).
 - **Favoriten bearbeiten & benennen:** Gespeicherte Favoriten (eigene Pizzen) lassen sich jetzt
   umbenennen und im Rezept ändern. `use-favorites` bekam `rename(id, name)` und `update(id, patch)` plus
   reine, mit `bun:test` getestete Helfer `applyRename`/`applyUpdate` (leerer Name = No-op, unbekannte id =
