@@ -6,6 +6,13 @@
 
 ## 2026-07-19
 
+- **Fix: Tailwind-Breakpoints fehlten (Responsive-Varianten global wirkungslos):** Im `@theme` von
+  `theme.css` waren keine `--breakpoint-*` definiert → Tailwind v4 erzeugte **keine** `sm:`/`md:`/`lg:`/…
+  -Varianten, das gebaute CSS hatte null `min-width`-Media-Queries. Dadurch blieb die Admin-Seitenleiste
+  (Phase 1, `lg:`) und die mehrspaltigen Listen (Phase 2) auf **jeder** Breite wirkungslos — auch bei
+  2000 px erschien die Handy-Ansicht. Standard-Breakpoints (40/48/64/80/96 rem) explizit ergänzt; im Build
+  verifiziert (alle fünf `min-width`-Media-Queries jetzt vorhanden). Betrifft die gesamte App, war aber nur
+  im Admin-Desktop sichtbar (davor keine Responsive-Klassen genutzt). Kein Betreiber-Deploy (nur Frontend).
 - **Admin-Desktop-Layout, Phase 2 (Listen mehrspaltig):** Die sechs Admin-Listenseiten (Bestellungen,
   Nutzer, Zutaten, Soßen, Gutscheine, Sonderartikel) zeigen ihre Karten auf großen Schirmen jetzt in
   responsiven Rastern statt als einspaltiger Stapel — kompakte Listen `sm:grid-cols-2 xl:grid-cols-3`,
