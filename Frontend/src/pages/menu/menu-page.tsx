@@ -1,7 +1,8 @@
 import type React from "react";
+import { useState } from "react";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router";
-import { X } from "lucide-react";
+import { X, Pencil } from "lucide-react";
 import { getMenu, getIngredients, getConfig, getSauces } from "@/lib/data/store";
 import { useAsync } from "@/hooks/use-async";
 import { useCart } from "@/hooks/use-cart";
@@ -22,8 +23,10 @@ export default function MenuPage(): React.ReactElement {
   const config = useAsync(getConfig);
   const sauces = useAsync(getSauces);
   const { addToCart, count } = useCart();
-  const { favorites, remove } = useFavorites();
+  const { favorites, remove, rename } = useFavorites();
   const navigate = useNavigate();
+  const [renameId, setRenameId] = useState<string | null>(null);
+  const [renameDraft, setRenameDraft] = useState("");
 
   const modes = config.data ? availableServiceModes(config.data) : [];
   const serviceLabel =
@@ -64,7 +67,21 @@ export default function MenuPage(): React.ReactElement {
                 <div key={f.id} className="rounded-2xl border border-border bg-card p-3 relative">
                   <button type="button" className="absolute top-2 right-2 text-muted-foreground hover:text-destructive" onClick={() => remove(f.id)}><X size={13} /></button>
                   <div className="h-24 mx-auto aspect-square"><PizzaSVG selected={f.ingredientIds} sauceColor={color} /></div>
-                  <p className="font-black text-sm leading-tight mt-2">{f.name}</p>
+                  {renameId === f.id ? (
+                    <input autoFocus value={renameDraft} onChange={(e) => setRenameDraft(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") { rename(f.id, renameDraft); setRenameId(null); }
+                        if (e.key === "Escape") setRenameId(null);
+                      }}
+                      onBlur={() => { rename(f.id, renameDraft); setRenameId(null); }}
+                      className="w-full mt-2 bg-transparent outline-none border-b border-primary/40 font-black text-sm" />
+                  ) : (
+                    <div className="flex items-center gap-1 mt-2">
+                      <p className="font-black text-sm leading-tight flex-1 min-w-0 truncate">{f.name}</p>
+                      <button type="button" className="text-muted-foreground hover:text-primary shrink-0"
+                        onClick={() => { setRenameId(f.id); setRenameDraft(f.name); }} aria-label="Umbenennen"><Pencil size={12} /></button>
+                    </div>
+                  )}
                   <button type="button"
                     onClick={() => addToCart(f.name, f.ingredientIds, f.sauceId)}
                     className="mt-2 w-full bg-primary/10 border border-primary/20 rounded-lg py-2 text-xs font-bold text-primary text-center hover:bg-primary hover:text-white transition-all">

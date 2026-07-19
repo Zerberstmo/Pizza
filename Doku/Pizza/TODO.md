@@ -5,6 +5,7 @@
 
 | Prio | Beschreibung | Status | Abhängigkeiten |
 |------|--------------|--------|----------------|
+| P3 | ~~Favoriten bearbeiten & benennen~~ | erledigt (2026-07-19) — `use-favorites` `rename`/`update` (+ getestete `applyRename`/`applyUpdate`); Konfigurator-Bearbeiten-Modus (überschreibt statt Duplikat, „als neuen speichern"), Namensfeld beim Speichern, Umbenennen per Stift in Favoritenleiste + Speisekarten-Kachel. Rein lokal, kein Deploy. Spec: `docs/superpowers/specs/2026-07-19-favoriten-bearbeiten-design.md`. | — |
 | P2 | ~~Mobile-Responsivität: horizontaler Überlauf am Handy~~ | erledigt (2026-07-19) — globales `overflow-x`-Sicherheitsnetz in `theme.css` + 360-px-Audit; Admin-Header-E-Mail getruncatet. Spec/Plan: `docs/superpowers/{specs,plans}/2026-07-19-mobile-overflow-*`. Kein Betreiber-Deploy (nur Frontend). | — |
 | P3 | PC-/Desktop-Layout (Kunden echtes Web-Layout, Admin Seitenleiste) — bewusst aus dem Handy-Fix ausgeklammert | offen | Mobile-Overflow-Fix |
 | P2 | ~~Dashboard-Reset-Button (weicher Reset-Punkt)~~ | erledigt (2026-07-18) — Admin-Seite `/admin/einstellungen`: Reset-Zeitpunkt `app_config.dashboard_reset_at` (Migration `0018`), zweistufiger Confirm + „auf all-time zurückstellen"; `getDashboardStats` filtert ab Reset, nicht destruktiv (Bestellungen/Digest/Historie unberührt). Betreiber: `bunx supabase db push` (0018). | — |

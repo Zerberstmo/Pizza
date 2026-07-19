@@ -16,6 +16,7 @@ import { SaucePicker } from "@/components/pizza/sauce-picker";
 import { FavoritesBar } from "@/components/pizza/favorites-bar";
 import { AsyncBoundary } from "@/components/common/async-boundary";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -24,11 +25,14 @@ export default function ConfiguratorPage(): React.ReactElement {
   const { data, loading, error } = useAsync(getIngredients);
   const { data: sauces } = useAsync(getSauces);
   const { addToCart } = useCart();
-  const { favorites, add: addFavorite, isFull } = useFavorites();
+  const { favorites, add: addFavorite, update: updateFavorite, isFull } = useFavorites();
   const navigate = useNavigate();
   const [selected, setSelected] = useState<string[]>([]);
   const [sauceId, setSauceId] = useState<string>("");
   const [favMsg, setFavMsg] = useState<string>("");
+  const [editingFavId, setEditingFavId] = useState<string | null>(null); // geladener Favorit im Bearbeiten-Modus
+  const [favName, setFavName] = useState<string>("");
+  const [saveOpen, setSaveOpen] = useState<boolean>(false);
 
   // Default-Soße setzen, sobald geladen und noch keine gewählt.
   const availableSauces = (sauces ?? []).filter((s) => s.available);
@@ -45,7 +49,39 @@ export default function ConfiguratorPage(): React.ReactElement {
     if (selected.length === 0) return;
     addToCart("Eigene Pizza", selected, sauceId);
     setSelected([]);
+    setEditingFavId(null);
+    setSaveOpen(false);
     navigate("/warenkorb");
+  };
+
+  const flash = (m: string) => { setFavMsg(m); setTimeout(() => setFavMsg(""), 2000); };
+  const suggestName = () => `Eigene Pizza ${favorites.length + 1}`;
+
+  // Öffnet das Namensfeld zum Speichern. Beim Bearbeiten eines geladenen Favoriten ist es ohnehin sichtbar.
+  const openSaveFav = () => {
+    if (selected.length === 0) return;
+    if (!editingFavId && isFull) { flash("Max. 5 Favoriten – lösche zuerst einen."); return; }
+    if (!editingFavId) setFavName(suggestName());
+    setSaveOpen(true);
+  };
+  // Speichert bzw. aktualisiert je nach Modus.
+  const saveFav = () => {
+    if (selected.length === 0) return;
+    if (editingFavId) {
+      updateFavorite(editingFavId, { name: favName, ingredientIds: selected, sauceId });
+      flash("Favorit aktualisiert.");
+      setEditingFavId(null);
+    } else {
+      const ok = addFavorite(favName.trim() || suggestName(), selected, sauceId);
+      flash(ok ? "Als Favorit gespeichert." : "Max. 5 Favoriten – lösche zuerst einen.");
+    }
+    setSaveOpen(false);
+  };
+  // Im Bearbeiten-Modus stattdessen als zusätzlichen (neuen) Favoriten ablegen.
+  const saveFavAsNew = () => {
+    const ok = addFavorite(favName.trim() || suggestName(), selected, sauceId);
+    flash(ok ? "Als neuer Favorit gespeichert." : "Max. 5 Favoriten – lösche zuerst einen.");
+    if (ok) { setEditingFavId(null); setSaveOpen(false); }
   };
 
   return (
@@ -69,7 +105,10 @@ export default function ConfiguratorPage(): React.ReactElement {
           }, []);
           return (
             <div className="px-4 mt-5">
-              <FavoritesBar onLoad={(fav: FavoritePizza) => { setSelected(fav.ingredientIds); setSauceId(fav.sauceId); }} />
+              <FavoritesBar onLoad={(fav: FavoritePizza) => {
+                setSelected(fav.ingredientIds); setSauceId(fav.sauceId);
+                setEditingFavId(fav.id); setFavName(fav.name); setSaveOpen(true);
+              }} />
               {/* Live-Vorschau */}
               <div className="flex items-start gap-4 mb-5">
                 <div className="w-36 h-36 shrink-0">
@@ -176,30 +215,41 @@ export default function ConfiguratorPage(): React.ReactElement {
       {/* Sticky CTA */}
       <div className="fixed bottom-[68px] left-0 right-0 z-40 px-4 pb-2 max-w-lg mx-auto">
         <Card className="shadow-2xl shadow-black/60">
-          <CardContent className="py-3 px-4 flex items-center justify-between gap-4">
-            <div>
-              <p className="text-xs text-muted-foreground">
-                {selected.length > 0 ? `${selected.length} Zutat${selected.length !== 1 ? "en" : ""}` : "Keine Zutaten"}
-              </p>
-              <p className="font-black text-xl text-primary leading-tight">10,00 €</p>
+          <CardContent className="py-3 px-4 space-y-2">
+            {(saveOpen || editingFavId) && (
+              <div className="flex items-center gap-2">
+                <Input value={favName} onChange={(e) => setFavName(e.target.value)}
+                  placeholder="Name des Favoriten" className="h-9"
+                  onKeyDown={(e) => e.key === "Enter" && saveFav()} />
+                <Button size="sm" className="shrink-0" onClick={saveFav}>
+                  {editingFavId ? "Aktualisieren" : "Speichern"}
+                </Button>
+              </div>
+            )}
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs text-muted-foreground">
+                  {selected.length > 0 ? `${selected.length} Zutat${selected.length !== 1 ? "en" : ""}` : "Keine Zutaten"}
+                </p>
+                <p className="font-black text-xl text-primary leading-tight">10,00 €</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" disabled={selected.length === 0} onClick={openSaveFav} className="gap-1.5">
+                  ♥ {editingFavId ? "Bearbeiten" : "Favorit"}
+                </Button>
+                <Button onClick={addOwnPizza} disabled={selected.length === 0} className="gap-2 shadow-lg shadow-primary/20">
+                  + Warenkorb
+                </Button>
+              </div>
             </div>
-            <Button
-              variant="outline"
-              disabled={selected.length === 0 || isFull}
-              onClick={() => {
-                const ok = addFavorite(`Eigene Pizza ${favorites.length + 1}`, selected, sauceId);
-                setFavMsg(ok ? "Als Favorit gespeichert." : "Max. 5 Favoriten – lösche zuerst einen.");
-                setTimeout(() => setFavMsg(""), 2000);
-              }}
-              className="gap-1.5"
-            >
-              ♥ Favorit
-            </Button>
-            <Button onClick={addOwnPizza} disabled={selected.length === 0} className="gap-2 shadow-lg shadow-primary/20">
-              + Warenkorb
-            </Button>
+            {editingFavId && (
+              <button type="button" onClick={saveFavAsNew}
+                className="text-[11px] text-muted-foreground underline hover:text-foreground">
+                Stattdessen als neuen Favoriten speichern
+              </button>
+            )}
+            {favMsg && <p className="text-xs text-muted-foreground text-center">{favMsg}</p>}
           </CardContent>
-          {favMsg && <p className="text-xs text-muted-foreground text-center pb-2">{favMsg}</p>}
         </Card>
       </div>
     </div>

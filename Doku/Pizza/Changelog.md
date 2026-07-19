@@ -6,6 +6,15 @@
 
 ## 2026-07-19
 
+- **Favoriten bearbeiten & benennen:** Gespeicherte Favoriten (eigene Pizzen) lassen sich jetzt
+  umbenennen und im Rezept ändern. `use-favorites` bekam `rename(id, name)` und `update(id, patch)` plus
+  reine, mit `bun:test` getestete Helfer `applyRename`/`applyUpdate` (leerer Name = No-op, unbekannte id =
+  No-op). Im Konfigurator lädt das Antippen eines Favoriten diesen in den Bearbeiten-Modus: der Speichern-
+  Bereich zeigt ein Namensfeld, der Button heißt „Aktualisieren" und überschreibt den bestehenden Favoriten
+  (kein Duplikat) — plus „Stattdessen als neuen Favoriten speichern". Neue Favoriten werden mit eigenem Namen
+  gespeichert (Vorschlag „Eigene Pizza N"). Nachträgliches Umbenennen per Stift-Icon in der Konfigurator-
+  Favoritenleiste und auf der Speisekarten-Kachel. Bleibt rein lokal (`localStorage`, max. 5). Kein
+  Betreiber-Deploy (nur Frontend).
 - **Rest-Härtung (Teil 2 — Infrastruktur):** (1) `auth.role()` (deprecated) in den vier authenticated-Read-Policies
   (`ingredients`/`sauces`/`vouchers`/`app_config`) und im `protect_profile_columns`-Trigger durch die aktuelle
   `auth.jwt() ->> 'role'` ersetzt — verhaltensgleich (Migration `0019`). (2) `admin-users`-Edge-Function: CORS von
