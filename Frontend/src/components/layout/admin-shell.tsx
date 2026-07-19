@@ -40,9 +40,9 @@ export default function AdminLayout(): React.ReactElement {
           <ChefHat size={16} className="text-primary" />
           <span className="font-black text-sm">Pizza Admin</span>
         </div>
-        <div className="flex items-center gap-1">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/profil")} className="text-xs text-muted-foreground gap-1.5 h-7">
-            <User size={11} /> {currentUser?.email}
+        <div className="flex items-center gap-1 min-w-0">
+          <Button variant="ghost" size="sm" onClick={() => navigate("/profil")} className="text-xs text-muted-foreground gap-1.5 h-7 max-w-[45vw] min-w-0 truncate">
+            <User size={11} className="shrink-0" /> {currentUser?.email}
           </Button>
           <Button variant="ghost" size="sm" onClick={handleLogout} className="text-xs text-muted-foreground gap-1.5 h-7">
             <LogOut size={11} /> Abmelden
