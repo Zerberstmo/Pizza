@@ -6,6 +6,12 @@
 
 ## 2026-07-19
 
+- **Sonderartikel: Basisstufe `min_qty:1` im Admin-UI erzwungen:** Im `GrantsEditor` werden Tier-Änderungen
+  und -Löschungen, die die Basisstufe (`min_qty 1`) entfernen würden, jetzt verworfen; der Löschen-Button der
+  einzigen Basisstufe ist deaktiviert, und bei Altdaten ohne Basisstufe erscheint ein Warnhinweis. Neue Stufen
+  starten bei `max(min_qty)+1` statt erneut bei 1. Verhindert, dass Kundenbestellungen serverseitig an
+  „keine passende Preisstaffel" (Migration `0012`) scheitern, ohne dass der Admin es merkt. Kein Betreiber-Deploy
+  (nur Frontend).
 - **`daily-digest`-Fehlermeldungen gehärtet (Security, defensiv):** Die beiden `fetch`-`catch`-Blöcke
   interpolierten `${e}` in den Response-Body — bei einem Fetch-Fehler hätte theoretisch die
   apikey-behaftete CallMeBot-URL im Body landen können (nur an den privilegierten Cron-Aufrufer, daher

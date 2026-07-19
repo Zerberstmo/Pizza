@@ -152,12 +152,22 @@ function GrantsEditor({ itemId, profiles }: { itemId: string; profiles: User[] }
 
   // Staffeln: die Stufe min_qty:1 ist der Basispreis und muss erhalten bleiben — sonst findet
   // special_line_price (Migration 0012) für kleine Mengen keine Stufe und die Bestellung scheitert.
+  // Deshalb im UI erzwingen: Änderungen, die die Basisstufe entfernen würden, werden verworfen.
+  const hasBaseTier = (tiers: Tier[]) => tiers.some((t) => t.min_qty === 1);
   const setTier = (g: SpecialGrant, idx: number, patch: Partial<Tier>) => {
     const tiers = g.tiers.map((t, i) => (i === idx ? { ...t, ...patch } : t));
+    if (!hasBaseTier(tiers)) return; // Basisstufe „ab Menge 1“ muss erhalten bleiben
     void persist({ ...g, tiers });
   };
-  const addTier = (g: SpecialGrant) => void persist({ ...g, tiers: [...g.tiers, { min_qty: 1, unit_price: 0 }] });
-  const removeTier = (g: SpecialGrant, idx: number) => void persist({ ...g, tiers: g.tiers.filter((_, i) => i !== idx) });
+  const addTier = (g: SpecialGrant) => {
+    const nextMin = Math.max(1, ...g.tiers.map((t) => t.min_qty)) + 1;
+    void persist({ ...g, tiers: [...g.tiers, { min_qty: nextMin, unit_price: 0 }] });
+  };
+  const removeTier = (g: SpecialGrant, idx: number) => {
+    const tiers = g.tiers.filter((_, i) => i !== idx);
+    if (tiers.length === 0 || !hasBaseTier(tiers)) return; // Basisstufe darf nicht entfernt werden
+    void persist({ ...g, tiers });
+  };
 
   if (loading) return <p className="text-xs text-muted-foreground">Lädt…</p>;
 
@@ -191,7 +201,11 @@ function GrantsEditor({ itemId, profiles }: { itemId: string; profiles: User[] }
                   <Input type="number" min="0" step="0.5" className="h-8 w-24" value={t.unit_price}
                     onChange={(e) => setTier(g, idx, { unit_price: parseFloat(e.target.value) || 0 })} />
                   <span className="text-xs text-muted-foreground">€/Stk</span>
-                  <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-destructive" onClick={() => removeTier(g, idx)}>
+                  <Button variant="ghost" size="icon"
+                    className="h-6 w-6 text-muted-foreground hover:text-destructive disabled:opacity-30 disabled:pointer-events-none"
+                    disabled={t.min_qty === 1 && g.tiers.filter((x) => x.min_qty === 1).length === 1}
+                    title={t.min_qty === 1 ? "Basisstufe „ab Menge 1“ kann nicht entfernt werden" : "Stufe entfernen"}
+                    onClick={() => removeTier(g, idx)}>
                     <X size={11} />
                   </Button>
                 </div>
@@ -199,6 +213,9 @@ function GrantsEditor({ itemId, profiles }: { itemId: string; profiles: User[] }
               <Button variant="outline" size="sm" className="text-xs gap-1" onClick={() => addTier(g)}>
                 <Plus size={11} /> Stufe
               </Button>
+              {!hasBaseTier(g.tiers) && (
+                <p className="text-[11px] text-destructive">⚠ Ohne Stufe „ab Menge 1“ schlagen Kundenbestellungen dieses Artikels fehl — bitte eine Basisstufe anlegen.</p>
+              )}
               <p className="text-[11px] text-muted-foreground">Beispiel 3 Stück: {formatPrice(priceForQty(g.tiers, 3))}</p>
             </div>
           </CardContent>
