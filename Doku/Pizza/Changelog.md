@@ -6,6 +6,14 @@
 
 ## 2026-07-19
 
+- **Rest-Härtung (Teil 2 — Infrastruktur):** (1) `auth.role()` (deprecated) in den vier authenticated-Read-Policies
+  (`ingredients`/`sauces`/`vouchers`/`app_config`) und im `protect_profile_columns`-Trigger durch die aktuelle
+  `auth.jwt() ->> 'role'` ersetzt — verhaltensgleich (Migration `0019`). (2) `admin-users`-Edge-Function: CORS von
+  `*` auf eine Origin-Allowlist (Prod + localhost + Vercel-Preview-Regex) umgestellt und Eingabe-Validierung ergänzt
+  (E-Mail-Format, Passwortlänge ≥ 6, `userId` vorhanden, Rolle auf `customer`/`admin` begrenzt); Catch gibt jetzt
+  generisch „Interner Fehler" statt `String(e)`. (3) Defense-in-Depth: Format-CHECK `NOT VALID` auf
+  `orders.pickup_date` (`YYYY-MM-DD`) und `orders.pickup_time` (`HH:MM`) (Migration `0020`). Betreiber:
+  `bunx supabase db push` (0019+0020) + `bunx supabase functions deploy admin-users`.
 - **Rest-Härtung (Teil 1):** (1) Admin-Nutzerverwaltung — Toggle/Löschen/Passwort-Reset warfen bei Fehler
   bisher unbemerkt (`void`/unhandled); jetzt `try/catch` mit sichtbarem Fehler-Banner, optimistische Updates
   nur bei Erfolg. (2) Passwort-Reset-Seite — `busy`-State schützt vor Doppelklick/Doppel-Enter (Button
