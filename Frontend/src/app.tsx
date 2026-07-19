@@ -10,7 +10,7 @@ export default function App() {
       <CartProvider>
         <FavoritesProvider>
           <div
-            className="min-h-screen bg-background text-foreground max-w-lg mx-auto relative"
+            className="min-h-screen bg-background text-foreground max-w-lg lg:max-w-none mx-auto relative"
             style={{ fontFamily: "'DM Sans', sans-serif" }}
           >
             <RouterProvider router={router} />
