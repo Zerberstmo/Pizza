@@ -6,6 +6,12 @@
 
 ## 2026-07-19
 
+- **Rest-Härtung (Teil 1):** (1) Admin-Nutzerverwaltung — Toggle/Löschen/Passwort-Reset warfen bei Fehler
+  bisher unbemerkt (`void`/unhandled); jetzt `try/catch` mit sichtbarem Fehler-Banner, optimistische Updates
+  nur bei Erfolg. (2) Passwort-Reset-Seite — `busy`-State schützt vor Doppelklick/Doppel-Enter (Button
+  disabled während des Submits, bleibt nach Erfolg gesperrt bis zum Redirect), und Enter in den Feldern löst
+  „Speichern" aus. Kein Betreiber-Deploy (nur Frontend). Offen aus dem Sammelposten: `auth.role()`→
+  `request.jwt.claims` (RLS-Migration), Edge-Function-CORS/Input-Validierung.
 - **Sonderartikel: Basisstufe `min_qty:1` im Admin-UI erzwungen:** Im `GrantsEditor` werden Tier-Änderungen
   und -Löschungen, die die Basisstufe (`min_qty 1`) entfernen würden, jetzt verworfen; der Löschen-Button der
   einzigen Basisstufe ist deaktiviert, und bei Altdaten ohne Basisstufe erscheint ein Warnhinweis. Neue Stufen

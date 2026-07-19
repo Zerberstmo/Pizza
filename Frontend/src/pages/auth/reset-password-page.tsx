@@ -16,11 +16,14 @@ export default function ResetPasswordPage(): React.ReactElement {
   const [pw, setPw] = useState("");
   const [pw2, setPw2] = useState("");
   const [msg, setMsg] = useState("");
+  const [busy, setBusy] = useState(false);
 
   const submit = async () => {
+    if (busy) return; // Doppelklick-/Doppel-Enter-Schutz
     if (!pw || pw !== pw2) { setMsg("Passwörter stimmen nicht überein."); return; }
+    setBusy(true);
     try { await updatePassword(pw); setMsg("Passwort geändert. Weiter zum Login…"); setTimeout(() => navigate("/login", { replace: true }), 1500); }
-    catch { setMsg("Reset-Link abgelaufen oder ungültig. Bitte erneut anfordern."); }
+    catch { setMsg("Reset-Link abgelaufen oder ungültig. Bitte erneut anfordern."); setBusy(false); }
   };
 
   return (
@@ -29,11 +32,13 @@ export default function ResetPasswordPage(): React.ReactElement {
         <h1 className="text-2xl font-black text-center">Neues Passwort</h1>
         <Card><CardContent className="pt-5 space-y-4">
           <div className="space-y-1.5"><Label htmlFor="p1">Neues Passwort</Label>
-            <Input id="p1" type="password" value={pw} onChange={(e) => setPw(e.target.value)} /></div>
+            <Input id="p1" type="password" value={pw} onChange={(e) => setPw(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && submit()} /></div>
           <div className="space-y-1.5"><Label htmlFor="p2">Bestätigen</Label>
-            <Input id="p2" type="password" value={pw2} onChange={(e) => setPw2(e.target.value)} /></div>
+            <Input id="p2" type="password" value={pw2} onChange={(e) => setPw2(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && submit()} /></div>
           {msg && <p className="text-xs text-muted-foreground">{msg}</p>}
-          <Button className="w-full gap-2" onClick={submit}><Check size={15} /> Speichern</Button>
+          <Button className="w-full gap-2" onClick={submit} disabled={busy}><Check size={15} /> Speichern</Button>
         </CardContent></Card>
       </div>
     </div>

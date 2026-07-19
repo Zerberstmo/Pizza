@@ -29,6 +29,7 @@ export default function UsersPage(): React.ReactElement {
   const [formErr, setFormErr] = useState("");
   const [resetId, setResetId] = useState<string | null>(null);
   const [resetPw, setResetPw] = useState("");
+  const [actionErr, setActionErr] = useState("");
 
   useEffect(() => { if (data) setList(data); }, [data]);
 
@@ -47,23 +48,34 @@ export default function UsersPage(): React.ReactElement {
     setList(fresh);
   };
 
+  const errMsg = (e: unknown) => (e instanceof Error ? e.message : "Unbekannter Fehler");
+
   const toggleActive = async (u: User) => {
     if (!list) return;
     const next = !u.active;
-    await setProfileActive(u.id, next);
-    setList(list.map((x) => (x.id === u.id ? { ...x, active: next } : x)));
+    try {
+      await setProfileActive(u.id, next);
+      setActionErr("");
+      setList(list.map((x) => (x.id === u.id ? { ...x, active: next } : x)));
+    } catch (e) { setActionErr(`Status konnte nicht geändert werden: ${errMsg(e)}`); }
   };
 
   const removeUser = async (u: User) => {
     if (!list) return;
-    await adminDeleteUser(u.id);
-    setList(list.filter((x) => x.id !== u.id));
+    try {
+      await adminDeleteUser(u.id);
+      setActionErr("");
+      setList(list.filter((x) => x.id !== u.id));
+    } catch (e) { setActionErr(`Löschen fehlgeschlagen: ${errMsg(e)}`); }
   };
 
   const applyReset = async (u: User) => {
     if (!resetPw.trim()) return;
-    await adminResetPassword(u.id, resetPw);
-    setResetId(null); setResetPw("");
+    try {
+      await adminResetPassword(u.id, resetPw);
+      setActionErr("");
+      setResetId(null); setResetPw("");
+    } catch (e) { setActionErr(`Passwort-Reset fehlgeschlagen: ${errMsg(e)}`); }
   };
 
   return (
@@ -72,6 +84,8 @@ export default function UsersPage(): React.ReactElement {
         <h2 className="font-bold text-lg">Nutzer</h2>
         <Button size="sm" className="gap-1.5 h-8 text-xs" onClick={() => setShowForm(!showForm)}><Plus size={12} /> Neuer Nutzer</Button>
       </div>
+
+      {actionErr && <p className="text-destructive text-xs flex items-center gap-1.5"><AlertCircle size={11} />{actionErr}</p>}
 
       <AnimatePresence>
         {showForm && (
