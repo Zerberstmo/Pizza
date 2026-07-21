@@ -9,18 +9,49 @@ er ist die verbindliche Reihenfolge, sofern nicht anders angegeben:
 1. **`/ecc:plan "<Aufgabe>"`** — Planner-Agent erstellt einen Blueprint (Schritte,
    Risiken, Dependencies). Dabei prüft er bestehende Doku (`Doku/Pizza/`) und
    `SETUP.md`, bevor er plant.
-2. **Umsetzen** gemäß Blueprint. Wo sinnvoll: `tdd-workflow`-Skill (Tests zuerst).
-   Bei größeren/unabhängigen Teilaufgaben: Git-Worktree-Parallelisierung nutzen.
-3. **`/code-review`** — Qualitäts- und Security-Pass durch den Code-Reviewer-Agent.
-4. **`/security-scan`** (AgentShield) — Pflicht vor jedem Commit.
-5. **Doku aktualisieren** (siehe unten, via Templates).
-6. **Changelog-Eintrag** ergänzen (`Doku/Pizza/Changelog.md`).
-7. **TODO** pflegen (`Doku/Pizza/TODO.md`).
-8. Größere Entscheidung? → **ADR** anlegen (`Doku/Pizza/Entscheidungen/`).
+
+2. **Skill-Check (PFLICHT, vor jeder Umsetzung)** — Bevor irgendein Code
+   geschrieben wird, gehe ich die verfügbare Skill-Liste durch und bewerte
+   für jeden potenziell relevanten Skill explizit JA/NEIN mit Begründung,
+   z. B.:Relevante Skill-Familien für dieses Projekt (nicht abschließend):
+   `ponytail-*` (audit, debt, gain, help, review), `caveman-*` (commit,
+   compress, help, review, stats), `design-taste-frontend*`,
+   `ui-styling`, `ui-ux-pro-max`, `imagegen-frontend-*`,
+   `image-to-code`, `stitch-design-taste`, `emil-design-eng`,
+   `full-output-enforcement`, `gpt-taste`, `high-end-visual-design`,
+   `industrial-brutalist-ui`, `llm-council`, `minimalist-ui`,
+   `redesign-existing-projects`.
+   Trifft ein Skill zu → ich rufe ihn **explizit** auf (z. B. `/ponytail-review`),
+   statt die Aufgabe direkt selbst zu implementieren. Bei Unsicherheit gilt:
+   lieber einen Skill zu viel geprüft als einen relevanten übersehen.
+
+3. **Umsetzen** gemäß Blueprint und den in Schritt 2 gewählten Skills.
+   Wo sinnvoll: `tdd-workflow`-Skill (Tests zuerst). Bei größeren/unabhängigen
+   Teilaufgaben: Git-Worktree-Parallelisierung nutzen.
+
+4. **`/code-review`** — Qualitäts- und Security-Pass durch den Code-Reviewer-Agent.
+
+5. **`/security-scan`** (AgentShield) — Pflicht vor jedem Commit.
+
+6. **Doku aktualisieren** (siehe unten, via Templates).
+
+7. **Changelog-Eintrag** ergänzen (`Doku/Pizza/Changelog.md`).
+
+8. **TODO** pflegen (`Doku/Pizza/TODO.md`).
+
+9. Größere Entscheidung? → **ADR** anlegen (`Doku/Pizza/Entscheidungen/`).
 
 Der Security-Reviewer/AgentShield-Agent wird zusätzlich automatisch bei
 sicherheitsrelevanten Änderungen (Auth, Payments, Datenzugriff) hinzugezogen,
-auch außerhalb von Schritt 4.
+auch außerhalb von Schritt 5.
+
+## Skill-Priorität (verbindlich)
+
+Installierte, aktivierte Skills haben **Vorrang** vor meinem Standardverhalten.
+Ich implementiere eine Aufgabe nicht "einfach so", wenn ein passender Skill
+existiert — auch wenn ich die Aufgabe auch ohne Skill lösen könnte. Bin ich
+unsicher, ob ein Skill passt, liste ich kurz die Kandidaten auf und wähle den
+naheliegendsten, statt den Skill-Schritt zu überspringen.
 
 ## Doku-System
 
@@ -54,6 +85,6 @@ Neue Doku-Seiten IMMER aus einer Vorlage in `Doku/Pizza/Templates/` erstellen:
 
 ## Wiederverwendung
 
-`Doku/`, diese `CLAUDE.md` und der Hook in `.claude/settings.json` sind projekt­unabhängig
+`Doku/`, diese `CLAUDE.md` und der Hook in `.claude/settings.json` sind projektunabhängig
 gestaltet und lassen sich in neue Website-Projekte kopieren. Das Tracking-Script leitet den
 Log-Pfad dynamisch aus dem Projektnamen ab.
