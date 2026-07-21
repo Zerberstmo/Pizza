@@ -118,7 +118,7 @@ Deno.serve(async () => {
   if (cfg.last_digest_date === todayIso) {
     status.push("digest: already sent");
   } else {
-    const { data: rows, error } = await db.from("orders").select("*").eq("pickup_date", todayIso);
+    const { data: rows, error } = await db.from("orders").select("*").eq("pickup_date", todayIso).neq("status", "storniert");
     if (error) return new Response(`db error: ${error.message}`, { status: 500 });
     const orders: DigestOrder[] = (rows ?? [])
       .map((r) => ({
@@ -147,7 +147,7 @@ Deno.serve(async () => {
   if (cfg.last_prep_date === tomorrow.todayIso) {
     status.push("prep: already sent");
   } else {
-    const { data: prepRows, error: prepErr } = await db.from("orders").select("items").eq("pickup_date", tomorrow.todayIso);
+    const { data: prepRows, error: prepErr } = await db.from("orders").select("items").eq("pickup_date", tomorrow.todayIso).neq("status", "storniert");
     if (prepErr) return new Response(`prep db error: ${prepErr.message}`, { status: 500 });
     const prepOrders: PrepOrder[] = (prepRows ?? []).map((r) => ({ items: r.items ?? [] }));
     const doughCount = prepOrders.reduce((s, o) => s + o.items.filter((it: PrepItem) => it.kind !== "special").length, 0);

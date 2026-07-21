@@ -99,3 +99,45 @@ Zusammenfassung ("Was wurde gemacht") ergänzt Claude während der Session.
 - **Geschätzte Kosten:** $0.36 USD
 - **Was wurde gemacht:** _(von Claude während der Session ergänzt — siehe TODO/Changelog)_
 
+
+## 2026-07-18 08:07 — Session `1fd5265a`
+
+- **Modell:** claude-haiku-4-5-20251001
+- **Dauer:** 00h 00m 20s
+- **Tokens gesamt:** 86.032
+  - Input: 20 · Output: 2.568
+  - Cache-Write: 46.490 · Cache-Read: 36.954
+- **Geschätzte Kosten:** $0.37 USD
+- **Was wurde gemacht:** _(von Claude während der Session ergänzt — siehe TODO/Changelog)_
+
+
+## 2026-07-18 16:11 — Session `c970e056`
+
+- **Modell:** claude-haiku-4-5-20251001
+- **Dauer:** 00h 00m 17s
+- **Tokens gesamt:** 85.642
+  - Input: 20 · Output: 2.286
+  - Cache-Write: 46.382 · Cache-Read: 36.954
+- **Geschätzte Kosten:** $0.37 USD
+- **Was wurde gemacht:**
+  - **Feature „Öffnungstage per Kalender" umgesetzt & nach `main` gemergt** (Brainstorming → Spec → Plan → subagent-/inline-getriebene Umsetzung): Betrieb wird jetzt als konkrete Kalendertage geplant statt fester Wochentage.
+  - Migration `0017`: neue Tabelle `open_days` (RLS: alle lesen, nur Admin schreibt); `validate_order` prüft `date ∈ open_days` statt Wochentag — byte-identisch zu `0013` außer den drei geplanten Änderungen; Sonderartikel-Sofortbestellung (`pizza_qty = 0`-Bypass) unberührt.
+  - Store `getOpenDays`/`addOpenDay`/`removeOpenDay`; `slots.ts` `getSelectableDates` (aus offenen Tagen) + neuer `calendarGrid` (TDD, 8/8); Checkout + Vorlaufzeit-Seite umgestellt; Admin `/admin/tage` als 4-Wochen-Kalenderraster.
+  - Drei nötige Plan-Abweichungen gefixt: alte `slots.test.ts`-Signatur, zweiter `getSelectableDates`-Aufrufer (lead-time-page), `AsyncBoundary`-Bug (leeres `open_days` hätte das Raster ausgeblendet).
+  - Vom Betreiber ausgerollt: Push (Vercel-Deploy), `supabase db push` (0017). Hinweis: ab Task 1 griff das Monats-Spend-Limit → restliche Reviews/Umsetzung inline.
+  - **Feature „Dashboard-Reset" umgesetzt & nach `main` gemergt** (Design lag schon vor → Plan → subagent-getrieben): Admin kann die Dashboard-Statistik auf einen weichen Reset-Punkt zurücksetzen, ohne Daten zu verlieren.
+  - Migration `0018`: Spalte `app_config.dashboard_reset_at` (nullable). Store: `dashboardResetAt`-Mapping, `setDashboardResetAt` (partielles Update), `getDashboardStats` filtert `created_at >= reset` bei unverändertem `computeDashboard`. Neue Admin-Seite `/admin/einstellungen` (zweistufiger Confirm + „auf all-time zurückstellen"), Dashboard-Hinweis „Statistik seit …".
+  - Tasks 1–4 als Fable-5-Subagenten (je Diff geprüft), Task 5 (Doku) inline nach erneutem Spend-Limit. Vom Betreiber ausgerollt (Push + `db push` 0018).
+  - Nebenbei geklärt: „Zutaten editieren" war bereits vorhanden (Stift-Button in `/admin/zutaten`) — nichts zu bauen.
+
+
+## 2026-07-19 08:03 — Session `2594d222`
+
+- **Modell:** claude-haiku-4-5-20251001
+- **Dauer:** 00h 00m 22s
+- **Tokens gesamt:** 85.136
+  - Input: 20 · Output: 2.808
+  - Cache-Write: 82.308 · Cache-Read: 0
+- **Geschätzte Kosten:** $0.58 USD
+- **Was wurde gemacht:** _(von Claude während der Session ergänzt — siehe TODO/Changelog)_
+

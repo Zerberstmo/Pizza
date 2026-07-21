@@ -131,7 +131,7 @@ export interface User {
   active: boolean;
 }
 
-export type OrderStatus = "eingegangen" | "in_arbeit" | "fertig" | "abgeholt" | "storniert";
+export type OrderStatus = "eingegangen" | "angenommen" | "in_arbeit" | "fertig" | "abgeholt" | "storniert";
 
 export interface OrderRow {
   id: string;

@@ -1,13 +1,15 @@
 import type React from "react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router";
-import { X, RotateCcw } from "lucide-react";
+import { X, RotateCcw, Ban } from "lucide-react";
 import type { OrderRow } from "@/types";
 import { describeItem } from "@/lib/public-order";
 import { formatPrice } from "@/lib/pricing";
 import { isSpecialItem, itemTitle, itemLineTotal } from "@/lib/cart-items";
 import { formatDateLabel } from "@/lib/slots";
+import { isCancellable } from "@/lib/order-status";
+import { cancelMyOrder } from "@/lib/data/store";
 import { QrCode } from "@/components/common/qr-code";
 import { OrderStatusBadge } from "@/components/common/order-status-badge";
 import { PizzaSVG } from "@/components/pizza/pizza-svg";
@@ -24,6 +26,24 @@ export function OrderQrModal({ order, labels, onClose }: {
 }): React.ReactElement {
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const [confirming, setConfirming] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
+
+  // Storno: zweistufig gegen Fehlklick. Erst „Ja" ruft die RPC; Realtime zieht die Liste nach.
+  const cancel = async () => {
+    setCancelling(true);
+    setCancelError(null);
+    try {
+      await cancelMyOrder(order.id);
+      onClose();
+    } catch {
+      setCancelError("Storno fehlgeschlagen — bitte erneut versuchen (evtl. schon in Arbeit).");
+      setConfirming(false);
+    } finally {
+      setCancelling(false);
+    }
+  };
 
   // Alle Pizza-Positionen zurück in den Warenkorb legen → Checkout.
   // Sonderartikel brauchen Code + Freischaltung und werden daher nicht mit-reordert.
@@ -108,6 +128,30 @@ export function OrderQrModal({ order, labels, onClose }: {
           <Button className="w-full gap-2" onClick={reorder}>
             <RotateCcw size={15} /> Erneut bestellen
           </Button>
+        )}
+
+        {isCancellable(order.status) && (
+          <div className="space-y-2">
+            {!confirming ? (
+              <Button variant="outline" className="w-full gap-2 text-destructive border-destructive/30 hover:bg-destructive/10"
+                onClick={() => { setConfirming(true); setCancelError(null); }}>
+                <Ban size={15} /> Bestellung stornieren
+              </Button>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-sm text-center text-muted-foreground">Bestellung wirklich stornieren?</p>
+                <div className="flex gap-2">
+                  <Button variant="outline" className="flex-1" disabled={cancelling}
+                    onClick={() => setConfirming(false)}>Abbrechen</Button>
+                  <Button className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    disabled={cancelling} onClick={cancel}>
+                    {cancelling ? "Storniere…" : "Ja, stornieren"}
+                  </Button>
+                </div>
+              </div>
+            )}
+            {cancelError && <p className="text-xs text-center text-destructive">{cancelError}</p>}
+          </div>
         )}
       </motion.div>
     </div>

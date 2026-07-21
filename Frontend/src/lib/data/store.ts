@@ -109,6 +109,13 @@ export async function createOrder(input: NewOrder): Promise<OrderData> {
   return order;
 }
 
+// Kunde storniert eigene Bestellung (nur bis „in Arbeit"; Server prüft Eigentum + Status,
+// gibt Gutschein zurück). RPC ist SECURITY DEFINER — RLS erlaubt Kunden kein Update auf orders.
+export async function cancelMyOrder(id: string): Promise<void> {
+  const { error } = await supabase.rpc("cancel_my_order", { p_order_id: id });
+  if (error) throw error;
+}
+
 // Öffentlicher Bestell-Status über den nicht-ratbaren Token (RPC umgeht RLS feld-begrenzt).
 export async function getOrderStatus(token: string): Promise<PublicOrderStatus | null> {
   const { data, error } = await supabase.rpc("get_order_status", { p_token: token });
