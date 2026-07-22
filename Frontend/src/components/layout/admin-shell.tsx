@@ -1,7 +1,7 @@
 import type React from "react";
 import { NavLink, Outlet, useNavigate } from "react-router";
 import { motion } from "motion/react";
-import { BarChart2, Calendar, Clock, Timer, Package, Droplet, Tag, Users, ChefHat, LogOut, Store, User, ClipboardList, MessageSquare, Settings, Star } from "lucide-react";
+import { BarChart2, Calendar, Package, Droplet, Tag, Users, ChefHat, LogOut, User, ClipboardList, Settings, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -12,15 +12,11 @@ const NAV: Array<{ to: string; icon: React.ElementType; label: string }> = [
   { to: "/admin/bestellungen",    icon: ClipboardList, label: "Bestellungen"  },
   { to: "/admin/dashboard",       icon: BarChart2, label: "Dashboard"      },
   { to: "/admin/tage",            icon: Calendar,  label: "Bestelltage"    },
-  { to: "/admin/oeffnungszeiten", icon: Clock,     label: "Öffnungszeiten" },
-  { to: "/admin/vorlaufzeit",     icon: Timer,     label: "Vorlaufzeit"    },
-  { to: "/admin/service",         icon: Store,     label: "Service"       },
   { to: "/admin/zutaten",         icon: Package,   label: "Zutaten"        },
   { to: "/admin/sossen",          icon: Droplet,   label: "Soßen"          },
   { to: "/admin/gutscheine",      icon: Tag,       label: "Gutscheine"     },
   { to: "/admin/sonderartikel",   icon: Star,      label: "Sonderartikel"  },
   { to: "/admin/nutzer",          icon: Users,     label: "Nutzer"         },
-  { to: "/admin/benachrichtigungen", icon: MessageSquare, label: "Benachrichtigungen" },
   { to: "/admin/einstellungen",   icon: Settings,  label: "Einstellungen"  },
 ];
 
