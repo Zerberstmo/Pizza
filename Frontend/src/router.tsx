@@ -14,14 +14,10 @@ import MyOrdersPage from "@/pages/orders/my-orders-page";
 import OrdersPage from "@/pages/admin/orders-page";
 import DashboardPage from "@/pages/admin/dashboard-page";
 import DaysPage from "@/pages/admin/days-page";
-import HoursPage from "@/pages/admin/hours-page";
-import LeadTimePage from "@/pages/admin/lead-time-page";
 import IngredientsPage from "@/pages/admin/ingredients-page";
 import SaucesPage from "@/pages/admin/sauces-page";
 import VouchersPage from "@/pages/admin/vouchers-page";
-import ServicePage from "@/pages/admin/service-page";
 import UsersPage from "@/pages/admin/users-page";
-import NotificationsPage from "@/pages/admin/notifications-page";
 import SpecialItemsPage from "@/pages/admin/special-items-page";
 import SettingsPage from "@/pages/admin/settings-page";
 
@@ -48,15 +44,15 @@ export const router = createBrowserRouter([
       { path: "bestellungen", element: <OrdersPage /> },
       { path: "dashboard", element: <DashboardPage /> },
       { path: "tage", element: <DaysPage /> },
-      { path: "oeffnungszeiten", element: <HoursPage /> },
-      { path: "vorlaufzeit", element: <LeadTimePage /> },
-      { path: "service", element: <ServicePage /> },
+      { path: "oeffnungszeiten", element: <Navigate to="/admin/einstellungen" replace /> },
+      { path: "vorlaufzeit", element: <Navigate to="/admin/einstellungen" replace /> },
+      { path: "service", element: <Navigate to="/admin/einstellungen" replace /> },
       { path: "zutaten", element: <IngredientsPage /> },
       { path: "sossen", element: <SaucesPage /> },
       { path: "gutscheine", element: <VouchersPage /> },
       { path: "sonderartikel", element: <SpecialItemsPage /> },
       { path: "nutzer", element: <UsersPage /> },
-      { path: "benachrichtigungen", element: <NotificationsPage /> },
+      { path: "benachrichtigungen", element: <Navigate to="/admin/einstellungen" replace /> },
       { path: "einstellungen", element: <SettingsPage /> },
     ],
   },

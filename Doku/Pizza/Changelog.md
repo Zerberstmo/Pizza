@@ -4,6 +4,22 @@
 
 <!-- Neue Einträge oben einfügen -->
 
+## 2026-07-22
+
+- **Admin-Desktop, Phase 3 (Einstellungen-Hub + Dashboard-Breite):** Alle Konfigurations- und
+  Dashboard-Seiten des Admin-Bereichs nutzen jetzt Desktop-Layout. Neue zentrale Seite
+  `/admin/einstellungen` (Einstellungen-Hub) mit fünf Karten im responsive Grid
+  (`md:grid-cols-2 xl:grid-cols-3`) — **Service**, **Öffnungszeiten**, **Vorlaufzeit**,
+  **Benachrichtigungen**, **Dashboard-Reset** — fasst die vier bisherigen Routen
+  (`/admin/oeffnungszeiten`, `/admin/vorlaufzeit`, `/admin/service`, `/admin/benachrichtigungen`)
+  zusammen; alte Routen leiten um, ihre vier Seiten-Dateien gelöscht. Geteilte Config-Logik
+  `useConfigEditor` im Hub ohne Lost-Updates; Benachrichtigungen + Reset selbstständig. Admin-Navigation
+  von 13 auf 9 Einträge gekürzt. Admin-Dashboard erweitert sich auf Desktop: **KPI-Tiles** in
+  4-Spalten-Gitter auf `xl`, die zwei **Charts** side-by-side auf `lg` (statt gestapelt). Neue
+  Card-Komponenten unter `Frontend/src/components/admin/settings/`. Reine Frontend-Änderung,
+  kein Betreiber-Deploy. Spec: `docs/superpowers/specs/2026-07-22-admin-desktop-phase3-design.md`,
+  Plan: `docs/superpowers/plans/2026-07-22-admin-desktop-phase3.md`.
+
 ## 2026-07-21
 
 - **Status „angenommen" + Kunden-Storno:** Neuer Zwischenstatus `angenommen` zwischen `eingegangen` und

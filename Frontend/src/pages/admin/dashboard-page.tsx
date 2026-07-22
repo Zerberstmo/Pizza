@@ -38,7 +38,7 @@ export default function DashboardPage(): React.ReactElement {
           ];
           return (
             <>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
                 {tiles.map(({ label, val, sub, col }) => (
                   <Card key={label}>
                     <CardContent className="pt-4 pb-4">
@@ -50,36 +50,38 @@ export default function DashboardPage(): React.ReactElement {
                 ))}
               </div>
 
-              <Card>
-                <CardHeader><CardTitle className="text-sm">Beliebteste Pizzen</CardTitle></CardHeader>
-                <CardContent className="pt-0">
-                  {stats.topPizzas.length > 0
-                    ? <SvgBarChart data={stats.topPizzas} />
-                    : <p className="text-xs text-muted-foreground py-6 text-center">Noch keine Daten.</p>}
-                </CardContent>
-              </Card>
+              <div className="grid gap-5 lg:grid-cols-2 items-start">
+                <Card>
+                  <CardHeader><CardTitle className="text-sm">Beliebteste Pizzen</CardTitle></CardHeader>
+                  <CardContent className="pt-0">
+                    {stats.topPizzas.length > 0
+                      ? <SvgBarChart data={stats.topPizzas} />
+                      : <p className="text-xs text-muted-foreground py-6 text-center">Noch keine Daten.</p>}
+                  </CardContent>
+                </Card>
 
-              <Card>
-                <CardHeader><CardTitle className="text-sm">Beliebteste Zutaten</CardTitle></CardHeader>
-                <CardContent className="pt-0">
-                  {stats.topIngredients.length > 0 ? (
-                    <div className="flex items-center gap-4">
-                      <SvgDonutChart data={stats.topIngredients} colors={CHART_COLORS} />
-                      <div className="space-y-1.5 flex-1">
-                        {stats.topIngredients.map((d, i) => (
-                          <div key={d.name} className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className="w-2 h-2 rounded-full shrink-0" style={{ background: CHART_COLORS[i] }} />
-                              <span className="text-xs text-muted-foreground">{d.name}</span>
+                <Card>
+                  <CardHeader><CardTitle className="text-sm">Beliebteste Zutaten</CardTitle></CardHeader>
+                  <CardContent className="pt-0">
+                    {stats.topIngredients.length > 0 ? (
+                      <div className="flex items-center gap-4">
+                        <SvgDonutChart data={stats.topIngredients} colors={CHART_COLORS} />
+                        <div className="space-y-1.5 flex-1">
+                          {stats.topIngredients.map((d, i) => (
+                            <div key={d.name} className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full shrink-0" style={{ background: CHART_COLORS[i] }} />
+                                <span className="text-xs text-muted-foreground">{d.name}</span>
+                              </div>
+                              <span className="text-xs font-bold">{d.v}×</span>
                             </div>
-                            <span className="text-xs font-bold">{d.v}×</span>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ) : <p className="text-xs text-muted-foreground py-6 text-center">Noch keine Daten.</p>}
-                </CardContent>
-              </Card>
+                    ) : <p className="text-xs text-muted-foreground py-6 text-center">Noch keine Daten.</p>}
+                  </CardContent>
+                </Card>
+              </div>
             </>
           );
         }}
