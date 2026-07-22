@@ -141,3 +141,14 @@ Zusammenfassung ("Was wurde gemacht") ergänzt Claude während der Session.
 - **Geschätzte Kosten:** $0.58 USD
 - **Was wurde gemacht:** _(von Claude während der Session ergänzt — siehe TODO/Changelog)_
 
+
+## 2026-07-21 21:38 — Session `af9029c7`
+
+- **Modell:** claude-haiku-4-5-20251001
+- **Dauer:** 00h 00m 29s
+- **Tokens gesamt:** 84.584
+  - Input: 20 · Output: 3.078
+  - Cache-Write: 44.532 · Cache-Read: 36.954
+- **Geschätzte Kosten:** $0.37 USD
+- **Was wurde gemacht:** _(von Claude während der Session ergänzt — siehe TODO/Changelog)_
+
