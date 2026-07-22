@@ -4,6 +4,23 @@
 
 <!-- Neue Einträge oben einfügen -->
 
+## 2026-07-21
+
+- **Status „angenommen" + Kunden-Storno:** Neuer Zwischenstatus `angenommen` zwischen `eingegangen` und
+  `in_arbeit` — der Betreiber bestätigt eine Bestellung, bevor die Zubereitung startet (Vorwärtskette
+  `eingegangen → angenommen → in_arbeit → fertig → abgeholt`, `storniert` als Abbruch). Kunden können ihre
+  eigene Bestellung jetzt **selbst stornieren**, solange sie noch nicht in Arbeit ist (also `eingegangen`
+  oder `angenommen`): Button „Bestellung stornieren" im `OrderQrModal` („Meine Bestellungen"), zweistufiger
+  Inline-Confirm gegen Fehlklick; die Liste zieht per Realtime nach. Ein eingelöster **Gutschein wird
+  zurückgegeben**. Storno läuft serverautoritativ über die SECURITY-DEFINER-RPC `cancel_my_order`
+  (Migration `0021`), die Eigentum (`user_id = auth.uid()`) **und** stornierbaren Status prüft — der
+  Client-`isCancellable` blendet den Button nur vor; die harte Absicherung ist der Server. CHECK-Constraint
+  additiv um `angenommen` erweitert (keine Datenmigration). `order-status.ts` um `isCancellable` + Kette/
+  Label ergänzt (Tests: 6 Status, `isCancellable`), eigenes blaues Badge für `angenommen`. Der
+  `daily-digest` filtert stornierte Bestellungen in **beiden** Blöcken (Tages-Digest + Vorbereitungsliste)
+  über `status != 'storniert'`. Betreiber: `bunx supabase db push` (0021) + `daily-digest` neu deployen.
+  Design: `docs/superpowers/specs/2026-07-15-status-angenommen-stornieren-design.md`.
+
 ## 2026-07-19
 
 - **Öffnungs-Status-Banner (Startseite):** Oben auf der Speisekarte zeigt ein dezentes Banner jetzt eine
