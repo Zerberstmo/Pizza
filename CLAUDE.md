@@ -75,6 +75,21 @@ Nach jeder Umsetzung aktualisiere ich die betroffene Doku.
 Neue Doku-Seiten IMMER aus einer Vorlage in `Doku/Pizza/Templates/` erstellen:
 `_feature.md`, `_page.md`, `_component.md`, `_adr.md`, `_bug.md`, `_changelog-entry.md`.
 
+## Verlinkung (Obsidian-Graph) — verbindlich
+
+Der Obsidian-Graph entsteht **nur** durch Links. Deshalb gilt für jede Doku-Notiz:
+
+- **Interne Verweise IMMER als Obsidian-Wikilink** `[[Dateiname]]` bzw. `[[Dateiname|Anzeigetext]]` —
+  **nicht** als relativer Markdown-Link (`[Text](../pfad.md)`). Wikilinks überleben Umbenennungen,
+  haben Autovervollständigung und erscheinen sauber im Graph.
+- Bei mehrdeutigen Dateinamen (es gibt mehrere `README.md`) den Ordner mitangeben:
+  `[[Frontend/README|Frontend-Doku]]`.
+- **Keine Waisen:** Jede neue Notiz verlinkt mindestens die Nabe [[00_CONTEXT]] zurück und ihre
+  fachlich verwandten Notizen (Feature ↔ ADR ↔ Seite ↔ Changelog/TODO). Index-/README-Seiten
+  verlinken ihre Kinder, ADRs verlinken den [[Entscheidungen/README|ADR-Index]].
+- Neue ADRs zusätzlich in die Index-Tabelle in `Entscheidungen/README.md` eintragen.
+- Einstiegspunkt und Zentrum des Vaults ist `Doku/Pizza/00_CONTEXT.md`.
+
 ## Session-Tracking (automatisch)
 
 - Am **Session-Ende** läuft automatisch der `SessionEnd`-Hook und schreibt Dauer,
@@ -88,3 +103,13 @@ Neue Doku-Seiten IMMER aus einer Vorlage in `Doku/Pizza/Templates/` erstellen:
 `Doku/`, diese `CLAUDE.md` und der Hook in `.claude/settings.json` sind projektunabhängig
 gestaltet und lassen sich in neue Website-Projekte kopieren. Das Tracking-Script leitet den
 Log-Pfad dynamisch aus dem Projektnamen ab.
+
+## graphify
+
+This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
+
+Rules:
+- For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
+- If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
+- Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
+- After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).

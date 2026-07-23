@@ -49,3 +49,6 @@ ios/
 # Supabase
 supabase/.temp/
 supabase/.branches/
+
+# graphify generated knowledge graph
+graphify-out/
