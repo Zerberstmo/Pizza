@@ -1,5 +1,7 @@
 # ADR-0002 — Backend via Supabase
 
+> Nabe: [[00_CONTEXT]] · Index: [[Entscheidungen/README|ADR-Übersicht]] · Cutover: [[ADR-0006-supabase-cutover|ADR-0006]] · Doku: [[Backend/README|Backend-Doku]]
+
 - **Status:** akzeptiert
 - **Datum:** 2026-07-09
 

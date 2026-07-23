@@ -1,5 +1,7 @@
 # ADR-0001 — Mobile-App via Capacitor
 
+> Nabe: [[00_CONTEXT]] · Index: [[Entscheidungen/README|ADR-Übersicht]] · Umsetzung: Teil-C (siehe [[TODO]])
+
 - **Status:** akzeptiert
 - **Datum:** 2026-07-09
 

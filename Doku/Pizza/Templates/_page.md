@@ -23,3 +23,7 @@
 ## Fehlerfälle & Performance
 
 <Fehlerbehandlung, Ladeverhalten, Optimierungen.>
+
+## Verwandt
+
+> Nabe: [[00_CONTEXT]] · [[Frontend/README|Frontend-Doku]] · <verwandte Seiten/Komponenten mit `[[…]]` verlinken>

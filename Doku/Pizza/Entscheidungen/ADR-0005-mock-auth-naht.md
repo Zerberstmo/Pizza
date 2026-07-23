@@ -1,5 +1,7 @@
 # ADR-0005 — Nutzer-Accounts als localStorage-Mock (Klartext-Passwörter) — Naht zu Teil-B
 
+> Nabe: [[00_CONTEXT]] · Index: [[Entscheidungen/README|ADR-Übersicht]] · ersetzt durch: [[ADR-0006-supabase-cutover|ADR-0006 Supabase-Cutover]]
+
 - **Status:** akzeptiert
 - **Datum:** 2026-07-10
 

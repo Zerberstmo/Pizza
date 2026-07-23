@@ -1,5 +1,7 @@
 # Feature — Scanbarer QR → öffentliche Bestell-Status-Seite
 
+> Nabe: [[00_CONTEXT]] · Frontend: [[Frontend/README|Frontend-Doku]] · Entscheidung: [[ADR-0007-oeffentlicher-bestell-status-token|ADR-0007]]
+
 - **Status:** fertig
 - **Zweck:** Kunde scannt den QR auf der Bestätigung und verfolgt ohne Login den Bearbeitungsstand seiner Bestellung.
 

@@ -49,7 +49,7 @@ verlängert.
   verhindern Selbst-Eskalation serverseitig, nicht nur im Client.
 - ➖ **In dieser Entwicklungsumgebung nicht testbar** — kein Netzwerkzugriff auf Supabase; hier
   wurde ausschließlich Build/Typecheck/reine Logik-Tests verifiziert, siehe
-  [SETUP-Supabase.md](../SETUP-Supabase.md).
+  [[SETUP-Supabase]].
 - ➖ Preis-/Vorlaufzeit-Validierung ist weiterhin **client-seitig** — serverseitige Härtung folgt
   erst in Teil-B4.
 - ➖ Auth wurde von Benutzername (Teil-A-Mock) auf **E-Mail** umgestellt (Supabase-Auth-Standard) —
@@ -65,7 +65,7 @@ verlängert.
   neue Passwort-Reset-Seite — auf Supabase Auth (E-Mail-basiert) umgestellt; der localStorage-Mock
   aus ADR-0005 (inkl. Klartext-Passwörter) wurde vollständig entfernt.
 - Teil-B2–B4 (Bestell-Status/Realtime, WhatsApp via CallMeBot, serverseitige Vorlauf-/
-  Preis-Validierung) folgen auf dieser Grundlage, siehe [TODO.md](../TODO.md).
+  Preis-Validierung) folgen auf dieser Grundlage, siehe [[TODO]].
 
 ## Alternativen
 

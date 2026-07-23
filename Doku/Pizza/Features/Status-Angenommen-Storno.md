@@ -1,5 +1,7 @@
 # Feature — Status „angenommen" + Bestellung stornieren
 
+> Nabe: [[00_CONTEXT]] · Frontend: [[Frontend/README|Frontend-Doku]] · verwandt: [[Sonderartikel-VIP|Sonderartikel/VIP]] · Historie: [[Changelog]] · [[TODO]]
+
 - **Status:** fertig (2026-07-21)
 - **Zweck:** Der Betreiber kann eine Bestellung erst **annehmen**, bevor die Zubereitung startet; der
   Kunde kann seine Bestellung **selbst stornieren**, solange sie noch nicht in Arbeit ist.

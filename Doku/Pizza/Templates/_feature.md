@@ -24,3 +24,7 @@
 ## Offene Punkte
 
 <TODOs / bekannte Grenzen.>
+
+## Verwandt
+
+> Nabe: [[00_CONTEXT]] · [[Frontend/README|Frontend-Doku]] · <verwandte Features/ADRs mit `[[…]]` verlinken>
