@@ -1,8 +1,39 @@
 # Changelog
 
-> Jede Änderung wird dokumentiert. Neueste zuerst. Vorlage: [Templates/_changelog-entry.md](Templates/_changelog-entry.md)
+> Jede Änderung wird dokumentiert. Neueste zuerst. Vorlage: [[Templates/_changelog-entry|_changelog-entry]]
+> Nabe: [[00_CONTEXT]] · [[TODO]] · [[Entscheidungen/README|ADRs]]
 
 <!-- Neue Einträge oben einfügen -->
+
+## 2026-07-23
+
+- **Dunkel-Premium Visual-Refresh (Frontend, Branch `feat/dark-premium-redesign`):** Das dunkle
+  Theme zu einem warm-dunklen Premium-Look weiterentwickelt (Ansatz „Design-System-Schicht",
+  subagent-parallel in zwei Wellen umgesetzt). **Tokens** in `styles/theme.css`: kalter Grundton
+  `#09090B` → warm `#0C0A09`, gestaffelte Flächen (`--card`/`--popover`/neu `--elevated`), Gold-Akzent
+  `#FBBF24` statt blassem Gelb, warme Haarlinien, `--radius` 0.625→0.75rem, neue `--primary-hover`/
+  `--primary-glow`/`--shadow-warm`, schärfere Heading-Typo; Sekundärtext-Kontrast auf AA angehoben.
+  **Neue geteilte Bausteine:** `ui/button`-Variante `glow` (CTA mit Orange-Glow + Hover-Lift),
+  `ui/card`-Prop `elevated` (warmer Schatten + Glaskante `.card-glass-edge`), `common/section-header`,
+  `common/reveal` (Fade-up via `motion/react`, respektiert `prefers-reduced-motion`). **Angewandt** auf
+  Speisekarte (SectionHeader, PizzaCard-Glow/Lift), Checkout (Glow-CTA + elevated Summary),
+  Bestätigung + öffentlicher Status (elevated Card) und Konfigurator (elevated Preview/Auswahl); Rest
+  erbt über die Tokens. 148 Unit-Tests + Build grün, reine Frontend-Änderung, kein Deploy.
+  Spec/Plan: `docs/superpowers/specs|plans/2026-07-23-dark-premium-redesign*`.
+
+- **Doku: voller Obsidian-Verlinkungs-Pass (Vault vernetzt).** Die gesamte Projektdoku unter
+  `Doku/Pizza/` wurde von losen Einzelseiten zu einem zusammenhängenden Graph verlinkt. Vorher hatten
+  nur **8 von 30** Notizen Links (22 Waisenknoten); jetzt **28 von 30** (die zwei Ausnahmen
+  `Templates/_changelog-entry` und `_session-entry` sind bewusst reine Text-Schnipsel). Alle internen
+  relativen Markdown-Links (`[Text](../pfad.md)`) auf **Obsidian-Wikilinks** (`[[Datei|Alias]]`)
+  vereinheitlicht (0 interne `.md`-Links übrig); bei mehrdeutigen `README.md` mit Ordnerpräfix
+  (`[[Frontend/README|…]]`). `00_CONTEXT.md` von Platzhalter-Gerüst zur echten **Nabe** ausgebaut
+  (Projektbeschreibung + Navigation) — **26 Notizen verlinken zurück** darauf. Der **ADR-Index**
+  (`Entscheidungen/README.md`), der noch „noch keine ADRs" behauptete, mit allen sieben ADRs als
+  Wikilink-Tabelle gefüllt; jede ADR-/Feature-/README-Seite mit Nabe- und Querverweisen versehen
+  (Feature ↔ ADR ↔ Frontend-Doku ↔ Changelog/TODO). Damit neue Notizen nicht wieder verwaisen:
+  `## Verwandt`-Backlink-Stubs in die fünf Inhalts-Templates eingebaut und eine verbindliche
+  **Wikilink-Regel** in `CLAUDE.md` ergänzt. Reine Doku-Änderung, kein Code, kein Deploy.
 
 ## 2026-07-22
 
@@ -164,7 +195,7 @@
   immer alles. `special_line_price` (SQL) spiegelt `priceForQty` (TS) — synchron halten. Reine Logik mit
   bun:test verifiziert (107 Tests grün, Typecheck + Build grün). Migration `0012` ist am 2026-07-17
   eingespielt; offen: `bunx supabase functions deploy daily-digest` + Frontend-Deploy (Merge nach `main`).
-  Details: [Features/Sonderartikel-VIP.md](Features/Sonderartikel-VIP.md).
+  Details: [[Sonderartikel-VIP]].
 - **Sonderartikel: Sofort-Bestellung + Sofort-WhatsApp** — eine Bestellung aus ausschließlich
   Sonderartikeln braucht kein Abholdatum und keine Uhrzeit mehr (Datum/Zeit = jetzt, Europe/Berlin) und
   umgeht Vorlaufzeit/Bestelltage/Öffnungszeiten/Service-Verfügbarkeit; Preis- und Zugangsprüfung bleiben
@@ -288,7 +319,7 @@
   Formatier-/Filter-Logik (`lib/digest.ts` `formatDigest`/`filterTodaysPickups`) getestet; die Edge
   Function spiegelt sie (Deno-Copy). ADR-0003 von „Push pro Bestellung" auf Digest umgeschrieben.
   Hier nur Build + Tests verifiziert (`bun test src` 48 grün); Migration `0006`, Edge Function und
-  `cron.schedule` führt der Betreiber aus (siehe [SETUP-Supabase.md](SETUP-Supabase.md)).
+  `cron.schedule` führt der Betreiber aus (siehe [[SETUP-Supabase]]).
 - **Teil-B4: serverseitige Preis-/Vorlauf-Validierung:** Postgres-`BEFORE INSERT`-Trigger
   `validate_order` (Migration `0005`) berechnet Preis/Gutschein serverseitig neu und weist ungültige
   Abhol-Slots ab (Vorlaufzeit, Wochentag, Uhrzeit, Service-Modus). Manipulierte `total`/`discount`
@@ -308,20 +339,20 @@
 
 - **Teil-B1: Supabase-Cutover (Tasks 1–8):** Umstieg von den Teil-A-Mocks auf ein echtes
   Supabase-Backend hinter der bestehenden Naht (`store.ts`/`use-auth.tsx`), siehe
-  [ADR-0006](Entscheidungen/ADR-0006-supabase-cutover.md). Supabase-Client + `.env.local`-Keys;
+  [[ADR-0006-supabase-cutover|ADR-0006]]. Supabase-Client + `.env.local`-Keys;
   SQL-Migrationen `0001` (Schema + RLS, inkl. `protect_profile_columns`-Trigger und
   `handle_new_user`, das die Rolle serverseitig auf `customer` erzwingt), `0002` (Seed), `0003`
   (`profiles.email`); Edge Function `admin-users` (Anlegen/Löschen/Passwort-Reset via
   `service_role`); alle Domänendaten + Bestellungen laufen jetzt über Supabase-Postgres statt
   localStorage. **Auth-Umstellung auf E-Mail** (statt Benutzername) — Login-, Profil- und
   Admin-Nutzerverwaltungsseiten sowie `useAuth` sprechen jetzt Supabase Auth; neue
-  Passwort-Reset-Seite. Der localStorage-Mock aus [ADR-0005](Entscheidungen/ADR-0005-mock-auth-naht.md)
+  Passwort-Reset-Seite. Der localStorage-Mock aus [[ADR-0005-mock-auth-naht|ADR-0005]]
   (inkl. Klartext-Passwörter) ist vollständig entfernt. Start-Admin „Mo" wird per Dashboard
-  angelegt und per SQL zu `admin` befördert (siehe [SETUP-Supabase.md](SETUP-Supabase.md)).
+  angelegt und per SQL zu `admin` befördert (siehe [[SETUP-Supabase]]).
   Hier nur Build/Typecheck + reine Logik-Tests verifiziert (`bun run build` grün, `bun test src`
   36/36 grün) — diese Umgebung hat keinen Netzwerkzugriff auf Supabase; die Ausführung gegen ein
   echtes Projekt (Migrationen, Edge Function, Klick-Test) obliegt dem Betreiber gemäß
-  [SETUP-Supabase.md](SETUP-Supabase.md).
+  [[SETUP-Supabase]].
 
 ## 2026-07-10
 
@@ -333,7 +364,7 @@
   Start-Admin `Mo`/`pizza` (im Profil änderbar). Datenschicht `lib/auth.ts`
   (`getUsers`/`saveUsers`/`verifyLogin`) + `hooks/use-auth.tsx` als `localStorage`-Mock
   (Klartext-Passwörter — bewusste, dokumentierte Teil-A-Grenze, siehe
-  [ADR-0005](Entscheidungen/ADR-0005-mock-auth-naht.md); Teil-B ersetzt durch Supabase-Auth).
+  [[ADR-0005-mock-auth-naht|ADR-0005]]; Teil-B ersetzt durch Supabase-Auth).
   Build + 49 Unit-Tests grün, `sauber`-Check bestanden (keine Altlasten der alten Admin-Auth).
 - **Auth (Task A3):** `useAuth`-Hook + `AuthProvider` (`Frontend/src/hooks/use-auth.tsx`) — Mock-Session über `sessionStorage` (Key `pizza-auth`, speichert `user.id`), aufgelöst gegen `getUsers()` beim Start (`loading`-Flag). `login`/`logout`/`updateOwnProfile` (patcht nur `firstName`/`lastName`/`phone`/`password`, `username`/`role`/`id` unantastbar). Als äußerster Provider in `app.tsx` eingehängt. TDD, 4 neue Tests grün, Build sauber. TEIL-B TODO: Supabase-Auth.
 - **Teil-A-Erweiterung (Tasks 1–12):** Soßen (admin-verwaltbar unter `/admin/sossen`, färben die `PizzaSVG`-Vorschau, im pauschalen 10€-Preis enthalten), Favoriten (max. 5 eigene Pizzen, `useFavorites`/localStorage, nutzbar in Konfigurator + Speisekarte), Service-Modus (Vor Ort / Abholen, admin-schaltbar unter `/admin/service`, wirkt auf Checkout, Bestätigung und Speisekarten-Header). Build sauber, 35 Unit-Tests grün, keine Altlasten.
@@ -351,4 +382,4 @@
 - **Datenschicht (Task 4):** async Store `lib/data/store.ts` als Naht für Teil-B (heute localStorage + Delay), inkl. Seed-Daten `lib/data/seed.ts` (Zutaten, Templates, Gutscheine, Dashboard-Mocks, `DEFAULT_CONFIG` mit `leadTimeDays: 3`). Getestet.
 - **Slot-Logik-Fix:** `toISO` ohne UTC-Verschiebung (lokale Zeitzone), `formatDateLabel`-Test ergänzt.
 - **Teil-A gestartet:** Frontend-Fundament — sauberer Neuaufbau in `Frontend/` (Vite + React 18 + TS + Tailwind v4 + shadcn), Bun als PM/Runner. Scaffold + Tooling (Task 1) umgesetzt.
-- **Test-Runner-Wechsel** Vitest → Bun-nativ (`bun test` + happy-dom): Vitest läuft nicht unter Bun-on-Windows. Siehe [ADR-0004](Entscheidungen/ADR-0004-bun-test-statt-vitest.md). SETUP aktualisiert.
+- **Test-Runner-Wechsel** Vitest → Bun-nativ (`bun test` + happy-dom): Vitest läuft nicht unter Bun-on-Windows. Siehe [[ADR-0004-bun-test-statt-vitest|ADR-0004]]. SETUP aktualisiert.
