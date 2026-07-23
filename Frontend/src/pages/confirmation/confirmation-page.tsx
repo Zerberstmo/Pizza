@@ -46,7 +46,7 @@ export default function ConfirmationPage(): React.ReactElement {
           </p>
         </div>
 
-        <Card className="border-primary/15 bg-primary/4 text-center">
+        <Card elevated className="border-primary/15 bg-primary/4 text-center">
           <CardContent className="py-5">
             <p className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] mb-2">Bestellnummer</p>
             <p className="text-5xl font-black text-primary">{order.id}</p>

@@ -356,7 +356,7 @@ export default function CheckoutPage(): React.ReactElement {
         </Card>
 
         {/* Preisübersicht */}
-        <Card>
+        <Card elevated>
           <CardContent className="pt-5 space-y-2 text-sm">
             {cart.map((item) => (
               <div key={item.cartId} className="flex justify-between text-muted-foreground">
@@ -387,7 +387,7 @@ export default function CheckoutPage(): React.ReactElement {
 
       <div className="fixed bottom-[68px] left-0 right-0 z-40 px-4 pb-2 max-w-lg mx-auto">
         {orderError && <p className="text-destructive text-xs text-center mb-2">{orderError}</p>}
-        <Button size="lg" className="w-full font-black text-base shadow-2xl shadow-primary/25"
+        <Button variant="glow" size="lg" className="w-full font-black text-base"
           disabled={!canOrder || (!specialsOnly && (noDates || noService))} onClick={placeOrder}>
           {specialsOnly
             ? `Sofort bestellen — ${formatPrice(total)}`

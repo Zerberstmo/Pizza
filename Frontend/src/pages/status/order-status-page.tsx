@@ -58,7 +58,7 @@ export default function OrderStatusPage(): React.ReactElement {
           <div><OrderStatusBadge status={status.status} /></div>
         </div>
 
-        <Card>
+        <Card elevated>
           <CardContent className="py-4 space-y-3 text-sm">
             <div className="flex justify-between">
               <span className="text-muted-foreground">{status.serviceMode === "dinein" ? "Vor Ort" : "Abholung"}</span>

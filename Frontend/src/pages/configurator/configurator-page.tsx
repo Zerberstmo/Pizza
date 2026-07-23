@@ -110,7 +110,7 @@ export default function ConfiguratorPage(): React.ReactElement {
                 setEditingFavId(fav.id); setFavName(fav.name); setSaveOpen(true);
               }} />
               {/* Live-Vorschau */}
-              <div className="flex items-start gap-4 mb-5">
+              <div className="flex items-start gap-4 mb-5 p-3 rounded-2xl bg-elevated card-glass-edge shadow-[var(--shadow-warm)]">
                 <div className="w-36 h-36 shrink-0">
                   <motion.div
                     key={selected.join(",")}
@@ -177,36 +177,38 @@ export default function ConfiguratorPage(): React.ReactElement {
               )}
 
               {/* Zutaten-Chips nach Kategorie */}
-              {categories.map((cat) => {
-                const items = ingredients.filter((i) => i.category === cat);
-                if (items.length === 0) return null;
-                return (
-                  <div key={cat} className="mb-5">
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2">{cat}</p>
-                    <div className="flex flex-wrap gap-2">
-                      {items.map((ing) => {
-                        const active = selected.includes(ing.id);
-                        return (
-                          <button key={ing.id} disabled={!ing.available}
-                            onClick={() => ing.available && toggle(ing.id)}
-                            className={cn(
-                              "flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-all",
-                              !ing.available
-                                ? "opacity-25 cursor-not-allowed border-border bg-card text-muted-foreground"
-                                : active
-                                ? "border-primary/50 bg-primary/10 text-primary"
-                                : "border-border bg-card hover:border-border/80 text-foreground"
-                            )}>
-                            <span className="text-base leading-none">{ing.emoji}</span>
-                            {ing.name}
-                            {active && <Check size={11} className="text-primary" />}
-                          </button>
-                        );
-                      })}
+              <div className="p-3.5 rounded-2xl bg-elevated card-glass-edge shadow-[var(--shadow-warm)]">
+                {categories.map((cat) => {
+                  const items = ingredients.filter((i) => i.category === cat);
+                  if (items.length === 0) return null;
+                  return (
+                    <div key={cat} className="mb-5 last:mb-0">
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2">{cat}</p>
+                      <div className="flex flex-wrap gap-2">
+                        {items.map((ing) => {
+                          const active = selected.includes(ing.id);
+                          return (
+                            <button key={ing.id} disabled={!ing.available}
+                              onClick={() => ing.available && toggle(ing.id)}
+                              className={cn(
+                                "flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-all",
+                                !ing.available
+                                  ? "opacity-25 cursor-not-allowed border-border bg-card text-muted-foreground"
+                                  : active
+                                  ? "border-primary/50 bg-primary/10 text-primary"
+                                  : "border-border bg-card hover:border-border/80 text-foreground"
+                              )}>
+                              <span className="text-base leading-none">{ing.emoji}</span>
+                              {ing.name}
+                              {active && <Check size={11} className="text-primary" />}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           );
         }}
