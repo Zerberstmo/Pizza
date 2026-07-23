@@ -1,5 +1,7 @@
 # Feature — Sonderartikel/VIP
 
+> Nabe: [[00_CONTEXT]] · Frontend: [[Frontend/README|Frontend-Doku]] · verwandt: [[Status-Angenommen-Storno|Status/Storno]] · Historie: [[Changelog]] · [[TODO]]
+
 - **Status:** live (nach `main` gemergt, Migrationen 0012–0015 eingespielt, Functions deployt, Sofort-Bestellung + WhatsApp am 2026-07-18 end-to-end verifiziert)
 - **Zweck:** Versteckte Menü-Items, die nur einzelnen registrierten Kunden per Code zugänglich sind —
   mit **pro-Kunde-Preis** und **Mengen-Staffeln**. Für den Betreiber: etwas verkaufen, das nicht auf der

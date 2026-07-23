@@ -19,3 +19,7 @@
 ## Wiederverwendung & Beispiele
 
 <Wo eingesetzt, kurzes Anwendungsbeispiel.>
+
+## Verwandt
+
+> Nabe: [[00_CONTEXT]] · [[Frontend/README|Frontend-Doku]] · <nutzende Seiten/Komponenten mit `[[…]]` verlinken>

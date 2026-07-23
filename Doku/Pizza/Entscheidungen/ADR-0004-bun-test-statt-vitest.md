@@ -1,5 +1,7 @@
 # ADR-0004 — Bun-nativer Test-Runner statt Vitest
 
+> Nabe: [[00_CONTEXT]] · Index: [[Entscheidungen/README|ADR-Übersicht]] · Defaults: [[SETUP]] · [[Testing/README|Testing-Doku]]
+
 - **Status:** akzeptiert
 - **Datum:** 2026-07-09
 

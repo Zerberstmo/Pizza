@@ -1,5 +1,7 @@
 # ADR-0007 — Öffentlicher Bestell-Status über nicht-ratbaren Token
 
+> Nabe: [[00_CONTEXT]] · Index: [[Entscheidungen/README|ADR-Übersicht]] · Feature: [[qr-bestell-status|QR-Bestell-Status]]
+
 - **Status:** akzeptiert
 - **Datum:** 2026-07-13
 

@@ -1,5 +1,7 @@
 # ADR-0003 — WhatsApp-Benachrichtigung via CallMeBot (Tages-Digest)
 
+> Nabe: [[00_CONTEXT]] · Index: [[Entscheidungen/README|ADR-Übersicht]] · Betrieb: [[SETUP-Supabase]] · Historie: [[Changelog]]
+
 - **Status:** akzeptiert
 - **Datum:** 2026-07-09 · **überarbeitet:** 2026-07-12 (Teil-B3)
 
@@ -39,7 +41,7 @@ Dauer-Pings. Keine Meta-Verifizierung, keine laufenden API-Kosten.
 - **Formatierung:** reine, getestete Logik `lib/digest.ts` (`formatDigest`/`filterTodaysPickups`);
   die Edge Function spiegelt sie als Deno-Copy (Deno kann den `@/`-Alias-Graphen nicht importieren).
 - **Betreiber-Setup:** CallMeBot-Registrierung (Nummer → API-Key), Extensions `pg_cron`/`pg_net`,
-  `cron.schedule` — siehe [SETUP-Supabase.md](../SETUP-Supabase.md).
+  `cron.schedule` — siehe [[SETUP-Supabase]].
 
 ## Vor- und Nachteile
 

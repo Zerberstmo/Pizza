@@ -4,6 +4,8 @@ Automatisch generierte Einträge pro Claude-Code-Session (Tokens, Dauer, Kosten)
 Erzeugt vom `SessionEnd`-Hook via `scripts/session-report.ps1`. Die inhaltliche
 Zusammenfassung ("Was wurde gemacht") ergänzt Claude während der Session.
 
+> Nabe: [[00_CONTEXT]] · [[Changelog]] · [[TODO]]
+
 ## 2026-07-09 17:40 — Session `31b015e4`
 
 - **Modell:** claude-opus-4-8
@@ -150,5 +152,55 @@ Zusammenfassung ("Was wurde gemacht") ergänzt Claude während der Session.
   - Input: 20 · Output: 3.078
   - Cache-Write: 44.532 · Cache-Read: 36.954
 - **Geschätzte Kosten:** $0.37 USD
+- **Was wurde gemacht:** _(von Claude während der Session ergänzt — siehe TODO/Changelog)_
+
+
+## 2026-07-23 — Zusammenfassung (Claude)
+
+> Harte Zahlen ergänzt der SessionEnd-Hook in seinem eigenen Eintrag.
+
+- **Was wurde gemacht:**
+  - **Obsidian-Vault geprüft** (`Doku/Pizza/`): Graph war kaum aussagekräftig — nur 8/30 Notizen
+    verlinkt (22 Waisen), zwei Link-Stile gemischt, `00_CONTEXT` ein leeres Gerüst, ADR-Index stale.
+  - **Vollen Verlinkungs-Pass** umgesetzt: alle internen Markdown-Links → `[[Wikilinks]]`
+    (0 interne `.md`-Links übrig), `00_CONTEXT` als Nabe ausgebaut (26 eingehende Links), ADR-Index
+    mit 7 ADRs gefüllt, Nabe-/Querverweise in allen READMEs/Features/ADRs. Ergebnis: **28/30** Notizen
+    vernetzt (2 bewusste Schnipsel-Ausnahmen).
+  - **Nachhaltigkeit:** `## Verwandt`-Backlink-Stubs in 5 Inhalts-Templates + verbindliche
+    Wikilink-Regel in `CLAUDE.md`, damit neue Notizen nicht wieder verwaisen.
+  - Reine Doku-Arbeit, kein Code/Deploy. Randnotiz: GateGuard-Hook fing jede Datei-Erstberührung
+    einmal ab (Fakten-Abfrage) — verlangsamte, blockierte nicht.
+
+
+## 2026-07-23 09:40 — Session `ca03d979`
+
+- **Modell:** claude-haiku-4-5-20251001
+- **Dauer:** 00h 00m 23s
+- **Tokens gesamt:** 84.798
+  - Input: 20 · Output: 2.550
+  - Cache-Write: 82.228 · Cache-Read: 0
+- **Geschätzte Kosten:** $0.58 USD
+- **Was wurde gemacht:** _(von Claude während der Session ergänzt — siehe TODO/Changelog)_
+
+
+## 2026-07-23 10:09 — Session `9de34d90`
+
+- **Modell:** claude-haiku-4-5-20251001
+- **Dauer:** 00h 00m 26s
+- **Tokens gesamt:** 87.228
+  - Input: 20 · Output: 3.560
+  - Cache-Write: 36.766 · Cache-Read: 46.882
+- **Geschätzte Kosten:** $0.34 USD
+- **Was wurde gemacht:** _(von Claude während der Session ergänzt — siehe TODO/Changelog)_
+
+
+## 2026-07-23 10:28 — Session `33b7a6be`
+
+- **Modell:** claude-haiku-4-5-20251001
+- **Dauer:** 00h 00m 21s
+- **Tokens gesamt:** 87.006
+  - Input: 20 · Output: 2.610
+  - Cache-Write: 37.494 · Cache-Read: 46.882
+- **Geschätzte Kosten:** $0.32 USD
 - **Was wurde gemacht:** _(von Claude während der Session ergänzt — siehe TODO/Changelog)_
 

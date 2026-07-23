@@ -1,6 +1,9 @@
 # Frontend-Doku
 
 > Dokumentiert den Code in `../../../Frontend/`. Betriebsanleitung & Befehle: `Frontend/README.md`.
+> Nabe: [[00_CONTEXT]] · Architektur: [[Architektur/README|Architektur]] · Backend: [[Backend/README|Backend-Doku]]
+>
+> **Features:** [[Sonderartikel-VIP|Sonderartikel/VIP]] · [[Status-Angenommen-Storno|Status „angenommen"+Storno]] · [[qr-bestell-status|Öffentlicher QR-Bestell-Status]]
 
 ## Seiten (Kundenfluss)
 
@@ -22,8 +25,9 @@ Benutzername `Mo`, Passwort `pizza` (im Profil änderbar). Datenschicht: `lib/au
 
 **Sicherheitshinweis:** Passwörter liegen **im Klartext** im `localStorage`-Datensatz
 (Key `pizza-users`) — bewusste, dokumentierte Mock-Grenze nur für die lokale Entwicklung,
-siehe [ADR-0005](../Entscheidungen/ADR-0005-mock-auth-naht.md).
-**Teil-B ersetzt die gesamte Auth-Schicht durch Supabase-Auth** (gehashte Passwörter, RLS).
+siehe [[ADR-0005-mock-auth-naht|ADR-0005 Mock-Auth-Naht]].
+**Teil-B ersetzt die gesamte Auth-Schicht durch Supabase-Auth** (gehashte Passwörter, RLS) —
+siehe [[ADR-0006-supabase-cutover|ADR-0006 Supabase-Cutover]].
 
 ## Admin (`/admin/*`, Guard via `RequireAdmin`)
 
@@ -43,8 +47,9 @@ selbst deaktivieren oder löschen (Selbstschutz).
 - **Datenschicht:** `lib/data/store.ts` (async, localStorage-Naht → Teil-B Supabase). Seiten importieren keine Seed-Konstanten.
 - **Reine Logik (getestet):** `lib/pricing.ts` (Preis/Gutschein), `lib/slots.ts` (Slots/Vorlaufzeit/`availableServiceModes`), `lib/sauces.ts` (`resolveSauce`), `lib/auth.ts` (`getUsers`/`saveUsers`/`verifyLogin`), `lib/recommendations.ts`.
 - **Hooks:** `useAsync`, `useCart` (localStorage), `useFavorites` (localStorage, max. 5), `useConfigEditor`, `useAuth` (Mock/sessionStorage, `AuthProvider`).
-- **Bausteine:** `components/ui` (shadcn), `pizza` (SVG/Card/`SaucePicker`/`favorites-bar`), `common` (QR, Select, Charts, AsyncBoundary), `layout` (BottomNav, AdminShell).
+- **Bausteine:** `components/ui` (shadcn), `pizza` (SVG/Card/`SaucePicker`/`favorites-bar`), `common` (QR, Select, Charts, AsyncBoundary, `section-header`, `reveal`), `layout` (BottomNav, AdminShell).
 - **Routing:** `react-router` (`router.tsx`), Kunden-Layout + Admin-Layout.
+- **Design-System (dunkel-premium, 2026-07-23):** Farb-/Form-Tokens in `styles/theme.css` (warm-dunkler Grundton, Orange-Glow `--primary-glow`, Gold-Akzent, `--elevated`/`--shadow-warm`, Glaskanten-Utility `.card-glass-edge`, `prefers-reduced-motion`-Abschaltung). Geteilte Bausteine: `ui/button` Variante `glow`, `ui/card` Prop `elevated`, `common/section-header` (Eyebrow+Titel), `common/reveal` (Fade-up über `motion/react`). Angewandt auf Speisekarte, Konfigurator, Checkout, Bestätigung/Status.
 
 ## Soßen
 
@@ -73,8 +78,12 @@ E2E: `tests/e2e/order.spec.ts` (Playwright).
 
 ## Entscheidungen
 
-[ADR-0001 Capacitor](../Entscheidungen/ADR-0001-mobile-capacitor.md) ·
-[ADR-0002 Supabase](../Entscheidungen/ADR-0002-backend-supabase.md) ·
-[ADR-0003 CallMeBot](../Entscheidungen/ADR-0003-whatsapp-callmebot.md) ·
-[ADR-0004 bun:test](../Entscheidungen/ADR-0004-bun-test-statt-vitest.md) ·
-[ADR-0005 Mock-Auth-Naht](../Entscheidungen/ADR-0005-mock-auth-naht.md)
+[[ADR-0001-mobile-capacitor|ADR-0001 Capacitor]] ·
+[[ADR-0002-backend-supabase|ADR-0002 Supabase]] ·
+[[ADR-0003-whatsapp-callmebot|ADR-0003 CallMeBot]] ·
+[[ADR-0004-bun-test-statt-vitest|ADR-0004 bun:test]] ·
+[[ADR-0005-mock-auth-naht|ADR-0005 Mock-Auth-Naht]] ·
+[[ADR-0006-supabase-cutover|ADR-0006 Supabase-Cutover]] ·
+[[ADR-0007-oeffentlicher-bestell-status-token|ADR-0007 Öffentl. Token]]
+
+Alle Entscheidungen im Index: [[Entscheidungen/README|ADR-Übersicht]].

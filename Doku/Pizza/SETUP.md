@@ -2,6 +2,8 @@
 
 > Zentrale Referenz für Stack, Werkzeuge und Konventionen. **Claude hält sich an diese Defaults** und schlägt keine abweichenden Technologien vor, ohne zu fragen.
 > Status je Zeile: ✅ `entschieden` · 🕓 `noch offen`
+>
+> Nabe: [[00_CONTEXT]] · Supabase-Betrieb: [[SETUP-Supabase]] · Entscheidungen: [[Entscheidungen/README|ADRs]] · Testing: [[Testing/README|Testing-Doku]]
 
 ## Tech-Stack
 
@@ -52,4 +54,4 @@
 - Deployment-Ziel festlegen (Vercel / Netlify / eigener Server)
 - CI/CD-Pipeline definieren
 
-> Neue Entscheidungen hier eintragen und Status auf ✅ setzen. Größere Wahl → zusätzlich als [ADR](Entscheidungen/README.md) dokumentieren.
+> Neue Entscheidungen hier eintragen und Status auf ✅ setzen. Größere Wahl → zusätzlich als [[Entscheidungen/README|ADR]] dokumentieren.

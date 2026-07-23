@@ -16,6 +16,7 @@ import { PizzaSVG } from "@/components/pizza/pizza-svg";
 import { AsyncBoundary } from "@/components/common/async-boundary";
 import { OpeningStatusBanner } from "@/components/common/opening-status-banner";
 import { Separator } from "@/components/ui/separator";
+import { SectionHeader } from "@/components/common/section-header";
 
 // Speisekarte. Portiert aus App.tsx:541-637 (HomePage), Menü nun async.
 export default function MenuPage(): React.ReactElement {
@@ -43,13 +44,7 @@ export default function MenuPage(): React.ReactElement {
       {/* Header */}
       <div className="px-5 pt-10 pb-6">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-          <p className="text-[10px] font-black tracking-[0.3em] uppercase text-primary mb-3">
-            Pizzeria · {serviceLabel}
-          </p>
-          <h1 className="text-4xl font-black leading-none tracking-tight mb-1">
-            Unsere<br />
-            <span className="text-primary">Speisekarte.</span>
-          </h1>
+          <SectionHeader eyebrow={`Pizzeria · ${serviceLabel}`} title="Unsere Speisekarte" />
           <p className="text-muted-foreground text-sm mt-2">
             Jede Pizza <span className="text-primary font-bold">10 €</span> · Bezahlung in bar
           </p>

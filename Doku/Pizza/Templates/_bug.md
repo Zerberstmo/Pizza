@@ -22,3 +22,7 @@
 ## Geplante Lösung
 
 <Wie soll es behoben werden?>
+
+## Verwandt
+
+> Nabe: [[00_CONTEXT]] · [[TODO]] · <betroffene Feature-/Seiten-Notiz mit `[[…]]` verlinken>

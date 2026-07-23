@@ -2,7 +2,9 @@
 
 > Schritt-für-Schritt-Anleitung für den Betreiber, um die App gegen ein echtes Supabase-Projekt
 > laufen zu lassen. In dieser Entwicklungsumgebung ist kein Zugriff auf Supabase möglich — die
-> folgenden Schritte sind **nicht** hier ausgeführt/getestet worden, siehe [ADR-0006](Entscheidungen/ADR-0006-supabase-cutover.md).
+> folgenden Schritte sind **nicht** hier ausgeführt/getestet worden, siehe [[ADR-0006-supabase-cutover|ADR-0006]].
+>
+> Nabe: [[00_CONTEXT]] · Defaults: [[SETUP]] · Backend: [[Backend/README|Backend-Doku]] · [[Datenbank/README|Datenbank-Doku]]
 
 ## 1. Supabase-Projekt anlegen
 

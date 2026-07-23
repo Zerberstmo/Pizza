@@ -32,3 +32,7 @@
 ## Alternativen
 
 <Verworfene Alternativen und warum.>
+
+## Verwandt
+
+> Nabe: [[00_CONTEXT]] · Index: [[Entscheidungen/README|ADR-Übersicht]] · <verwandte ADRs/Features mit `[[…]]` verlinken>
