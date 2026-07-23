@@ -19,8 +19,8 @@ export function PizzaCard({ template, onAdd, ingredients = [], index = 0 }: {
     >
       <button onClick={() => onAdd(template)} className="w-full text-left group focus:outline-none">
         <div className="rounded-2xl overflow-hidden border border-border bg-card
-          group-hover:border-primary/35 group-active:scale-[0.98]
-          transition-all duration-200 shadow-sm">
+          group-hover:border-primary/50 group-hover:-translate-y-0.5 group-hover:shadow-[var(--shadow-warm)]
+          group-active:scale-[0.98] transition-all duration-200 shadow-sm">
 
           {/* Visual */}
           <div className="relative h-36 bg-muted overflow-hidden flex items-center justify-center p-3">
@@ -51,7 +51,8 @@ export function PizzaCard({ template, onAdd, ingredients = [], index = 0 }: {
 
             <div className="mt-3 w-full bg-primary/10 border border-primary/20 rounded-lg py-2
               text-xs font-bold text-primary text-center
-              group-hover:bg-primary group-hover:text-white transition-all duration-200">
+              group-hover:bg-primary group-hover:text-primary-foreground group-hover:shadow-[0_4px_16px_-4px_var(--primary-glow)]
+              transition-all duration-200">
               + In den Warenkorb
             </div>
           </div>
